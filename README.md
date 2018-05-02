@@ -1,4 +1,4 @@
-# Package generator
+# ROS Package generator
 
 The following packages are about the automatic creation of ROS packages (so far c++ and python).
 To do so the input needed are:
@@ -98,5 +98,3 @@ Todo:
  * see how to handle list and map from parameter server
  * double check remap for service client
  * check python
-
-
