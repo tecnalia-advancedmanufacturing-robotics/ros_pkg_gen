@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package name="great_package_services" author="anthony" author_email="anthony@todo.todo" description="Package handling services" license="TODO">
+   <node name="node_service_server" frequency="100.0">
+    <serviceServer name="service_trigger_server" type="std_srvs::Trigger" description="just returns the number of calls to the service"/>
+   </node>
+   <node name="node_service_client" frequency="100.0">
+    <serviceClient name="service_client" type="std_srvs::Trigger" description="call the service avery 50 cycles"/>
+   </node>
+<depend>std_srvs</depend>
+</package>

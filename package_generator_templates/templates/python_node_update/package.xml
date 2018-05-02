@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package>
+  <name>{packageName}</name>
+  <description>{packageDescription}</description>
+  <version>0.1.0</version>
+  <!-- todo: should we differentiate both of them? -->
+  <maintainer email="{packageAuthorEmail}">{packageAuthor}</maintainer>
+  <author email="{packageAuthorEmail}">{packageAuthor}</author>
+  <license>{packageLicense}</license>
+  <url></url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rospy</build_depend>
+  <run_depend>rospy</run_depend>
+
+  <!-- user dependencies -->
+  {foralldependencies}
+  <build_depend>{dependencyName}</build_depend>
+  <run_depend>{dependencyName}</run_depend>
+  {endforalldependencies}
+
+  <!-- protected region additional package statements begin -->
+  <!-- protected region additional package statements end -->
+
+</package>

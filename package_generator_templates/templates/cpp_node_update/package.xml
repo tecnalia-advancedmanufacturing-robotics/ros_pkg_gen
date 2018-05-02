@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<package>
+  <name>{packageName}</name>
+  <description>{packageDescription}</description>
+  <version>0.1.0</version>
+  <!-- todo: should we differentiate both of them? -->
+  <maintainer email="{packageAuthorEmail}">{packageAuthor}</maintainer>
+  <author email="{packageAuthorEmail}">{packageAuthor}</author>
+  <license>{packageLicense}</license>
+  <url></url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- todo should we differentiate system & user dependencies? -->
+  <!-- we assume roscpp is always used?-->
+  <build_depend>roscpp</build_depend>
+  <run_depend>roscpp</run_depend>
+
+  <!-- user dependencies -->
+  {foralldependencies}
+  <build_depend>{dependencyName}</build_depend>
+  <run_depend>{dependencyName}</run_depend>
+  {endforalldependencies}
+
+  <!-- protected region additional package statements begin -->
+  <!-- protected region additional package statements end -->
+
+</package>

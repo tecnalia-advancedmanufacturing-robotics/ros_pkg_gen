@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package name="extended" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO">
+  <node name="node_extended" frequency="100.0">
+    <publisher name="pub" type="std_msgs::Bool" description="boolean publisher"/>
+    <subscriber name="sub_in" type="std_msgs::String" description="subcription to a string"/>
+    <serviceClient name="service_client" type="std_srvs::Trigger" description="great service proposed"/>
+    <serviceServer name="service_server" type="std_srvs::SetBool" description="great service used"/>
+    <parameter name="param_one" type="std::string" value="Empty" description="Critical string parameter"/>
+    <parameter name="param_two" type="bool" value="1" description=""/>
+    <actionServer name="action_server" type="actionlib::Test" description="great action proposed to ROS world"/>
+    <actionClient name="action_client" type="actionlib::Test" description="great action from ROS used"/>
+  </node>
+  <depend>std_msgs</depend>
+  <depend>std_srvs</depend>
+  <depend>bride_tutorials</depend>
+</package>
