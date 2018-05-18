@@ -13,8 +13,9 @@ For full terms see https://www.gnu.org/licenses/gpl.txt
 import rospy
 import xml.etree.cElementTree as ET
 from xml.dom import minidom
-from termcolor import colored
-import inspect
+
+from package_generator.generate_dict import GenerateDictionnary
+from package_generator.enhanced_object import EnhancedObject
 
 
 def str2bool(strg):
@@ -38,7 +39,7 @@ def remove_empty_line(text):
 # todo look at http://stackoverflow.com/questions/299588/validating-with-an-xml-schema-in-python
 # for improving the xml format validation
 
-class PackageXMLParser(object):
+class PackageXMLParser(EnhancedObject):
     """load a package description and prepare appropriate access structure
 
     Attributes:
@@ -46,67 +47,30 @@ class PackageXMLParser(object):
         data_depend_ (list): list of package dependency
         data_node_ (list): list of node specification
         data_pack_ (dict): specifications of the package
-        interface_spec_ (dict): authorized tag for a node interface spec
-        is_dependency_complete_ (bool): whether depedencies were automatically added
-        name_ (str): object name
-        node_attributes_ (list): authorized tags for a node spec
-        node_interface_ (list): authorized interface types
-        package_attributes_ (list): Description
+        dico_ (GenerateDictionnary): Dictionnary expected for node description
+        is_dependency_complete_ (bool): whether dependencies were automatically added
         root_ (TYPE): root of the xml tree
 
     """
     def __init__(self, name="PackageXMLParser"):
+        #  call super class constructor
+        super(PackageXMLParser, self).__init__(name)
 
-        self.name_ = name
         self.root_ = None
-        self.package_attributes_ = ["name", "author", "author_email",
-                                    "description", "license"]
-        self.node_attributes_ = ["name", "frequency"]
-        self.node_interface_ = ["publisher", "subscriber",
-                                "serviceClient", "serviceServer",
-                                "parameter", "dynParameter",
-                                "actionServer", "actionClient",
-                                "listener", "broadcaster",
-                                "directPublisher", "directSubscriber",]
-
-        self.interface_spec_ = {
-            "publisher": ["name", "type", "description"],
-            "directPublisher": ["name", "type", "description"],
-            "subscriber": ["name", "type", "description"],
-            "directSubscriber": ["name", "type", "description"],
-            "serviceClient": ["name", "type", "description"],
-            "serviceServer": ["name", "type", "description"],
-            "parameter": ["name", "type", "value", "description"],
-            "dynParameter": ["name", "type", "value", "description"],
-            "actionServer": ["name", "type", "description"],
-            "actionClient": ["name", "type", "description"],
-            "listener": ["name", "description"],
-            "broadcaster": ["name", "description"]
-        }
-
+        self.dico_ = None
         self.data_pack_ = dict()
         self.data_depend_ = list()
         self.data_node_ = list()
         self.active_node_ = -1
         self.is_dependency_complete_ = True
 
-    def log(self, text):
-        """ display log message with the class name in parameter
-        text the string to display
-        """
-        print "[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text
+    def set_dictionnary(self, dico):
+        """set the dictionnary to be used for parsing package spec
 
-    def log_warn(self, text):
-        """ display warn message with the class name in parameter
-        text the string to display
+        Args:
+            dico (GenerateDictionnary): Object containing the specs.
         """
-        print colored("[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text, 'yellow')
-
-    def log_error(self, text):
-        """ display warn message with the class name in parameter
-        text the string to display
-        """
-        print colored("[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text, 'red')
+        self.dico_ = dico
 
     # todo: see how to put warning messages in the comment.
     def load(self, filename):
@@ -121,6 +85,9 @@ class PackageXMLParser(object):
         Deleted Parameters:
             Warning: on success the active node is placed on the first one
         """
+        if self.dico_ is None:
+            self.log("Cannot load a package decsription without dictionnary")
+            return False
         self.log("Parsing file: {}".format(filename))
 
         try:
@@ -272,7 +239,9 @@ class PackageXMLParser(object):
         """
         self.log("Package attributes: \n{}".format(self.root_.attrib))
 
-        for attrib in self.package_attributes_:
+        attributes_package = self.dico_.spec_['package_attributes']
+
+        for attrib in attributes_package:
             assert attrib in self.root_.attrib.keys(), "Missing required attrib {} for package description".format(attrib)
             # self.log("package attribute {} set to {}".format(attrib, self.root_.attrib[attrib]))
             self.data_pack_[attrib] = self.root_.attrib[attrib]
@@ -280,7 +249,7 @@ class PackageXMLParser(object):
         # self.log("Requested package description correct")
 
         for attrib in self.root_.attrib.keys():
-            if attrib not in self.package_attributes_:
+            if attrib not in attributes_package:
                 self.log_warn("Provided attrib {} ignored".format(attrib))
 
     def sanity_check_node_interface(self, xml_interface):
@@ -292,16 +261,19 @@ class PackageXMLParser(object):
         Returns:
             dict: the node interface
         """
-        # self.log("Checking node interface {}".format(xml_interface.tag))
-        assert xml_interface.tag in self.node_interface_, "Unknown interface {}".format(xml_interface.tag)
-        assert xml_interface.tag in self.interface_spec_.keys(), "Interface {} not fully described".format(xml_interface.tag)
+        self.log("Checking node interface {}".format(xml_interface.tag))
+
+        interface_node = self.dico_.spec_['node_interface'].keys()
+
+        assert xml_interface.tag in interface_node, "Unknown interface {}".format(xml_interface.tag)
 
         interface_spec = dict()
         interface_spec["type"] = xml_interface.tag
         interface_spec["attributes"] = dict()
 
-        # depending on the interface type, the check is different
-        for attrib in self.interface_spec_[xml_interface.tag]:
+        attributes = self.dico_.spec_['node_interface'][xml_interface.tag]
+
+        for attrib in attributes:
             # print "Checking for attributes {}".format(attrib)
             assert attrib in xml_interface.attrib.keys(), 'Missing required attribute {} for {} interface. Check line {}'.format(attrib, xml_interface.tag, xml_interface.attrib)
             interface_spec["attributes"][attrib] = xml_interface.attrib[attrib]
@@ -309,7 +281,7 @@ class PackageXMLParser(object):
         # self.log("Requested interface for {} correct".format(xml_interface.tag))
 
         for attrib in xml_interface.attrib.keys():
-            if attrib not in self.interface_spec_[xml_interface.tag]:
+            if attrib not in attributes:
                 self.log_warn("Provided attrib {} of interface {} ignored (check {})".format(attrib, xml_interface.tag, xml_interface.attrib))
         return interface_spec
 
@@ -318,18 +290,25 @@ class PackageXMLParser(object):
 
         loc_data_node = dict()
         loc_data_node['attributes'] = dict()
-        for attrib in self.node_attributes_:
+
+        attributes_node = self.dico_.spec_['node_attributes']
+
+        for attrib in attributes_node:
             assert attrib in xml_node.attrib.keys(), "Missing required attribute {} for node description".format(attrib)
             loc_data_node['attributes'][attrib] = xml_node.attrib[attrib]
 
         # self.log("Requested node description correct")
 
         for attrib in xml_node.attrib.keys():
-            if attrib not in self.node_attributes_:
+            if attrib not in attributes_node:
                 self.log_warn("Provided attrib {} ignored".format(attrib))
 
+        interface_node = self.dico_.spec_['node_interface'].keys()
+
+        self.log("Check: node interface is: {}".format(interface_node))
+
         loc_data_node['interface'] = dict()
-        for item in self.node_interface_:
+        for item in interface_node:
             loc_data_node['interface'][item] = list()
 
         for child in xml_node:
@@ -343,6 +322,11 @@ class PackageXMLParser(object):
         return loc_data_node
 
     def sanity_check_dependency(self, xml_dep):
+        """Summary
+
+        Args:
+            xml_dep (TYPE): Description
+        """
         assert xml_dep.text, "Missing dependency text"
         self.data_depend_.append(xml_dep.text)
 
@@ -458,19 +442,32 @@ class PackageXMLParser(object):
 
 # todo the content of the main should be adapted to be a sanity check instead
 def main():
-    rospy.init_node('package_xml_parser', anonymous=True)
-    rospy.loginfo("Package description sanity check")
+    print "package xml parser trial"
+    #rospy.init_node('package_xml_parser', anonymous=True)
+    #rospy.loginfo("Package description sanity check")
 
     package_parser = PackageXMLParser()
     import rospkg
     rospack = rospkg.RosPack()
     node_path = rospack.get_path('package_generator')
 
+    file_dico = node_path + "/sandbox/dico.yaml"
+    dico = GenerateDictionnary()
+
+    if not dico.load_yaml_desc(file_dico):
+        print "Could not load the dictionnary"
+        return
+
+    package_parser.set_dictionnary(dico)
+
     filename = node_path + '/tests/extended.ros_package'
     rospy.loginfo("Loading xml file {}".format(filename))
     if package_parser.load(filename):
-        rospy.loginfo("File loaded with success")
+        print "File loaded with success"
+        print "Rewritting the file"
+        if not package_parser.write_xml("debug_ros_xml.xml"):
+            print "could not write the xml file"
     else:
-        rospy.logerr("Prb while loading the xml file")
+        print "Prb while loading the xml file"
 
-    rospy.loginfo("Bye bye")
+    print "Bye bye"

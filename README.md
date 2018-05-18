@@ -1,4 +1,4 @@
-# ROS Package generator
+# Package generator
 
 The following packages are about the automatic creation of ROS packages (so far c++ and python).
 To do so the input needed are:
@@ -88,13 +88,26 @@ rosrun great_multi_package_pub_sub node_sub sub_int:=/pub_int
 ## Current actions
 
 Todo:
+* insert in package desc added dependencies
+* dbcheck param generation (doc)
+* see how to handle list and map from parameter server
+* retest all packages
+* remap for service client
+* cpp: change tf for a simple tf example, no action used
 
-* Major:
- * externalize xml package description to the template
- * consider use of Jinja for template description
- * apply Haros on cpp template
-* Minor:
- * double check param generation (doc)
- * see how to handle list and map from parameter server
- * double check remap for service client
- * check python
+* update: if the requested file is generated, refuse it, and mention the use of winmerge to handle it.
+
+Done:
+* intensive test maintained content
+* cpp: merge action server and client in unique package
+* cpp: adapt the content of the python example.
+* check the message provided as usage.
+* update model examples in the template package (dynParam)
+* update doc with dynParam
+* add a test for static parameters
+* add auto generated in class not supposed to be touched.
+* remove the include files in the python template
+* adjust class name as said here. Handle the CamelCase stuff in python
+* remove includeheaders from cpp pattern
+* service client and action client in cpp: move it into passthrough
+

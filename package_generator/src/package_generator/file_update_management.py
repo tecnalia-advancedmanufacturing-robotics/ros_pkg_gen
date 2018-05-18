@@ -22,7 +22,6 @@ from copy import deepcopy
 # begining and end of line as well
 
 class ProtectedArea(object):
-
     """Definition of a protected area, as a list of code line
 
     Attributes:

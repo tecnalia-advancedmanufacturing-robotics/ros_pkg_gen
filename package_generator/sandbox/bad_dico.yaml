@@ -1,0 +1,3 @@
+package_attributes: ["name", "author", "author_email", "description", "license"]
+node_attributes: ["name", "frequency"]
+node_attributes: ["oh", "yeah"

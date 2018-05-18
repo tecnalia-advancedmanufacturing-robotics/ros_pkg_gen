@@ -14,6 +14,8 @@ from termcolor import colored
 import inspect
 import re
 from package_generator.package_xml_parser import PackageXMLParser
+from package_generator.enhanced_object import EnhancedObject
+from package_generator.generate_dict import GenerateDictionnary
 
 import string
 
@@ -155,28 +157,31 @@ class CodeGenerator(object):
 
     Attributes:
         dep_spec_ (TYPE): Description
+        dico_ (TYPE): Description
         formatter_ (TYPE): Description
         name_ (TYPE): Description
         nodes_spec_ (TYPE): Description
         package_spec_ (TYPE): Description
         tmp_buffer_ (TYPE): Description
         transformation_ (TYPE): Description
+        transformation_functions_ (TYPE): Description
         transformation_loop_ (TYPE): Description
         xml_parser_ (TYPE): Description
     """
     def __init__(self, name="CodeGenerator"):
         self.name_ = name
 
-        self.transformation_ = {
-            'packageName' : lambda: self.get_package_attr("name"),
-            'packageDescription' : lambda: self.get_package_attr("description"),
-            'packageAuthor' : lambda: self.get_package_attr("author"),
-            'packageAuthorEmail' : lambda: self.get_package_attr("author_email"),
-            'packageLicense' : lambda: self.get_package_attr("license"),
-            'nodeName' : lambda: self.get_node_attr("name"),
-            "camelCaseNodeName": lambda: get_camelcase_name(self.nodes_spec_["attributes"]),
-            'nodeFrequency' : lambda: self.get_node_attr("frequency")#,
-        }
+        self.transformation_ = dict()
+        #{
+            # 'packageName' : lambda: self.get_package_attr("name"),
+            # 'packageDescription' : lambda: self.get_package_attr("description"),
+            # 'packageAuthor' : lambda: self.get_package_attr("author"),
+            # 'packageAuthorEmail' : self.get_package_attr("author_email"),
+            # 'packageLicense' : lambda: self.get_package_attr("license"),
+            # 'nodeName' : lambda: self.get_node_attr("name"),
+            # "camelCaseNodeName": get_camelcase_name(self.nodes_spec_["attributes"])
+            # 'nodeFrequency' : lambda: self.get_node_attr("frequency")#,
+        #}
 
         self.transformation_loop_ = {
             'forallpublisher' : lambda text: self.get_loop_gen("publisher", text),
@@ -218,6 +223,7 @@ class CodeGenerator(object):
             'get_py_param_type': lambda context : get_py_param_type(context)
         }
 
+        self.dico_ = None
         self.tmp_buffer_ = list()
         self.xml_parser_ = None
         self.nodes_spec_ = None
@@ -250,8 +256,36 @@ class CodeGenerator(object):
         Args:
             parser (PackageXMLParser): the parser of interest
         """
+        self.log_error("Setting parser")
         self.xml_parser_ = parser
         self.get_xml_parsing()
+        #self.log("Check")
+        #self.log(self.package_spec_)
+
+    def set_dictionnary(self, dico):
+        self.dico_ = dico
+
+        # generating the package attributes
+        self.generate_simple_tags()
+
+    def generate_simple_tags(self):
+
+        package_attributes = self.dico_.spec_['package_attributes']
+
+        for attrib_pack in package_attributes:
+            tag = "package" + attrib_pack.title()
+            self.transformation_[tag] = self.get_package_attr(attrib_pack)
+
+        node_attributes = self.dico_.spec_['node_attributes']
+
+        for attrib_node in node_attributes:
+            tag = "node" + attrib_node.title()
+            self.transformation_[tag] = self.get_node_attr(attrib_node)
+
+        self.log_warn("Conditions to handle later on")
+        self.transformation_['packageAuthorEmail'] = self.get_package_attr("author_email")
+        self.transformation_['camelCaseNodeName'] = get_camelcase_name(self.nodes_spec_["attributes"])
+
 
     def get_xml_parsing(self):
         """ set the xml parser, and extract the relevant input from it
@@ -261,6 +295,8 @@ class CodeGenerator(object):
         self.package_spec_ = self.xml_parser_.get_package_spec()
         self.dep_spec_ = self.xml_parser_.get_dependency_spec()
 
+        print "debug"
+        print self.package_spec_
         assert self.nodes_spec_, "No nodes specification"
         assert self.package_spec_, "No package specification"
         assert self.dep_spec_, "No dependency specification"
@@ -316,10 +352,6 @@ class CodeGenerator(object):
             return False
         return True
 
-    # def process_multi_line_string(self, stringfile):
-    #     for item in stringfile.splitlines():
-    #         self.add_output_line(self.process_line(item))
-
     def process_file(self, filename):
         """
         process a file with tags
@@ -335,6 +367,10 @@ class CodeGenerator(object):
         if self.xml_parser_ is None:
             self.log_error("XML parser not defined")
             return False
+        if self.dico_ is None:
+            self.log_error("Dictionnary missing")
+            return False
+
         lines_in_file = list()
         try:
             with open(filename) as input_file:
@@ -416,7 +452,7 @@ class CodeGenerator(object):
             is_ok = True
             while is_ok:
                 num_line, line = iter_enum_lines.next()
-                # self.log("Processing line [{}]: {}".format(num_line, line))
+                self.log("Processing line [{}]: {}".format(num_line, line))
 
                 matches = self.get_all_tags(line)
 
@@ -425,7 +461,7 @@ class CodeGenerator(object):
                     num_line += 1
                     continue
 
-                # the line has a tag
+                self.log("the line has a tag")
                 # check for a loop tag
                 loop_tag_found = False
                 tags = [tag for tag, _ in matches]
@@ -444,11 +480,14 @@ class CodeGenerator(object):
 
                 if not loop_tag_found:
                     for tag, indent in matches:
-                        #self.log("found tag |{}| at line {}:col {}".format(tag, num_line, indent))
+                        self.log("found tag |{}| at line {}:col {}".format(tag, num_line, indent))
 
                         if tag in self.transformation_.keys():
-                            replacement = self.transformation_[tag]()
+                            self.log("Tag known")
+                            replacement = self.transformation_[tag]
+                            self.log("Replaced by: {}".format(replacement))
                             line = convert(line, **{tag: replacement})
+                            self.log("Tag known, generated lines: \n |{}|".format(line))
                         else:
                             # todo here we could publish the line
                             self.log_warn("tag {} not processed".format(tag))
@@ -533,6 +572,7 @@ class CodeGenerator(object):
         return self.package_spec_[attr]
 
     def get_node_attr(self, attr):
+        self.log("Looking for {} in \n {}".format(attr, self.nodes_spec_["attributes"]))
         return self.nodes_spec_["attributes"][attr]
 
     # todo remove that function and use the apply tag instead
@@ -631,7 +671,7 @@ class CodeGenerator(object):
         # todo we could aonly do this when item exists in any case
         context_upper = dict()
         for key in self.transformation_:
-            context_upper[key] = self.transformation_[key]()
+            context_upper[key] = self.transformation_[key]
 
         for item in self.nodes_spec_["interface"][interface_type]:
             # self.log("Handling {} {}".format(interface_type, item))
@@ -741,19 +781,33 @@ def main():
     rospack = rospkg.RosPack()
     node_path = rospack.get_path('package_generator')
 
-    #filename = '/home/anthony/code/kinetic/rosin/sandbox/extended.ros_package'
+    file_dico = node_path + "/sandbox/dico.yaml"
+    dico = GenerateDictionnary()
+
+    if not dico.load_yaml_desc(file_dico):
+        print "Could not load the dictionnary"
+        return
+
+    xml_parser.set_dictionnary(dico)
+
     filename = node_path + '/tests/extended.ros_package'
 
     if not xml_parser.load(filename):
         print "Error while parsing the xml file {}".format(filename)
         print "Bye"
         return
-
-    filename = node_path + '/sandbox/template_interface.cpp'
+    xml_parser.set_active_node(0)
     gen.set_xml_parser(xml_parser)
+    gen.set_dictionnary(dico)
+
+    node_path = rospack.get_path('package_generator_templates')
+
+    filename = node_path + '/templates/cpp_node_update/README.md'
+    print "Setinng parese!!!"
+
     gen.reset_output_file()
     if gen.process_file(filename):
-        output_file = "test.cpp"
+        output_file = "README.md"
         gen.write_output_file(output_file)
         print "Output written in file {}".format(output_file)
     else:
