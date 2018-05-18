@@ -172,46 +172,7 @@ class CodeGenerator(object):
         self.name_ = name
 
         self.transformation_ = dict()
-        #{
-            # 'packageName' : lambda: self.get_package_attr("name"),
-            # 'packageDescription' : lambda: self.get_package_attr("description"),
-            # 'packageAuthor' : lambda: self.get_package_attr("author"),
-            # 'packageAuthorEmail' : self.get_package_attr("author_email"),
-            # 'packageLicense' : lambda: self.get_package_attr("license"),
-            # 'nodeName' : lambda: self.get_node_attr("name"),
-            # "camelCaseNodeName": get_camelcase_name(self.nodes_spec_["attributes"])
-            # 'nodeFrequency' : lambda: self.get_node_attr("frequency")#,
-        #}
-
-        self.transformation_loop_ = {
-            'forallpublisher' : lambda text: self.get_loop_gen("publisher", text),
-            'foralldirectpublisher' : lambda text: self.get_loop_gen("directPublisher", text),
-            'foralldirectsubscriber' : lambda text: self.get_loop_gen("directSubscriber", text),
-            'forallsubscriber' : lambda text: self.get_loop_gen("subscriber", text),
-            'forallserviceServer' : lambda text: self.get_loop_gen("serviceServer", text),
-            'forallserviceClient' : lambda text: self.get_loop_gen("serviceClient", text),
-            'forallactionServer' : lambda text: self.get_loop_gen("actionServer", text),
-            'forallactionClient' : lambda text: self.get_loop_gen("actionClient", text),
-            'foralllistener' : lambda text: self.get_loop_gen("listener", text),
-            'forallbroadcaster' : lambda text: self.get_loop_gen("broadcaster", text),
-            'foralldependencies' : lambda text: self.get_loop_dependencies(text),
-            'forallnodes' : lambda text: self.get_loop_nodes(text),
-            'forallparam' : lambda text: self.get_loop_gen("parameter", text),
-            'ifparam' : lambda text: self.get_if_defined("parameter", text),
-            'foralldynParam' : lambda text: self.get_loop_gen("dynParameter", text),
-            'ifdynParam' : lambda text: self.get_if_defined("dynParameter", text),
-            'ifpublisher' : lambda text: self.get_if_defined("publisher", text),
-            'ifdirectpublisher' : lambda text: self.get_if_defined("directPublisher", text),
-            'ifdirectsubscriber' :  lambda text: self.get_if_defined("directSubscriber", text),
-            'ifsubscriber' :  lambda text: self.get_if_defined("subscriber", text),
-            'ifaction' : lambda text: self.get_if_defined(["actionClient", "actionServer"], text),
-            'ifserviceServer' : lambda text: self.get_if_defined(["serviceServer"], text),
-            'ifserviceClient' : lambda text: self.get_if_defined(["serviceClient"], text),
-            'ifactionServer' : lambda text: self.get_if_defined(["actionServer"], text),
-            'ifactionClient' : lambda text: self.get_if_defined(["actionClient"], text),
-            'iflistener' : lambda text: self.get_if_defined(["listener"], text),
-            'ifbroadcaster' : lambda text: self.get_if_defined(["broadcaster"], text)
-        }
+        self.transformation_loop_ = dict()
 
         self.transformation_functions_ = {
             'get_package_type' : lambda context : get_package_type(context),
@@ -267,6 +228,7 @@ class CodeGenerator(object):
 
         # generating the package attributes
         self.generate_simple_tags()
+        self.generate_flow_tags()
 
     def generate_simple_tags(self):
 
@@ -286,6 +248,29 @@ class CodeGenerator(object):
         self.transformation_['packageAuthorEmail'] = self.get_package_attr("author_email")
         self.transformation_['camelCaseNodeName'] = get_camelcase_name(self.nodes_spec_["attributes"])
 
+    def generate_flow_tags(self):
+
+        node_interface = self.dico_.spec_['node_interface'].keys()
+
+        lambda_for = lambda d: lambda t: self.get_loop_gen(d, t)
+        lambda_if = lambda u: lambda v: self.get_if_defined(u, v)
+
+        for item in node_interface:
+            self.log_warn("Adding tag for {}".format(item))
+            tag = "forall" + item
+            self.transformation_loop_[tag] = lambda_for(item)
+            tag = "if" + item
+            self.transformation_loop_[tag] = lambda_if(item)
+
+        self.log_warn("Conditions to handle later on")
+        self.transformation_loop_['foralldependencies'] = lambda text: self.get_loop_dependencies(text)
+        self.transformation_loop_['forallnodes'] = lambda text: self.get_loop_nodes(text)
+        self.transformation_loop_['ifaction'] = lambda text: self.get_if_defined(["actionClient", "actionServer"], text)
+
+        self.log_warn("Generated flow tags : {}".format(self.transformation_loop_.keys()))
+
+        self.log("debug")
+        self.log("{}".format(self.transformation_loop_["iflistener"]("Super text")))
 
     def get_xml_parsing(self):
         """ set the xml parser, and extract the relevant input from it
@@ -504,7 +489,7 @@ class CodeGenerator(object):
 
                 if loop_tag_found:
                     tag, indent = matches[0]
-                    # self.log("tag {} in transformation_loop".format(tag))
+                    self.log("tag {} in transformation_loop".format(tag))
 
                     # looking for the end of the loop
                     search_tag = "end" + tag
@@ -519,7 +504,7 @@ class CodeGenerator(object):
                         while not tag_found:
                             # todo: avoid using an accumulated line here.
                             sub_num_line, sub_line = iter_enum_lines.next()
-                            # print "Sub Checking line: {}".format(sub_line)
+                            print "Sub Checking line: {}".format(sub_line)
 
                             sub_matches = self.get_all_tags(sub_line)
                             subtags = [tagg for tagg, _ in sub_matches]
@@ -542,12 +527,12 @@ class CodeGenerator(object):
                                            'text': error_msg})
 
                     # tag found. We know have a bunch of line to process
-                    # print "content to process in loop: \n{}".format(accumulated_line)
+                    self.log("content to process in loop: \n{}".format(accumulated_line))
                     # todo: should the loop tag be returning the generated code, or directly write in the
                     # output? using process_loop imbricated, it is by default writting in it.
-
+                    self.log("computing")
                     is_ok = self.transformation_loop_[tag](accumulated_line)
-
+                    self.log("done")
                     continue
                 raise SyntaxError('SyntaxError',
                                   {'filename': 'unknown',

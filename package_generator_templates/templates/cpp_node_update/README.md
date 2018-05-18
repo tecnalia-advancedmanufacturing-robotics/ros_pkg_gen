@@ -23,7 +23,7 @@ This node is using `\tf` to broadcast transforms.
 
 <!--- protected region {nodeName} begin -->
 <!--- protected region {nodeName} end -->
-{ifparam}
+{ifparameter}
 
 ## Static Parameters
 
@@ -31,14 +31,14 @@ All static parameters can be set through the command line:
 ```
 rosrun {packageName} {nodeName} [param_name]:=[new_value]
 ```
-{endifparam}
-{forallparam}
+{endifparameter}
+{forallparameter}
 `{name}` *({type}, default: {apply-get_py_param_value})*
 <!--- protected region param {name} begin -->
 {description}
 <!--- protected region param {name} end -->
-{endforallparam}
-{ifdynParam}
+{endforallparameter}
+{ifdynParameter}
 
 ## Dynamic Parameters
 
@@ -46,13 +46,13 @@ All dynamic parameters can be set through the command line:
 ```
 rosrun {packageName} {nodeName} _[param_name]:=[new_value]
 ```
-{endifdynParam}
-{foralldynParam}
+{endifdynParameter}
+{foralldynParameter}
 `{name}` *({type}, default: {apply-get_py_param_value})*
 <!--- protected region param {name} begin -->
 {description}
 <!--- protected region param {name} end -->
-{endforalldynParam}
+{endforalldynParameter}
 {ifpublisher}
 
 ## Published Topics
@@ -150,32 +150,32 @@ rosrun {packageName} {nodeName} _[old_name]_remap:=[new_name]
 {description}
 <!--- protected region action client {name} end -->
 {endforallactionClient}
-{ifdirectpublisher}
+{ifdirectPublisher}
 
 ## Direct Publishers
 
 These publishers are not handled through the update loop.
 Their publication frequency is thus unknown
 
-{endifdirectpublisher}
-{foralldirectpublisher}
+{endifdirectPublisher}
+{foralldirectPublisher}
 `{name}` *({type})*
 <!--- protected region direct publisher {name} begin -->
 {description}
 <!--- protected region direct publisher {name} end -->
-{endforalldirectpublisher}
-{ifdirectsubscriber}
+{endforalldirectPublisher}
+{ifdirectSubscriber}
 
 ## Direct Subscribers
 These subscribers are not handled through the update loop.
 The subscription handler is triggered as soon as a message arrives.
 
-{endifdirectsubscriber}
-{foralldirectsubscriber}
+{endifdirectSubscriber}
+{foralldirectSubscriber}
 `{name}` *({type})*
 <!--- protected region direct subscriber {name} begin -->
 {description}
 <!--- protected region direct subscriber {name} end -->
-{endforalldirectsubscriber}
+{endforalldirectSubscriber}
 
 {endforallnodes}

@@ -88,6 +88,7 @@ rosrun great_multi_package_pub_sub node_sub sub_int:=/pub_int
 ## Current actions
 
 Todo:
+* readjust parameter names, to camelCased. Extend param to parameter
 * insert in package desc added dependencies
 * dbcheck param generation (doc)
 * see how to handle list and map from parameter server
@@ -97,17 +98,4 @@ Todo:
 
 * update: if the requested file is generated, refuse it, and mention the use of winmerge to handle it.
 
-Done:
-* intensive test maintained content
-* cpp: merge action server and client in unique package
-* cpp: adapt the content of the python example.
-* check the message provided as usage.
-* update model examples in the template package (dynParam)
-* update doc with dynParam
-* add a test for static parameters
-* add auto generated in class not supposed to be touched.
-* remove the include files in the python template
-* adjust class name as said here. Handle the CamelCase stuff in python
-* remove includeheaders from cpp pattern
-* service client and action client in cpp: move it into passthrough
 
