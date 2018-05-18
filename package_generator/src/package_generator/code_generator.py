@@ -19,21 +19,6 @@ from package_generator.generate_dict import GenerateDictionnary
 
 import string
 
-class FormatterNoKeyError(string.Formatter):
-    """formatter not generating error when a key is unknown
-
-    Attributes:
-        default (TYPE): Description
-    """
-    def __init__(self, default='{{{0}}}'):
-        self.default = default
-
-    def get_value(self, key, args, kwds):
-        if isinstance(key, str):
-            return kwds.get(key, self.default.format(key))
-        else:
-            string.Formatter.get_value(key, args, kwds)
-
 def convert(line, delimiter=['{', '}'], **kwargs):
     """equivalant to format, with provided delimiter
        and without issue with unknown keys
@@ -152,7 +137,7 @@ def get_cpp_param_value(context):
     return context['value']
 
 
-class CodeGenerator(object):
+class CodeGenerator(EnhancedObject):
     """class responsible of the generation of a whole ROS package
 
     Attributes:
@@ -169,7 +154,8 @@ class CodeGenerator(object):
         xml_parser_ (TYPE): Description
     """
     def __init__(self, name="CodeGenerator"):
-        self.name_ = name
+        #  call super class constructor
+        super(CodeGenerator, self).__init__(name)
 
         self.transformation_ = dict()
         self.transformation_loop_ = dict()
@@ -191,25 +177,6 @@ class CodeGenerator(object):
         self.package_spec_ = None
         self.dep_spec_ = None
 
-        self.formatter_ = FormatterNoKeyError()
-
-    def log(self, text):
-        """ display log message with the class name in parameter
-        text the string to display
-        """
-        print "[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text
-
-    def log_warn(self, text):
-        """ display warn message with the class name in parameter
-        text the string to display
-        """
-        print colored("[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text, 'yellow')
-
-    def log_error(self, text):
-        """ display warn message with the class name in parameter
-        text the string to display
-        """
-        print colored("[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text, 'red')
 
     def set_xml_parser(self, parser):
         """set the xml parser object
