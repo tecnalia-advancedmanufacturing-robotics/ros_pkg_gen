@@ -186,8 +186,6 @@ class CodeGenerator(EnhancedObject):
         self.log_error("Setting parser")
         self.xml_parser_ = parser
         self.get_xml_parsing()
-        #self.log("Check")
-        #self.log(self.package_spec_)
 
     def set_dictionnary(self, dico):
         self.dico_ = dico
@@ -490,17 +488,17 @@ class CodeGenerator(EnhancedObject):
                                    'lineno': "{}".format(num_line),
                                    'offset': "{}".format(indent),
                                    'text': "unknown tag {}".format(tag)})
-        except AssertionError, e:
-            self.log_error("Assertion Error on line {}: {}".format(num_line, e.args))
+        except AssertionError, err:
+            self.log_error("Assertion Error on line {}: {}".format(num_line, err.args))
             return False
-        except SyntaxError, e:
-            self.log_error("Syntax Error on line {}: {}".format(num_line, e.args))
+        except SyntaxError, err:
+            self.log_error("Syntax Error on line {}: {}".format(num_line, err.args))
             return False
-        except StopIteration, e:
+        except StopIteration, err:
             # self.log("All file has been processed")
             return True
-        except Exception, e:
-            self.log_error("Error detected around line {}: {}".format(num_line, e.args))
+        except Exception, err:
+            self.log_error("Error detected around line {}: {}".format(num_line, err.args))
         self.log_error("This should not be reached...")
         return False
 

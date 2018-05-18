@@ -95,6 +95,7 @@ Todo:
 * retest all packages
 * remap for service client
 * cpp: change tf for a simple tf example, no action used
+* improve codeline management for error finding in templates
 
 * update: if the requested file is generated, refuse it, and mention the use of winmerge to handle it.
 
