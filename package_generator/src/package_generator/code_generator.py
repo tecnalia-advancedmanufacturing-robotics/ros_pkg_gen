@@ -177,7 +177,6 @@ class CodeGenerator(EnhancedObject):
         self.package_spec_ = None
         self.dep_spec_ = None
 
-
     def set_xml_parser(self, parser):
         """set the xml parser object
 
@@ -223,7 +222,7 @@ class CodeGenerator(EnhancedObject):
         lambda_if = lambda u: lambda v: self.get_if_defined(u, v)
 
         for item in node_interface:
-            self.log_warn("Adding tag for {}".format(item))
+            # self.log_warn("Adding tag for {}".format(item))
             tag = "forall" + item
             self.transformation_loop_[tag] = lambda_for(item)
             tag = "if" + item
@@ -234,11 +233,6 @@ class CodeGenerator(EnhancedObject):
         self.transformation_loop_['forallnodes'] = lambda text: self.get_loop_nodes(text)
         self.transformation_loop_['ifaction'] = lambda text: self.get_if_defined(["actionClient", "actionServer"], text)
 
-        self.log_warn("Generated flow tags : {}".format(self.transformation_loop_.keys()))
-
-        self.log("debug")
-        self.log("{}".format(self.transformation_loop_["iflistener"]("Super text")))
-
     def get_xml_parsing(self):
         """ set the xml parser, and extract the relevant input from it
         """
@@ -247,8 +241,6 @@ class CodeGenerator(EnhancedObject):
         self.package_spec_ = self.xml_parser_.get_package_spec()
         self.dep_spec_ = self.xml_parser_.get_dependency_spec()
 
-        print "debug"
-        print self.package_spec_
         assert self.nodes_spec_, "No nodes specification"
         assert self.package_spec_, "No package specification"
         assert self.dep_spec_, "No dependency specification"
@@ -404,7 +396,7 @@ class CodeGenerator(EnhancedObject):
             is_ok = True
             while is_ok:
                 num_line, line = iter_enum_lines.next()
-                self.log("Processing line [{}]: {}".format(num_line, line))
+                # self.log("Processing line [{}]: {}".format(num_line, line))
 
                 matches = self.get_all_tags(line)
 
@@ -413,7 +405,7 @@ class CodeGenerator(EnhancedObject):
                     num_line += 1
                     continue
 
-                self.log("the line has a tag")
+                # self.log("the line has a tag")
                 # check for a loop tag
                 loop_tag_found = False
                 tags = [tag for tag, _ in matches]
@@ -432,14 +424,11 @@ class CodeGenerator(EnhancedObject):
 
                 if not loop_tag_found:
                     for tag, indent in matches:
-                        self.log("found tag |{}| at line {}:col {}".format(tag, num_line, indent))
+                        # self.log("found tag |{}| at line {}:col {}".format(tag, num_line, indent))
 
                         if tag in self.transformation_.keys():
-                            self.log("Tag known")
                             replacement = self.transformation_[tag]
-                            self.log("Replaced by: {}".format(replacement))
                             line = convert(line, **{tag: replacement})
-                            self.log("Tag known, generated lines: \n |{}|".format(line))
                         else:
                             # todo here we could publish the line
                             self.log_warn("tag {} not processed".format(tag))
@@ -456,7 +445,7 @@ class CodeGenerator(EnhancedObject):
 
                 if loop_tag_found:
                     tag, indent = matches[0]
-                    self.log("tag {} in transformation_loop".format(tag))
+                    # self.log("tag {} in transformation_loop".format(tag))
 
                     # looking for the end of the loop
                     search_tag = "end" + tag
@@ -471,20 +460,17 @@ class CodeGenerator(EnhancedObject):
                         while not tag_found:
                             # todo: avoid using an accumulated line here.
                             sub_num_line, sub_line = iter_enum_lines.next()
-                            print "Sub Checking line: {}".format(sub_line)
+                            # self.log("Sub Checking line: {}".format(sub_line))
 
                             sub_matches = self.get_all_tags(sub_line)
                             subtags = [tagg for tagg, _ in sub_matches]
 
-                            if not matches:
-                                accumulated_line += sub_line + '\n'
-                                continue
                             if search_tag in subtags:
                                 tag_found = True
                                 break
-                            else:
-                                accumulated_line += sub_line + '\n'
-                                continue
+                            accumulated_line += sub_line + '\n'
+                            continue
+
                     except StopIteration, e:
                         error_msg = "missing closing tag {} openned on line {}".format(search_tag, num_line)
                         raise SyntaxError('Syntax ERROR',
@@ -494,12 +480,10 @@ class CodeGenerator(EnhancedObject):
                                            'text': error_msg})
 
                     # tag found. We know have a bunch of line to process
-                    self.log("content to process in loop: \n{}".format(accumulated_line))
+                    # self.log("content to process in loop: \n{}".format(accumulated_line))
                     # todo: should the loop tag be returning the generated code, or directly write in the
                     # output? using process_loop imbricated, it is by default writting in it.
-                    self.log("computing")
                     is_ok = self.transformation_loop_[tag](accumulated_line)
-                    self.log("done")
                     continue
                 raise SyntaxError('SyntaxError',
                                   {'filename': 'unknown',
@@ -524,7 +508,6 @@ class CodeGenerator(EnhancedObject):
         return self.package_spec_[attr]
 
     def get_node_attr(self, attr):
-        self.log("Looking for {} in \n {}".format(attr, self.nodes_spec_["attributes"]))
         return self.nodes_spec_["attributes"][attr]
 
     # todo remove that function and use the apply tag instead
@@ -755,7 +738,6 @@ def main():
     node_path = rospack.get_path('package_generator_templates')
 
     filename = node_path + '/templates/cpp_node_update/README.md'
-    print "Setinng parese!!!"
 
     gen.reset_output_file()
     if gen.process_file(filename):
