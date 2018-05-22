@@ -1,4 +1,4 @@
-extended
+demo_package
 ====================
 
 # General description of the package
@@ -19,12 +19,19 @@ Update frequency: 100.0 Hz.
 
 All static parameters can be set through the command line:
 ```
-rosrun extended node_extended [param_name]:=[new_value]
+rosrun demo_package node_extended [param_name]:=[new_value]
 ```
 `param_one` *(std::string, default: "Empty")*
 <!--- protected region param param_one begin -->
 Critical string parameter
 <!--- protected region param param_one end -->
+
+## Dynamic Parameters
+
+All dynamic parameters can be set through the command line:
+```
+rosrun demo_package node_extended _[param_name]:=[new_value]
+```
 `param_two` *(bool, default: True)*
 <!--- protected region param param_two begin -->
 
@@ -34,31 +41,31 @@ Critical string parameter
 
 A topic can be remapped from the command line:
 ```
-rosrun extended node_extended [old_name]:=[new_name]
+rosrun demo_package node_extended [old_name]:=[new_name]
 ```
 
-`pub` *(std_msgs::Bool)*
-<!--- protected region publisher pub begin -->
+`pub_bool` *(std_msgs::Bool)*
+<!--- protected region publisher pub_bool begin -->
 boolean publisher
-<!--- protected region publisher pub end -->
+<!--- protected region publisher pub_bool end -->
 
 ## Subscribed Topics
 
 A topic can be remapped from the command line:
 ```
-rosrun extended node_extended [old_name]:=[new_name]
+rosrun demo_package node_extended [old_name]:=[new_name]
 ```
 
-`sub_in` *(std_msgs::String)*
-<!--- protected region sub_in begin -->
-<!--- protected region sub_in end -->
+`sub_string` *(std_msgs::String)*
+<!--- protected region sub_string begin -->
+<!--- protected region sub_string end -->
 
 ## Services proposed
 
 A remapping of the service name is made possible at node launch:
 
 ```
-rosrun extended node_extended _[old_name]_remap:=/[new_name]
+rosrun demo_package node_extended _[old_name]_remap:=/[new_name]
 ```
 
 `service_server` *(std_srvs::SetBool)*
@@ -71,7 +78,7 @@ great service used
 A remapping of the service name is made possible at node launch:
 
 ```
-rosrun extended node_extended _[old_name]_remap:=/[new_name]
+rosrun demo_package node_extended _[old_name]_remap:=/[new_name]
 ```
 
 `service_client` *(std_srvs::Trigger)*
@@ -96,10 +103,29 @@ great action proposed to ROS world
 Any action client direaction can be readjusted at node launch:
 
 ```
-rosrun extended node_extended _[old_name]_remap:=[new_name]
+rosrun demo_package node_extended _[old_name]_remap:=[new_name]
 ```
 `action_client` *(actionlib::Test)*
 <!--- protected region action client action_client begin -->
 great action from ROS used
 <!--- protected region action client action_client end -->
+
+## Direct Publishers
+
+These publishers are not handled through the update loop.
+Their publication frequency is thus unknown
+
+`dir_pub_bool` *(std_msgs::Bool)*
+<!--- protected region direct publisher dir_pub_bool begin -->
+Publisher out of the loop
+<!--- protected region direct publisher dir_pub_bool end -->
+
+## Direct Subscribers
+These subscribers are not handled through the update loop.
+The subscription handler is triggered as soon as a message arrives.
+
+`sub_string` *(std_msgs::String)*
+<!--- protected region direct subscriber sub_string begin -->
+subcription out of the loop
+<!--- protected region direct subscriber sub_string end -->
 

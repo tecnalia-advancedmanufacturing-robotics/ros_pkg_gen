@@ -10,14 +10,10 @@ Distributed under the GNU GPL v3.
 For full terms see https://www.gnu.org/licenses/gpl.txt
 """
 
-from termcolor import colored
-import inspect
 import re
 from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.enhanced_object import EnhancedObject
 from package_generator.generate_dict import GenerateDictionnary
-
-import string
 
 def convert(line, delimiter=['{', '}'], **kwargs):
     """equivalant to format, with provided delimiter
@@ -161,13 +157,13 @@ class CodeGenerator(EnhancedObject):
         self.transformation_loop_ = dict()
 
         self.transformation_functions_ = {
-            'get_package_type' : lambda context : get_package_type(context),
-            'get_class_type' : lambda context : get_class_type(context),
-            'get_python_type' : lambda context : get_python_type(context),
-            'get_cpp_path' : lambda context : get_cpp_path(context),
-            'get_py_param_value': lambda context : get_py_param_value(context),
-            'get_cpp_param_value': lambda context : get_cpp_param_value(context),
-            'get_py_param_type': lambda context : get_py_param_type(context)
+            'get_package_type' : get_package_type,
+            'get_class_type' : get_class_type,
+            'get_python_type' : get_python_type,
+            'get_cpp_path' : get_cpp_path,
+            'get_py_param_value': get_py_param_value,
+            'get_cpp_param_value':get_cpp_param_value,
+            'get_py_param_type': get_py_param_type
         }
 
         self.dico_ = None
@@ -723,7 +719,7 @@ def main():
 
     xml_parser.set_dictionnary(dico)
 
-    filename = node_path + '/tests/extended.ros_package'
+    filename = node_path + '/tests/data/demo.ros_package'
 
     if not xml_parser.load(filename):
         print "Error while parsing the xml file {}".format(filename)
