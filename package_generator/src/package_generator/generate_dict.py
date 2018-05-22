@@ -13,11 +13,11 @@ from package_generator.enhanced_object import EnhancedObject
 import yaml
 import pprint
 
-class GenerateDictionnary(EnhancedObject):
+class GenerateDictionary(EnhancedObject):
 
-    def __init__(self, name="GenerateDictionnary"):
+    def __init__(self, name="GenerateDictionary"):
         # call super class constructor
-        super(GenerateDictionnary, self).__init__(name)
+        super(GenerateDictionary, self).__init__(name)
 
         self.log("Hello world")
         self.spec_ = dict()
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     """
     print "Hello World"
 
-    gen_dict = GenerateDictionnary()
+    gen_dict = GenerateDictionary()
 
     gen_dict.load_yaml_desc("dico.yaml")
     gen_dict.generate_lambdas()

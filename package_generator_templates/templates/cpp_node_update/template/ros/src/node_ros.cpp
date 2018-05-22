@@ -23,24 +23,24 @@
 #include <{apply-get_cpp_path}Action.h>
 {endforallactionClient}
 {endifactionClient}
-{ifdynParam}
+{ifdynParameter}
 #include <dynamic_reconfigure/server.h>
 #include <{packageName}/{nodeName}Config.h>
 
-{endifdynParam}
+{endifdynParameter}
 // ROS message & services includes
 {forallpublisher}
 #include <{apply-get_cpp_path}.h>
 {endforallpublisher}
-{foralldirectpublisher}
+{foralldirectPublisher}
 #include <{apply-get_cpp_path}.h>
-{endforalldirectpublisher}
+{endforalldirectPublisher}
 {forallsubscriber}
 #include <{apply-get_cpp_path}.h>
 {endforallsubscriber}
-{foralldirectsubscriber}
+{foralldirectSubscriber}
 #include <{apply-get_cpp_path}.h>
-{endforalldirectsubscriber}
+{endforalldirectSubscriber}
 {forallserviceServer}
 #include <{apply-get_cpp_path}.h>
 {endforallserviceServer}
@@ -62,10 +62,10 @@ public:
     ros::NodeHandle n_;
     ros::NodeHandle np_;
 
-    {ifdynParam}
+    {ifdynParameter}
     dynamic_reconfigure::Server<{packageName}::{nodeName}Config> server;
     dynamic_reconfigure::Server<{packageName}::{nodeName}Config>::CallbackType f;
-    {endifdynParam}
+    {endifdynParameter}
     {forallpublisher}
     ros::Publisher {name}_;
     {endforallpublisher}
@@ -100,41 +100,41 @@ public:
         {forallactionServer}
         as_{name}_.start();
         {endforallactionServer}
-        {ifdynParam}
+        {ifdynParameter}
         // preparing dynamic reconfigure mechanism
         f = boost::bind(&{camelCaseNodeName}ROS::configure_callback, this, _1, _2);
         server.setCallback(f);
-        {endifdynParam}
+        {endifdynParameter}
         {forallpublisher}
         {name}_ = n_.advertise<{type}>("{name}", 1);
         {endforallpublisher}
-        {ifdirectpublisher}
+        {ifdirectPublisher}
         // Handling direct publisher
-        {foralldirectpublisher}
+        {foralldirectPublisher}
         component_implementation_.passthrough.{name} = n_.advertise<{type}>("{name}", 1);
-        {endforalldirectpublisher}
-        {endifdirectpublisher}
-        {ifdirectsubscriber}
+        {endforalldirectPublisher}
+        {endifdirectPublisher}
+        {ifdirectSubscriber}
         // Handling direct subscriber
-        {foralldirectsubscriber}
+        {foralldirectSubscriber}
         component_implementation_.passthrough.{name} = n_.subscribe("{name}", 1, &{camelCaseNodeName}Impl::directTopicCallback_{name}, &component_implementation_);
-        {endforalldirectsubscriber}
-        {endifdirectsubscriber}
+        {endforalldirectSubscriber}
+        {endifdirectSubscriber}
         {forallsubscriber}
         {name}_ = n_.subscribe("{name}", 1, &{camelCaseNodeName}ROS::topicCallback_{name}, this);
         {endforallsubscriber}
-        {ifparam}
+        {ifparameter}
         // handling parameters from the parameter server
-        {endifparam}
-        {forallparam}
+        {endifparameter}
+        {forallparameter}
         np_.param("{name}", component_config_.{name}, ({type}){apply-get_cpp_param_value});
-        {endforallparam}
-        {ifdynParam}
+        {endforallparameter}
+        {ifdynParameter}
         // handling dynamic parameters
-        {endifdynParam}
-        {foralldynParam}
+        {endifdynParameter}
+        {foralldynParameter}
         np_.param("{name}", component_config_.{name}, ({type}){apply-get_cpp_param_value});
-        {endforalldynParam}
+        {endforalldynParameter}
         {forallserviceServer}
         // to enable service name adjustment when loading the node
         std::string {name}_remap;
@@ -173,7 +173,7 @@ public:
     }
 
     {endforallsubscriber}
-    {ifdynParam}
+    {ifdynParameter}
     /**
      * @brief callback called when a dynamically reconfigurable parameter is changed
      * @param config the parameter structure to be updated
@@ -181,12 +181,12 @@ public:
      */
     void configure_callback({packageName}::{nodeName}Config &config, uint32_t level)
     {
-        {foralldynParam}
+        {foralldynParameter}
         component_config_.{name} = config.{name};
-        {endforalldynParam}
+        {endforalldynParameter}
     }
 
-    {endifdynParam}
+    {endifdynParameter}
     /**
      * @brief configure function called after node creation.
      */

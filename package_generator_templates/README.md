@@ -98,7 +98,7 @@ Then is introduced the ROS interface provided by the node:
 *  `actionServer` and `actionClient`: Similarly, `actionServer` is defined in the `[NodeName]Passthrough` component, since the Developer may be willing to send action messages within the action callback.
 * `listener` and `broadcaster`: informs the node will either listen to `tf` or publish transforms to `tf`.
    Both variables are then available from the `[NodeName]Passthrough` component.
-* `directsubscriber` and `directpublisher` are not handled through the update mechanism.
+* `directSubscriber` and `directPublisher` are not handled through the update mechanism.
   They are added to satisfy impatient Developer that consider they can not wait a period for receiving a message or sending another.
   These components (implemented as traditional subscriber / publisher) are defined in the `[NodeName]Passthrough`.
 

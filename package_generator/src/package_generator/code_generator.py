@@ -13,7 +13,7 @@ For full terms see https://www.gnu.org/licenses/gpl.txt
 import re
 from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.enhanced_object import EnhancedObject
-from package_generator.generate_dict import GenerateDictionnary
+from package_generator.generate_dict import GenerateDictionary
 
 def convert(line, delimiter=['{', '}'], **kwargs):
     """equivalant to format, with provided delimiter
@@ -22,7 +22,7 @@ def convert(line, delimiter=['{', '}'], **kwargs):
     Args:
         line (str): string to process
         delimiter (list, optional): two char to segment the tags
-        **kwargs: dictionnary to use
+        **kwargs: dictionary to use
 
     Returns:
         str: the converted string
@@ -173,22 +173,21 @@ class CodeGenerator(EnhancedObject):
         self.package_spec_ = None
         self.dep_spec_ = None
 
-    def set_xml_parser(self, parser):
-        """set the xml parser object
+    def configure(self, parser, dico):
+        """set the required information to configure the generator
 
         Args:
-            parser (PackageXMLParser): the parser of interest
+            parser (PackageXMLParser): XML node description parsed 
+            dico (GenerateDictionary): Dictionary to be used
         """
-        self.log_error("Setting parser")
         self.xml_parser_ = parser
         self.get_xml_parsing()
-
-    def set_dictionnary(self, dico):
         self.dico_ = dico
 
-        # generating the package attributes
+        # generating the tags
         self.generate_simple_tags()
         self.generate_flow_tags()
+        self.tmp_buffer_[:] = []
 
     def generate_simple_tags(self):
 
@@ -306,7 +305,7 @@ class CodeGenerator(EnhancedObject):
             self.log_error("XML parser not defined")
             return False
         if self.dico_ is None:
-            self.log_error("Dictionnary missing")
+            self.log_error("Dictionary missing")
             return False
 
         lines_in_file = list()
@@ -639,7 +638,7 @@ class CodeGenerator(EnhancedObject):
                 output.append(line_processed)
 
         self.add_output_lines(output)
-        # self.log_error("Sanity check: Is dictionnary extended?\n {}".format(self.nodes_spec_["interface"][interface_type]))
+        # self.log_error("Sanity check: Is dictinnary extended?\n {}".format(self.nodes_spec_["interface"][interface_type]))
         # self.log("created: {}".format(type(output)))
         # todo no false case?
         return True
@@ -691,6 +690,7 @@ class CodeGenerator(EnhancedObject):
 
         for item in all_node_spec:
             self.nodes_spec_ = item
+            self.generate_simple_tags()
 
             iter_enum_lines = iter(enumerate(input_line, start=1))
             is_ok = self.process_input(iter_enum_lines)
@@ -699,6 +699,7 @@ class CodeGenerator(EnhancedObject):
                 break
 
         self.nodes_spec_ = bup
+        self.generate_simple_tags()
         return is_ok
 
 def main():
@@ -711,13 +712,13 @@ def main():
     node_path = rospack.get_path('package_generator')
 
     file_dico = node_path + "/sandbox/dico.yaml"
-    dico = GenerateDictionnary()
+    dico = GenerateDictionary()
 
     if not dico.load_yaml_desc(file_dico):
         print "Could not load the dictionnary"
         return
 
-    xml_parser.set_dictionnary(dico)
+    xml_parser.set_dictionary(dico)
 
     filename = node_path + '/tests/data/demo.ros_package'
 
@@ -726,8 +727,7 @@ def main():
         print "Bye"
         return
     xml_parser.set_active_node(0)
-    gen.set_xml_parser(xml_parser)
-    gen.set_dictionnary(dico)
+    gen.configure(xml_parser, dico)
 
     node_path = rospack.get_path('package_generator_templates')
 

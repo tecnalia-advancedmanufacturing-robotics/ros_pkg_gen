@@ -13,10 +13,10 @@ import rospy
 {ifaction}
 import actionlib
 {endifaction}
-{ifdynParam}
+{ifdynParameter}
 from dynamic_reconfigure.server import Server
 from {packageName}.cfg import {nodeName}Config
-{endifdynParam}
+{endifdynParameter}
 
 # ROS message & services includes
 {forallpublisher}
@@ -25,12 +25,12 @@ from {apply-get_package_type}.msg import {apply-get_class_type}
 {forallsubscriber}
 from {apply-get_package_type}.msg import {apply-get_class_type}
 {endforallsubscriber}
-{foralldirectpublisher}
+{foralldirectPublisher}
 from {apply-get_package_type}.msg import {apply-get_class_type}
-{endforalldirectpublisher}
-{foralldirectsubscriber}
+{endforalldirectPublisher}
+{foralldirectSubscriber}
 from {apply-get_package_type}.msg import {apply-get_class_type}
-{endforalldirectsubscriber}
+{endforalldirectSubscriber}
 {forallserviceServer}
 from {apply-get_package_type}.srv import {apply-get_class_type}
 {endforallserviceServer}
@@ -61,22 +61,22 @@ class {camelCaseNodeName}ROS(object):
         self.component_config_ = {nodeName}_impl.{camelCaseNodeName}Config()
         self.component_implementation_ = {nodeName}_impl.{camelCaseNodeName}Implementation()
 
-        {ifdynParam}
+        {ifdynParameter}
         # preparing dynamic reconfigure mechanism
         srv = Server({nodeName}Config, self.configure_callback)
-        {endifdynParam}
-        {ifparam}
+        {endifdynParameter}
+        {ifparameter}
         # handling parameters from the parameter server
-        {endifparam}
-        {forallparam}
+        {endifparameter}
+        {forallparameter}
         self.component_config_.{name} = rospy.get_param("~{name}", {apply-get_py_param_value})
-        {endforallparam}
-        {ifdynParam}
+        {endforallparameter}
+        {ifdynParameter}
         # handling dynamic parameters
-        {endifdynParam}
-        {foralldynParam}
+        {endifdynParameter}
+        {foralldynParameter}
         self.component_config_.{name} = rospy.get_param("{name}", {apply-get_py_param_value})
-        {endforalldynParam}
+        {endforalldynParameter}
         {ifpublisher}
         # handling publishers
         {endifpublisher}
@@ -89,20 +89,20 @@ class {camelCaseNodeName}ROS(object):
         {forallsubscriber}
         self.{name}_ = rospy.Subscriber('{name}', {apply-get_class_type}, self.topic_callback_{name})
         {endforallsubscriber}
-        {ifdirectpublisher}
+        {ifdirectPublisher}
         # Handling direct publisher
-        {foralldirectpublisher}
+        {foralldirectPublisher}
         self.component_implementation_.passthrough.pub_{name} = rospy.Publisher('{name}', {apply-get_class_type}, queue_size=1)
-        {endforalldirectpublisher}
-        {endifdirectpublisher}
-        {ifdirectsubscriber}
+        {endforalldirectPublisher}
+        {endifdirectPublisher}
+        {ifdirectSubscriber}
         # Handling direct subscriber
-        {foralldirectsubscriber}
+        {foralldirectSubscriber}
         self.component_implementation_.passthrough.sub_{name} = rospy.Subscriber('{name}',
                                                                                  {apply-get_class_type},
                                                                                  self.component_implementation_.direct_topic_callback_{name})
-        {endforalldirectsubscriber}
-        {endifdirectsubscriber}
+        {endforalldirectSubscriber}
+        {endifdirectSubscriber}
         {forallserviceServer}
         # to enable service name adjustment when loading the node
         remap = rospy.get_param("~{name}_remap", "{name}")
@@ -139,17 +139,17 @@ class {camelCaseNodeName}ROS(object):
         self.component_data_.in_{name}_updated = True
 
     {endforallsubscriber}
-    {ifdynParam}
+    {ifdynParameter}
     def configure_callback(self, config, level):
         """
         callback on the change of parameters dynamically adjustable
         """
-        {foralldynParam}
+        {foralldynParameter}
         self.component_config_.{name} = config.{name}
-        {endforalldynParam}
+        {endforalldynParameter}
         return config
 
-    {endifdynParam}
+    {endifdynParameter}
     def configure(self):
         """
         function setting the initial configuration of the node

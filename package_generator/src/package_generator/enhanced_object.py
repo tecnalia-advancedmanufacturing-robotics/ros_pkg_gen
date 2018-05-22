@@ -26,7 +26,6 @@ class EnhancedObject(object):
             name (str, optional): name of the object
         """
         self.name_ = name
-        self.log("Base constructor")
 
     def log(self, text):
         """display log message with the class name in parameter

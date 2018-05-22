@@ -3,7 +3,7 @@
 @package package_generator
 @file test_dic_generator.py
 @author Anthony Remazeilles
-@brief test the dictionnary generator
+@brief test the dictionary generator
 
 Copyright (C) 2018 Tecnalia Research and Innovation
 Distributed under the GNU GPL v3.
@@ -66,7 +66,6 @@ node_interface:
 
     def test_correct_file(self):
         self.assertTrue(self.gen_dict.load_yaml_desc(self.filename))
-
 
 if __name__ == '__main__':
     print "test_dic_generator -- begin"

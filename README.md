@@ -88,15 +88,19 @@ rosrun great_multi_package_pub_sub node_sub sub_int:=/pub_int
 ## Current actions
 
 Todo:
-* readjust parameter names, to camelCased. Extend param to parameter
-* insert in package desc added dependencies
-* dbcheck param generation (doc)
+* update readme with externalized dictionary
+* adjust test files
+* adjust node_generator readme and template readme
 * see how to handle list and map from parameter server
 * retest all packages
 * remap for service client
 * cpp: change tf for a simple tf example, no action used
 * improve codeline management for error finding in templates
-
 * update: if the requested file is generated, refuse it, and mention the use of winmerge to handle it.
+
+Longer Term:
+* Externalize as well apply function
+* Enable apply function out of loop
+* Consider use of Jinja
 
 

@@ -25,24 +25,24 @@
 #include <{apply-get_cpp_path}Action.h>
 {endforallactionClient}
 {endifactionClient}
-{ifdynParam}
+{ifdynParameter}
 #include <dynamic_reconfigure/server.h>
 #include <{packageName}/{nodeName}Config.h>
 
-{endifdynParam}
+{endifdynParameter}
 // ROS message & services includes
 {forallpublisher}
 #include <{apply-get_cpp_path}.h>
 {endforallpublisher}
-{foralldirectpublisher}
+{foralldirectPublisher}
 #include <{apply-get_cpp_path}.h>
-{endforalldirectpublisher}
+{endforalldirectPublisher}
 {forallsubscriber}
 #include <{apply-get_cpp_path}.h>
 {endforallsubscriber}
-{foralldirectsubscriber}
+{foralldirectSubscriber}
 #include <{apply-get_cpp_path}.h>
-{endforalldirectsubscriber}
+{endforalldirectSubscriber}
 {forallserviceServer}
 #include <{apply-get_cpp_path}.h>
 {endforallserviceServer}
@@ -68,18 +68,18 @@
 class {camelCaseNodeName}Config
 {
 public:
-    {ifparam}
+    {ifparameter}
     // parameters handled through the parameter server
-    {endifparam}
-    {forallparam}
+    {endifparameter}
+    {forallparameter}
     {type} {name};
-    {endforallparam}
-    {ifdynParam}
+    {endforallparameter}
+    {ifdynParameter}
     // dynamic parameters handled through dynamic reconfigure
-    {endifdynParam}
-    {foralldynParam}
+    {endifdynParameter}
+    {foralldynParameter}
     {type} {name};
-    {endforalldynParam}
+    {endforalldynParameter}
 };
 
 /**
@@ -120,12 +120,12 @@ public:
     {forallbroadcaster}
     tf::TransformBroadcaster {name};
     {endforallbroadcaster}
-    {foralldirectpublisher}
+    {foralldirectPublisher}
     ros::Publisher {name};
-    {endforalldirectpublisher}
-    {foralldirectsubscriber}
+    {endforalldirectPublisher}
+    {foralldirectSubscriber}
     ros::Subscriber {name};
-    {endforalldirectsubscriber}
+    {endforalldirectSubscriber}
 
     {forallserviceClient}
     ros::ServiceClient client_{name};
@@ -230,7 +230,7 @@ public:
         return true;
     }
     {endforallserviceServer}
-    {foralldirectsubscriber}
+    {foralldirectSubscriber}
     /**
      * @brief direct callback of a topic subscription
      * @param msg message received on the topic
@@ -241,7 +241,7 @@ public:
         /* protected region user implementation of direct subscriber callback for {name} begin */
         /* protected region user implementation of direct subscriber callback for {name} end */
     }
-    {endforalldirectsubscriber}
+    {endforalldirectSubscriber}
     /* protected region user additional functions begin */
     /* protected region user additional functions end */
 };

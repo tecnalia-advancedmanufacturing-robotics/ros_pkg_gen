@@ -14,7 +14,7 @@ import rospy
 import xml.etree.cElementTree as ET
 from xml.dom import minidom
 
-from package_generator.generate_dict import GenerateDictionnary
+from package_generator.generate_dict import GenerateDictionary
 from package_generator.enhanced_object import EnhancedObject
 
 
@@ -47,7 +47,7 @@ class PackageXMLParser(EnhancedObject):
         data_depend_ (list): list of package dependency
         data_node_ (list): list of node specification
         data_pack_ (dict): specifications of the package
-        dico_ (GenerateDictionnary): Dictionnary expected for node description
+        dico_ (GenerateDictionary): Dictionary expected for node description
         is_dependency_complete_ (bool): whether dependencies were automatically added
         root_ (TYPE): root of the xml tree
 
@@ -64,11 +64,11 @@ class PackageXMLParser(EnhancedObject):
         self.active_node_ = -1
         self.is_dependency_complete_ = True
 
-    def set_dictionnary(self, dico):
-        """set the dictionnary to be used for parsing package spec
+    def set_dictionary(self, dico):
+        """set the dictionary to be used for parsing package spec
 
         Args:
-            dico (GenerateDictionnary): Object containing the specs.
+            dico (GenerateDictionary): Object containing the specs.
         """
         self.dico_ = dico
 
@@ -86,7 +86,7 @@ class PackageXMLParser(EnhancedObject):
             Warning: on success the active node is placed on the first one
         """
         if self.dico_ is None:
-            self.log("Cannot load a package decsription without dictionnary")
+            self.log("Cannot load a package decsription without dictionary")
             return False
         self.log("Parsing file: {}".format(filename))
 
@@ -452,13 +452,13 @@ def main():
     node_path = rospack.get_path('package_generator')
 
     file_dico = node_path + "/sandbox/dico.yaml"
-    dico = GenerateDictionnary()
+    dico = GenerateDictionary()
 
     if not dico.load_yaml_desc(file_dico):
         print "Could not load the dictionnary"
         return
 
-    package_parser.set_dictionnary(dico)
+    package_parser.set_dictionary(dico)
 
     filename = node_path + '/tests/extended.ros_package'
     rospy.loginfo("Loading xml file {}".format(filename))
