@@ -12,6 +12,7 @@ For full terms see https://www.gnu.org/licenses/gpl.txt
 from package_generator.enhanced_object import EnhancedObject
 import yaml
 import pprint
+import importlib
 
 class GenerateDictionary(EnhancedObject):
 
@@ -21,6 +22,7 @@ class GenerateDictionary(EnhancedObject):
 
         self.log("Hello world")
         self.spec_ = dict()
+        self.transformation_functions_ = dict()
 
     def load_yaml_desc(self, yaml_file):
 
@@ -37,6 +39,14 @@ class GenerateDictionary(EnhancedObject):
         self.log("Data read: | \n {}".format(self.spec_))
         pprint.pprint(self.spec_)
         return True
+
+    def load_transformation_functions(self, py_file):
+        # see https://pymotw.com/3/importlib/
+        # see https://copyninja.info/blog/dynamic-module-loading.html
+        # https://www.blog.pythonlibrary.org/2012/07/31/advanced-python-how-to-dynamically-load-modules-or-classes/
+        # from https://stackoverflow.com/questions/67631/how-to-import-a-module-given-the-full-path/67693
+        # best solution would be:
+        # module = importlib.import_module(py_file)
 
     def generate_lambdas(self):
 

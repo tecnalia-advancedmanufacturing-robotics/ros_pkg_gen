@@ -15,7 +15,7 @@ from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.enhanced_object import EnhancedObject
 from package_generator.generate_dict import GenerateDictionary
 
-def convert(line, delimiter=['{', '}'], **kwargs):
+def convert(line, delimiter=None, **kwargs):
     """equivalant to format, with provided delimiter
        and without issue with unknown keys
 
@@ -27,6 +27,9 @@ def convert(line, delimiter=['{', '}'], **kwargs):
     Returns:
         str: the converted string
     """
+
+    if delimiter is None:
+        delimiter = ['{', '}']
     result_line = line
 
     for key, value in kwargs.iteritems():
@@ -177,7 +180,7 @@ class CodeGenerator(EnhancedObject):
         """set the required information to configure the generator
 
         Args:
-            parser (PackageXMLParser): XML node description parsed 
+            parser (PackageXMLParser): XML node description parsed
             dico (GenerateDictionary): Dictionary to be used
         """
         self.xml_parser_ = parser
