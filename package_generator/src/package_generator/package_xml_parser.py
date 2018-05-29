@@ -14,22 +14,19 @@ import rospy
 import xml.etree.cElementTree as ET
 from xml.dom import minidom
 
-from package_generator.generate_dict import GenerateDictionary
 from package_generator.enhanced_object import EnhancedObject
+from package_generator.template_spec import TemplateSpec
 
-
-def str2bool(strg):
-    """Summary
-
-    Args:
-        strg (str): string containing a boolean value
-
-    Returns:
-        Bool: corresponding boolean value
-    """
-    return strg.lower() in ("yes", "true", "t", "1")
 
 def remove_empty_line(text):
+    """Remove empty line within a multiline string
+
+    Args:
+        text (str): Mutliline string to process
+
+    Returns:
+        str: String with empty lines removed
+    """
     res = list()
     for line in text.splitlines():
         if line.strip():
@@ -38,7 +35,6 @@ def remove_empty_line(text):
 
 # todo look at http://stackoverflow.com/questions/299588/validating-with-an-xml-schema-in-python
 # for improving the xml format validation
-
 class PackageXMLParser(EnhancedObject):
     """load a package description and prepare appropriate access structure
 
@@ -47,12 +43,16 @@ class PackageXMLParser(EnhancedObject):
         data_depend_ (list): list of package dependency
         data_node_ (list): list of node specification
         data_pack_ (dict): specifications of the package
-        dico_ (GenerateDictionary): Dictionary expected for node description
+        dico_ (dict): Dictionary expected for node description
         is_dependency_complete_ (bool): whether dependencies were automatically added
         root_ (TYPE): root of the xml tree
-
     """
     def __init__(self, name="PackageXMLParser"):
+        """object constructor
+
+        Args:
+            name (str, optional): component name
+        """
         #  call super class constructor
         super(PackageXMLParser, self).__init__(name)
 
@@ -68,9 +68,15 @@ class PackageXMLParser(EnhancedObject):
         """set the dictionary to be used for parsing package spec
 
         Args:
-            dico (GenerateDictionary): Object containing the specs.
+            dico (dict): Object containing the specs.
         """
+        expected_keys = ['package_attributes', 'node_interface', 'node_attributes']
+        for item  in expected_keys:
+            if item not in dico:
+                self.log_error("Missing key {} in provided dictionary")
+                return False
         self.dico_ = dico
+        return True
 
     # todo: see how to put warning messages in the comment.
     def load(self, filename):
@@ -102,7 +108,7 @@ class PackageXMLParser(EnhancedObject):
         self.root_ = tree.getroot()
 
         try:
-            is_ok = self.sanity_check(verbose=True)
+            is_ok = self.load_all_spec()
         except AssertionError, err:
             self.log_error("Prb while parsing the file: {}".format(err.args))
             return False
@@ -110,12 +116,17 @@ class PackageXMLParser(EnhancedObject):
         # we should not do the following
         is_ok = self.extend_dependencies()
         if is_ok:
-            self.print_xml_parsed()
+            # self.print_xml_parsed()
             self.active_node_ = 0
         return is_ok
 
     # todo: using the same type tag for all interfaces would ease the process.
     def extend_dependencies(self):
+        """Extend dependencies depending on the interfaces used
+
+        Returns:
+            Bool: Operation success
+        """
         for node in self.data_node_:
             # can not loop this way, since all interface do not share
             # the same type tag
@@ -150,7 +161,6 @@ class PackageXMLParser(EnhancedObject):
                     if pkg_dep not in pkg_dependencies:
                         pkg_dependencies[pkg_dep] = list()
                     pkg_dependencies[pkg_dep].append({"type_interface": "directSubscriber", "name":item["name"]})
-
 
             if node['interface']["subscriber"]:
                 for item in node['interface']["subscriber"]:
@@ -234,12 +244,12 @@ class PackageXMLParser(EnhancedObject):
 
         return True
 
-    def sanity_check_package_attribute(self):
-        """Check the package attributes are the ones expected
+    def load_package_attribute(self):
+        """Check and get the package attributes
         """
         self.log("Package attributes: \n{}".format(self.root_.attrib))
 
-        attributes_package = self.dico_.spec_['package_attributes']
+        attributes_package = self.dico_['package_attributes']
 
         for attrib in attributes_package:
             assert attrib in self.root_.attrib.keys(), "Missing required attrib {} for package description".format(attrib)
@@ -252,7 +262,7 @@ class PackageXMLParser(EnhancedObject):
             if attrib not in attributes_package:
                 self.log_warn("Provided attrib {} ignored".format(attrib))
 
-    def sanity_check_node_interface(self, xml_interface):
+    def load_one_node_interface(self, xml_interface):
         """Check and store a node interface
 
         Args:
@@ -261,9 +271,9 @@ class PackageXMLParser(EnhancedObject):
         Returns:
             dict: the node interface
         """
-        self.log("Checking node interface {}".format(xml_interface.tag))
+        # self.log("Checking node interface {}".format(xml_interface.tag))
 
-        interface_node = self.dico_.spec_['node_interface'].keys()
+        interface_node = self.dico_['node_interface'].keys()
 
         assert xml_interface.tag in interface_node, "Unknown interface {}".format(xml_interface.tag)
 
@@ -271,7 +281,7 @@ class PackageXMLParser(EnhancedObject):
         interface_spec["type"] = xml_interface.tag
         interface_spec["attributes"] = dict()
 
-        attributes = self.dico_.spec_['node_interface'][xml_interface.tag]
+        attributes = self.dico_['node_interface'][xml_interface.tag]
 
         for attrib in attributes:
             # print "Checking for attributes {}".format(attrib)
@@ -285,13 +295,21 @@ class PackageXMLParser(EnhancedObject):
                 self.log_warn("Provided attrib {} of interface {} ignored (check {})".format(attrib, xml_interface.tag, xml_interface.attrib))
         return interface_spec
 
-    def sanity_check_node(self, xml_node):
+    def load_node_spec(self, xml_node):
+        """Load the node specification
+
+        Args:
+            xml_node (TYPE): xml description of the node
+
+        Returns:
+            dict: uploaded node attributes and possible interface
+        """
         # todo check as well component names
 
         loc_data_node = dict()
         loc_data_node['attributes'] = dict()
 
-        attributes_node = self.dico_.spec_['node_attributes']
+        attributes_node = self.dico_['node_attributes']
 
         for attrib in attributes_node:
             assert attrib in xml_node.attrib.keys(), "Missing required attribute {} for node description".format(attrib)
@@ -303,7 +321,7 @@ class PackageXMLParser(EnhancedObject):
             if attrib not in attributes_node:
                 self.log_warn("Provided attrib {} ignored".format(attrib))
 
-        interface_node = self.dico_.spec_['node_interface'].keys()
+        interface_node = self.dico_['node_interface'].keys()
 
         self.log("Check: node interface is: {}".format(interface_node))
 
@@ -313,7 +331,7 @@ class PackageXMLParser(EnhancedObject):
 
         for child in xml_node:
             # self.log("Checking for {}".format(child))
-            child_interface = self.sanity_check_node_interface(child)
+            child_interface = self.load_one_node_interface(child)
             # self.log("Adding entry for type {}".format(child_interface["type"]))
             # self.log("Within: {}".format(loc_data_node['interface']))
 
@@ -321,7 +339,7 @@ class PackageXMLParser(EnhancedObject):
 
         return loc_data_node
 
-    def sanity_check_dependency(self, xml_dep):
+    def load_one_dependency(self, xml_dep):
         """Summary
 
         Args:
@@ -330,35 +348,40 @@ class PackageXMLParser(EnhancedObject):
         assert xml_dep.text, "Missing dependency text"
         self.data_depend_.append(xml_dep.text)
 
-    def sanity_check_child(self, xml_item):
+    def load_child_spec(self, xml_item):
         tag = xml_item.tag
         if tag == "node":
-            self.data_node_.append(self.sanity_check_node(xml_item))
+            self.data_node_.append(self.load_node_spec(xml_item))
         elif tag == "depend":
-            self.sanity_check_dependency(xml_item)
+            self.load_one_dependency(xml_item)
         else:
             self.log_error("Unknown tag {}".format(tag))
 
-    def sanity_check(self, verbose=False):
+    def load_all_spec(self):
         """
         checking the sanity of the xml file
-        @param verbose whether additional info is being displayed
+
+        Args:
+            verbose (bool, optional): whether additional info is being displayed
+
+        Returns:
+            TYPE: Description
         """
-        if verbose:
-            self.log("XML sanity check")
 
         if not self.root_:
             return False
 
-        self.sanity_check_package_attribute()
+        self.load_package_attribute()
 
         for child in self.root_:
-            self.sanity_check_child(child)
+            self.load_child_spec(child)
 
         # todo should not always return true!
         return True
 
     def print_xml_parsed(self):
+        """Prin the xml file that has been parsed
+        """
         self.log("**************")
         self.log("XML parsed: ")
         self.log("**************")
@@ -367,15 +390,29 @@ class PackageXMLParser(EnhancedObject):
         self.log("{}".format(self.data_depend_))
         self.log("**************")
         self.log("{}".format(self.data_node_))
-        return True
 
     def get_nodes_spec(self):
+        """Return all nodes spec
+
+        Returns:
+            list: All nodes description
+        """
         return self.data_node_
 
     def get_package_spec(self):
+        """Return the package spec
+
+        Returns:
+            dict: list of attributes of the package
+        """
         return self.data_pack_
 
     def get_dependency_spec(self):
+        """Get all the dependencies defined
+
+        Returns:
+            List: all dependencies defined
+        """
         return self.data_depend_
 
     def get_number_nodes(self):
@@ -412,6 +449,11 @@ class PackageXMLParser(EnhancedObject):
         return True
 
     def get_active_node_spec(self):
+        """Provide all the spec of a given node
+
+        Returns:
+            TYPE: Description
+        """
         assert self.active_node_ != -1, "No active node defined"
         assert self.active_node_ < len(self.data_node_), "Active node {} should be less then {}".format(self.active_node_, len(self.data_node_))
         return self.data_node_[self.active_node_]
@@ -429,7 +471,7 @@ class PackageXMLParser(EnhancedObject):
 
         st = ET.tostring(self.root_, 'utf-8')
 
-        reparsed= minidom.parseString(st)
+        reparsed = minidom.parseString(st)
         res = reparsed.toprettyxml(indent="  ", encoding="utf-8")
         res = remove_empty_line(res)
 
@@ -451,16 +493,19 @@ def main():
     rospack = rospkg.RosPack()
     node_path = rospack.get_path('package_generator')
 
-    file_dico = node_path + "/sandbox/dico.yaml"
-    dico = GenerateDictionary()
+    # the current example only contains the dictionary
+    dir_template_spec = node_path + "/sandbox/"
+    spec = TemplateSpec()
 
-    if not dico.load_yaml_desc(file_dico):
+    if not spec.load_spec(dir_template_spec):
         print "Could not load the dictionnary"
         return
 
-    package_parser.set_dictionary(dico)
+    print "Setting the dico to \n {}".format(spec.dico_)
+    if not package_parser.set_dictionary(spec.dico_):
+        print "Prb while setting the parser dictionary"
 
-    filename = node_path + '/tests/extended.ros_package'
+    filename = node_path + '/tests/data/demo.ros_package'
     rospy.loginfo("Loading xml file {}".format(filename))
     if package_parser.load(filename):
         print "File loaded with success"
