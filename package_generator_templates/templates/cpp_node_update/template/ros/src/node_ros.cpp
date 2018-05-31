@@ -88,11 +88,9 @@ public:
      * @brief object constructor.
      */
     {camelCaseNodeName}ROS() : np_("~")
-                     {ifaction}
                      {forallactionServer}
                      , as_{name}_(n_, "{name}", boost::bind(&{camelCaseNodeName}Impl::callback_{name}, &component_implementation_, _1, &as_{name}_), false)
                      {endforallactionServer}
-                     {endifaction}
     {
         {ifactionServer}
         // launching action servers

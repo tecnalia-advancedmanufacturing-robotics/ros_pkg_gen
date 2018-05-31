@@ -10,9 +10,12 @@ Copyright (C) {packageCopyright}
 """
 
 import rospy
-{ifaction}
+{ifactionServer}
 import actionlib
-{endifaction}
+{endifactionServer}
+{ifactionClient}
+import actionlib
+{endifactionClient}
 {ifdynParameter}
 from dynamic_reconfigure.server import Server
 from {packageName}.cfg import {nodeName}Config

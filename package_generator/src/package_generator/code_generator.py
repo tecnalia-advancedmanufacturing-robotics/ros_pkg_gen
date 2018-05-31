@@ -150,7 +150,6 @@ class CodeGenerator(EnhancedObject):
         self.log_warn("Conditions to handle later on")
         self.transformation_loop_['foralldependencies'] = lambda text: self.get_loop_dependencies(text)
         self.transformation_loop_['forallnodes'] = lambda text: self.get_loop_nodes(text)
-        self.transformation_loop_['ifaction'] = lambda text: self.get_if_defined(["actionClient", "actionServer"], text)
 
     # TODO empty self.transformation_functions_ before entering here
     def generate_apply_functions(self):
