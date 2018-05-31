@@ -113,7 +113,7 @@ class CodeGenerator(EnhancedObject):
             return False
         return True
 
-    # TODO empty self.transformation_ before entering here
+    # TODO empty self.transformation_ before/when entering here
     def generate_simple_tags(self):
 
         package_attributes = self.spec_.dico_['package_attributes']
@@ -132,7 +132,7 @@ class CodeGenerator(EnhancedObject):
         self.transformation_['camelCaseNodeName'] = get_camelcase_name(self.nodes_spec_["attributes"])
         #self.log_error("Generated tags: \n {}".format(self.transformation_.keys()))
 
-    # TODO empty self.transformation_loop_ before entering here
+    # TODO empty self.transformation_loop_ before/when entering here
     def generate_flow_tags(self):
 
         node_interface = self.spec_.dico_['node_interface'].keys()
@@ -151,7 +151,7 @@ class CodeGenerator(EnhancedObject):
         self.transformation_loop_['foralldependencies'] = lambda text: self.get_loop_dependencies(text)
         self.transformation_loop_['forallnodes'] = lambda text: self.get_loop_nodes(text)
 
-    # TODO empty self.transformation_functions_ before entering here
+    # TODO empty self.transformation_functions_ before/when entering here
     def generate_apply_functions(self):
         """Get the transformation functions defined with the template config
         TODO : is ir worth doing so?
@@ -250,7 +250,7 @@ class CodeGenerator(EnhancedObject):
         except IOError:
             self.log_error("Prb while opening file {}".format(filename))
             return False
-        # self.log("File to process contains {} lines".format(len(lines_in_file)))
+        # self.log("File to process has {} lines".format(len(lines_in_file)))
 
         # generate an iterator on the enumerated content of the lines list
         iter_enum_lines = iter(enumerate(lines_in_file, start=1))
@@ -341,6 +341,9 @@ class CodeGenerator(EnhancedObject):
                     end_item = 'end' + item
                     loop_tag_found = loop_tag_found or end_item in tags
 
+                # TODO see get_loop_gen to add the apply mechanism
+                # on the upper context aroud here
+
                 if len(matches) > 1:
                     # multiple matches.
                     # we make simple checks according to authorize operations
@@ -365,7 +368,7 @@ class CodeGenerator(EnhancedObject):
                     # else:
                     #    print colored("Line empty: |{}|".format(line), "blue")
 
-                    # todo why do I increase num_line here? Isn t it done automatically?
+                    # TODO why do I increase num_line here? Isn t it done automatically?
                     num_line += 1
                     continue
 
@@ -436,8 +439,8 @@ class CodeGenerator(EnhancedObject):
     def get_node_attr(self, attr):
         return self.nodes_spec_["attributes"][attr]
 
-    # todo remove that function and use the apply tag instead
-    # function kept in case it could be defined as an external function for simplification
+    # TODO remove that function that is not used anymore
+    # function kept as exmaple if externalizing makes sense
     def get_include_interface(self):
         output = None
 
@@ -495,10 +498,8 @@ class CodeGenerator(EnhancedObject):
         else:
             return output
 
-    # todo how should be handled the dependency inherent to the structure used?
+    # TODO how should be handled the dependency inherent to the structure used?
     # should it be manually added, or resulting in error?
-    # manually handled for dyn rec & action, similar point of view to consider
-    # for other types
     def get_loop_dependencies(self, text):
         output = list()
         # self.log("Handling text: \n {}".format(text))
@@ -515,21 +516,16 @@ class CodeGenerator(EnhancedObject):
 
         return True
 
-    # todo we loose the access to all information.
-    # Added manually the node name. More may be needed.
-    # todo how to catch an error
+    # TODO how to catch an error
     def get_loop_gen(self, interface_type, text):
         output = list()
 
         # self.log("Handling text: \n {} with interface {}".format(text, interface_type))
-        node_name = self.nodes_spec_["attributes"]["name"]
-
         assert interface_type in self.nodes_spec_["interface"], "Requested interface type {} unknown".format(interface_type)
 
         # computing all upperlayer spec
         # TODO this could be avoided and done once
-        # todo here is not considered the aditional functions
-        # todo we could only do this when item exists in any case
+        # We could only do this when item exists in any case
         context_upper = dict()
         for key in self.transformation_:
             context_upper[key] = self.transformation_[key]
@@ -542,13 +538,13 @@ class CodeGenerator(EnhancedObject):
             #self.log_warn("Extended item {}".format(context_extended))
             for line in text.splitlines():
                 # self.log("Handling line {}".format(line))
-                # todo: there is a risk of inserting empty lines
+                # TODO: there is a risk of inserting empty lines
                 # maybe not, since imbricated cases are not considered yet
                 # we can not have a for_all  if endif end_for_all
                 line_processed = convert(line, **context_extended)
 
                 # check for apply operator
-                # todo remove the loop on apply, that is useless
+                # TODO remove the loop on apply, that is useless
                 matches = self.get_all_tags_pattern("apply", line_processed)
                 if matches:
                     # self.log_warn("Found matches: {}".format(matches))
