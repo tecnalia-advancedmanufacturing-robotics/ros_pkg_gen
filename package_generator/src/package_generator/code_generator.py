@@ -57,45 +57,6 @@ def get_camelcase_name(context):
     return context['name'].title().replace("_", "")
 
 
-def str2bool(strg):
-    """Summary
-
-    Args:
-        strg (str): string containing a boolean value
-
-    Returns:
-        Bool: corresponding boolean value
-    """
-    return strg.lower() in ("yes", "true", "t", "1")
-
-def get_py_param_value(context):
-    param_type = context['type']
-    if param_type not in ['std::string', 'string', 'int', 'double', 'bool']:
-        msg = "Invalid type for param {}".format(param_type)
-        msg += "\n autorized type: std::string, string, int, double, bool]"
-        raise SyntaxError(msg)
-    if param_type in ['std::string', 'string']:
-        return "\"{}\"".format(context['value'])
-    if param_type == 'bool':
-        return "{}".format(str2bool(context['value']))
-    return context['value']
-
-def get_cpp_param_value(context):
-    param_type = context['type']
-    if param_type not in ['std::string', 'string', 'int', 'double', 'bool']:
-        msg = "Invalid type for param {}".format(param_type)
-        msg += "\n autorized type: [std::string, string, int, double, bool]"
-        raise SyntaxError(msg)
-    if param_type in ['std::string', 'string']:
-        return "\"{}\"".format(context['value'])
-    if param_type == 'bool':
-        if str2bool(context['value']):
-            return "true"
-        else:
-            return "false"
-    return context['value']
-
-
 class CodeGenerator(EnhancedObject):
     """class responsible of the generation of a single file
 
@@ -117,11 +78,7 @@ class CodeGenerator(EnhancedObject):
 
         self.transformation_ = dict()
         self.transformation_loop_ = dict()
-
-        self.transformation_functions_ = {
-            'get_py_param_value': get_py_param_value,
-            'get_cpp_param_value':get_cpp_param_value
-        }
+        self.transformation_functions_ = dict()
 
         self.spec_ = None
         self.tmp_buffer_ = list()
