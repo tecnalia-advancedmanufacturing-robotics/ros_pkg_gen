@@ -113,24 +113,26 @@ class CodeGenerator(EnhancedObject):
             return False
         return True
 
+    # TODO empty self.transformation_ before entering here
     def generate_simple_tags(self):
 
         package_attributes = self.spec_.dico_['package_attributes']
 
         for attrib_pack in package_attributes:
-            tag = "package" + attrib_pack.title()
+            tag = "package" + attrib_pack.title().replace("_", "")
             self.transformation_[tag] = self.get_package_attr(attrib_pack)
 
         node_attributes = self.spec_.dico_['node_attributes']
 
         for attrib_node in node_attributes:
-            tag = "node" + attrib_node.title()
+            tag = "node" + attrib_node.title().replace("_", "")
             self.transformation_[tag] = self.get_node_attr(attrib_node)
 
         self.log_warn("Conditions to handle later on")
-        self.transformation_['packageAuthorEmail'] = self.get_package_attr("author_email")
         self.transformation_['camelCaseNodeName'] = get_camelcase_name(self.nodes_spec_["attributes"])
+        #self.log_error("Generated tags: \n {}".format(self.transformation_.keys()))
 
+    # TODO empty self.transformation_loop_ before entering here
     def generate_flow_tags(self):
 
         node_interface = self.spec_.dico_['node_interface'].keys()
@@ -150,6 +152,7 @@ class CodeGenerator(EnhancedObject):
         self.transformation_loop_['forallnodes'] = lambda text: self.get_loop_nodes(text)
         self.transformation_loop_['ifaction'] = lambda text: self.get_if_defined(["actionClient", "actionServer"], text)
 
+    # TODO empty self.transformation_functions_ before entering here
     def generate_apply_functions(self):
         """Get the transformation functions defined with the template config
         TODO : is ir worth doing so?
@@ -525,9 +528,9 @@ class CodeGenerator(EnhancedObject):
         assert interface_type in self.nodes_spec_["interface"], "Requested interface type {} unknown".format(interface_type)
 
         # computing all upperlayer spec
-        # todo this could be avoided and done once
+        # TODO this could be avoided and done once
         # todo here is not considered the aditional functions
-        # todo we could aonly do this when item exists in any case
+        # todo we could only do this when item exists in any case
         context_upper = dict()
         for key in self.transformation_:
             context_upper[key] = self.transformation_[key]
