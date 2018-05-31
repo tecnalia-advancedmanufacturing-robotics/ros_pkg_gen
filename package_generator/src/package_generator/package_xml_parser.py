@@ -17,7 +17,6 @@ from xml.dom import minidom
 from package_generator.enhanced_object import EnhancedObject
 from package_generator.template_spec import TemplateSpec
 
-
 def remove_empty_line(text):
     """Remove empty line within a multiline string
 
@@ -482,8 +481,13 @@ class PackageXMLParser(EnhancedObject):
                 file_handler.write("{}\n".format(item))
         return True
 
-# todo the content of the main should be adapted to be a sanity check instead
+# TODO the content of the main should be adapted to be a sanity check instead
 def main():
+    """Main only used for trial purposes
+
+    Returns:
+        None: nothing
+    """
     print "package xml parser trial"
     #rospy.init_node('package_xml_parser', anonymous=True)
     #rospy.loginfo("Package description sanity check")
@@ -498,7 +502,7 @@ def main():
     spec = TemplateSpec()
 
     if not spec.load_spec(dir_template_spec):
-        print "Could not load the dictionnary"
+        print "Could not load the template spec"
         return
 
     print "Setting the dico to \n {}".format(spec.dico_)

@@ -22,16 +22,16 @@ from package_generator.code_generator import CodeGenerator
 from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.file_update_management import GeneratedFileAnalysis
 from package_generator.enhanced_object import EnhancedObject
-from package_generator.generate_dict import GenerateDictionary
+from package_generator.template_spec import TemplateSpec
 
 class PackageGenerator(EnhancedObject):
     """Handle the genration of a whole package
-
+    
     Attributes:
-        dico_ (TYPE): Description
         file_generator_ (TYPE): Description
         package_path_ (TYPE): Description
         path_pkg_backup_ (TYPE): Description
+        spec_ (TemplateSpec): configuration of the template model
         template_path_ (TYPE): Description
         xml_parser_ (TYPE): Description
 
@@ -54,7 +54,7 @@ class PackageGenerator(EnhancedObject):
         self.package_path_ = None
         # parser of the package description
         self.xml_parser_ = None
-        self.dico_ = None
+        self.spec_ = None
         # generic file generator
         self.file_generator_ = None
         # if the package already existed, location of the package backup
@@ -134,26 +134,26 @@ Revise the template, and compare to examples
             return False
 
         if not os.path.isdir(output_path):
-            msg_err = "Template path ({}) is not a directory ".format(output_path)
+            msg_err = "Template path ({}) not a directory ".format(output_path)
             self.log_error(msg_err)
             return False
 
-        self.dico_ = GenerateDictionary()
+        self.spec_ = TemplateSpec()
         self.xml_parser_ = PackageXMLParser()
         self.file_generator_ = CodeGenerator()
 
-        file_dico = self.template_path_ + "/config/dictionary.yaml"
-        if not self.dico_.load_yaml_desc(file_dico):
-            self.log_error("Could not load the template dictionary")
+        dir_template_spec = self.template_path_ + "/config/"
+        if not self.spec_.load_spec(dir_template_spec):
+            self.log_error("Could not load the template spec")
             return False
 
-        self.xml_parser_.set_dictionary(self.dico_)
+        self.xml_parser_.set_dictionary(self.spec_.dico_)
         if not self.xml_parser_.load(package_desc):
             msg_err = "Prb while parsing xml file {}".format(package_desc)
             self.log_error(msg_err)
             return False
 
-        self.file_generator_.configure(self.xml_parser_, self.dico_)
+        self.file_generator_.configure(self.xml_parser_, self.spec_)
 
         package_name = self.xml_parser_.get_package_spec()["name"]
 
@@ -188,8 +188,8 @@ Revise the template, and compare to examples
             node_name = self.xml_parser_.data_node_[id_node]["attributes"]["name"]
             self.log_warn("Handling files for node {}".format(node_name))
 
-            # redoing the xml parser setting to take into consideration the new active node
-            self.file_generator_.configure(self.xml_parser_, self.dico_)
+            # reconfiguring the generator to adjust to the new active node
+            self.file_generator_.configure(self.xml_parser_, self.spec_)
 
             for item in package_content:
                 file_generic = self.template_path_ + '/template/' + item

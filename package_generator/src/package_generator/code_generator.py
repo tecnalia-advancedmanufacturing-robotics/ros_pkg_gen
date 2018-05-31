@@ -13,7 +13,7 @@ For full terms see https://www.gnu.org/licenses/gpl.txt
 import re
 from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.enhanced_object import EnhancedObject
-from package_generator.generate_dict import GenerateDictionary
+from package_generator.template_spec import TemplateSpec
 
 def convert(line, delimiter=None, **kwargs):
     """equivalant to format, with provided delimiter
@@ -50,18 +50,6 @@ def convert(line, delimiter=None, **kwargs):
         # print "acc: {}".format(result_line)
         # print acc
     return result_line
-
-def get_package_type(context):
-    return context['type'].split("::")[0]
-
-def get_class_type(context):
-    return context['type'].split("::")[1]
-
-def get_python_type(context):
-    return context['type'].replace("::", ".")
-
-def get_cpp_path(context):
-    return context['type'].replace("::", "/")
 
 def get_camelcase_name(context):
     # print "here we are: processing {}".format(context)
@@ -141,16 +129,15 @@ class CodeGenerator(EnhancedObject):
 
     Attributes:
         dep_spec_ (TYPE): Description
-        dico_ (TYPE): Description
-        formatter_ (TYPE): Description
-        name_ (TYPE): Description
         nodes_spec_ (TYPE): Description
         package_spec_ (TYPE): Description
+        spec_ (TYPE): Description
         tmp_buffer_ (TYPE): Description
         transformation_ (TYPE): Description
         transformation_functions_ (TYPE): Description
         transformation_loop_ (TYPE): Description
         xml_parser_ (TYPE): Description
+
     """
     def __init__(self, name="CodeGenerator"):
         #  call super class constructor
@@ -160,47 +147,53 @@ class CodeGenerator(EnhancedObject):
         self.transformation_loop_ = dict()
 
         self.transformation_functions_ = {
-            'get_package_type' : get_package_type,
-            'get_class_type' : get_class_type,
-            'get_python_type' : get_python_type,
-            'get_cpp_path' : get_cpp_path,
             'get_py_param_value': get_py_param_value,
             'get_cpp_param_value':get_cpp_param_value,
             'get_py_param_type': get_py_param_type
         }
 
-        self.dico_ = None
+        self.spec_ = None
         self.tmp_buffer_ = list()
         self.xml_parser_ = None
         self.nodes_spec_ = None
         self.package_spec_ = None
         self.dep_spec_ = None
 
-    def configure(self, parser, dico):
+    def configure(self, parser, spec):
         """set the required information to configure the generator
 
         Args:
             parser (PackageXMLParser): XML node description parsed
-            dico (GenerateDictionary): Dictionary to be used
-        """
-        self.xml_parser_ = parser
-        self.get_xml_parsing()
-        self.dico_ = dico
+            spec (TemplateSpec): configuration of the template
 
-        # generating the tags
-        self.generate_simple_tags()
-        self.generate_flow_tags()
-        self.tmp_buffer_[:] = []
+        Returns:
+            Bool: Operation success
+        """
+        try:
+            self.xml_parser_ = parser
+            self.get_xml_parsing()
+
+            self.spec_ = spec
+
+            # generating the tags
+            self.generate_simple_tags()
+            self.generate_flow_tags()
+            self.generate_apply_functions()
+            self.tmp_buffer_[:] = []
+        except AssertionError, err:
+            self.log_error("Prb during configuration: {}".format(err))
+            return False
+        return True
 
     def generate_simple_tags(self):
 
-        package_attributes = self.dico_.spec_['package_attributes']
+        package_attributes = self.spec_.dico_['package_attributes']
 
         for attrib_pack in package_attributes:
             tag = "package" + attrib_pack.title()
             self.transformation_[tag] = self.get_package_attr(attrib_pack)
 
-        node_attributes = self.dico_.spec_['node_attributes']
+        node_attributes = self.spec_.dico_['node_attributes']
 
         for attrib_node in node_attributes:
             tag = "node" + attrib_node.title()
@@ -212,7 +205,7 @@ class CodeGenerator(EnhancedObject):
 
     def generate_flow_tags(self):
 
-        node_interface = self.dico_.spec_['node_interface'].keys()
+        node_interface = self.spec_.dico_['node_interface'].keys()
 
         lambda_for = lambda d: lambda t: self.get_loop_gen(d, t)
         lambda_if = lambda u: lambda v: self.get_if_defined(u, v)
@@ -228,6 +221,13 @@ class CodeGenerator(EnhancedObject):
         self.transformation_loop_['foralldependencies'] = lambda text: self.get_loop_dependencies(text)
         self.transformation_loop_['forallnodes'] = lambda text: self.get_loop_nodes(text)
         self.transformation_loop_['ifaction'] = lambda text: self.get_if_defined(["actionClient", "actionServer"], text)
+
+    def generate_apply_functions(self):
+        """Get the transformation functions defined with the template config
+        TODO : is ir worth doing so?
+        """
+        for fun in self.spec_.transformation_functions_:
+            self.transformation_functions_[fun] = self.spec_.transformation_functions_[fun]
 
     def get_xml_parsing(self):
         """ set the xml parser, and extract the relevant input from it
@@ -307,8 +307,8 @@ class CodeGenerator(EnhancedObject):
         if self.xml_parser_ is None:
             self.log_error("XML parser not defined")
             return False
-        if self.dico_ is None:
-            self.log_error("Dictionary missing")
+        if self.spec_ is None:
+            self.log_error("Template spec missing")
             return False
 
         lines_in_file = list()
@@ -706,35 +706,42 @@ class CodeGenerator(EnhancedObject):
         return is_ok
 
 def main():
+    """main only defined for debugging purposes
 
+    Returns:
+        None: nothing
+    """
     gen = CodeGenerator()
     xml_parser = PackageXMLParser()
 
     import rospkg
     rospack = rospkg.RosPack()
-    node_path = rospack.get_path('package_generator')
+    node_path = rospack.get_path('package_generator_templates')
 
-    file_dico = node_path + "/sandbox/dico.yaml"
-    dico = GenerateDictionary()
+    dir_template_spec = node_path + "/templates/cpp_node_update/config"
 
-    if not dico.load_yaml_desc(file_dico):
-        print "Could not load the dictionnary"
+    spec = TemplateSpec()
+
+    if not spec.load_spec(dir_template_spec):
+        print "Could not load the template spec"
         return
 
-    xml_parser.set_dictionary(dico)
+    xml_parser.set_dictionary(spec.dico_)
 
+    node_path = rospack.get_path('package_generator')
     filename = node_path + '/tests/data/demo.ros_package'
 
     if not xml_parser.load(filename):
         print "Error while parsing the xml file {}".format(filename)
         print "Bye"
         return
+
     xml_parser.set_active_node(0)
-    gen.configure(xml_parser, dico)
+    gen.configure(xml_parser, spec)
 
     node_path = rospack.get_path('package_generator_templates')
 
-    filename = node_path + '/templates/cpp_node_update/README.md'
+    filename = node_path + '/templates/cpp_node_update/template/README.md'
 
     gen.reset_output_file()
     if gen.process_file(filename):
