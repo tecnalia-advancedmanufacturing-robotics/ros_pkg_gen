@@ -56,18 +56,6 @@ def get_camelcase_name(context):
     # print "Node name: {}".format(context['name'])
     return context['name'].title().replace("_", "")
 
-def get_py_param_type(context):
-    param_type = context['type']
-    if param_type not in ['std::string', 'string', 'int', 'double', 'bool']:
-        raise SyntaxError("Invalid type for param {}".format(param_type))
-    if param_type in ['std::string', 'string']:
-        return 'str_t'
-    if param_type == 'int':
-        return 'int_t'
-    if param_type == 'double':
-        return 'double_t'
-    if param_type == 'bool':
-        return 'bool_t'
 
 def str2bool(strg):
     """Summary
@@ -79,22 +67,6 @@ def str2bool(strg):
         Bool: corresponding boolean value
     """
     return strg.lower() in ("yes", "true", "t", "1")
-
-# todo should this be merged with the previous one?
-def get_py_param_value_to_remove(context):
-    param_type = context['type']
-    if param_type not in ['std::string', 'string', 'int', 'double', 'bool']:
-        msg = "Invalid type for param {}".format(param_type)
-        msg += "\n autorized type: std::string, string, int, double, bool]"
-        raise SyntaxError(msg)
-    if param_type in ['std::string', 'string']:
-        return context['value']
-    if param_type == 'int':
-        return context['value']
-    if param_type == 'double':
-        return context['value']
-    if param_type == 'bool':
-        return "{}".format(str2bool(context['value']))
 
 def get_py_param_value(context):
     param_type = context['type']
@@ -125,18 +97,18 @@ def get_cpp_param_value(context):
 
 
 class CodeGenerator(EnhancedObject):
-    """class responsible of the generation of a whole ROS package
+    """class responsible of the generation of a single file
 
     Attributes:
-        dep_spec_ (TYPE): Description
-        nodes_spec_ (TYPE): Description
-        package_spec_ (TYPE): Description
-        spec_ (TYPE): Description
-        tmp_buffer_ (TYPE): Description
-        transformation_ (TYPE): Description
-        transformation_functions_ (TYPE): Description
-        transformation_loop_ (TYPE): Description
-        xml_parser_ (TYPE): Description
+        dep_spec_ (list): list of dependency of the package
+        nodes_spec_ (list): spec of each node
+        package_spec_ (dict): specification of the package
+        spec_ (TemplateSpec): specification of the template
+        tmp_buffer_ (list): will contain the generated file
+        transformation_ (dict): mapping instruction tag to generation function
+        transformation_functions_ (dict): mapping inst. fun to gen. fun
+        transformation_loop_ (dict): mapping instruction flow to gen. functions
+        xml_parser_ (PackageXMLParser): Parsed xml Developer specification
 
     """
     def __init__(self, name="CodeGenerator"):
@@ -148,8 +120,7 @@ class CodeGenerator(EnhancedObject):
 
         self.transformation_functions_ = {
             'get_py_param_value': get_py_param_value,
-            'get_cpp_param_value':get_cpp_param_value,
-            'get_py_param_type': get_py_param_type
+            'get_cpp_param_value':get_cpp_param_value
         }
 
         self.spec_ = None

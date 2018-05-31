@@ -65,7 +65,7 @@ def get_cpp_path(context):
         context (dict): context (related to an interface description)
 
     Returns:
-        str: The type of the interface written in path style
+        str: conversion in cpp path format of the type
 
     Examples:
         >>> context = {name: "misc", type={std_msgs::String}, desc="an interface"}
@@ -73,3 +73,30 @@ def get_cpp_path(context):
         "std_msgs/String"
     """
     return context['type'].replace("::", "/")
+
+def get_py_param_type(context):
+    """convert a param type into python accepted format.
+    Related to the formats accepted by the parameter under dynamic reconfigure
+
+    Args:
+        context (dict): context (related to an interface description)
+
+    Returns:
+        str: The type of the interface written in path style
+
+    Examples:
+        >>> context = {desc="an interface" name="misc" type="std::string"/>
+        >>> get_py_param_type(context)
+        "str_t"
+    """
+    param_type = context['type']
+    if param_type not in ['std::string', 'string', 'int', 'double', 'bool']:
+        raise SyntaxError("Invalid type for param {}".format(param_type))
+    if param_type in ['std::string', 'string']:
+        return 'str_t'
+    if param_type == 'int':
+        return 'int_t'
+    if param_type == 'double':
+        return 'double_t'
+    if param_type == 'bool':
+        return 'bool_t'
