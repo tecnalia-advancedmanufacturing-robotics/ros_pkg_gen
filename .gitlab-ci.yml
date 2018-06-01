@@ -1,0 +1,22 @@
+image: docker:git
+
+services:
+  - docker:dind
+
+before_script:
+  - apk add --update bash coreutils tar
+  - git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
+
+variables:
+  TMPDIR: "${CI_PROJECT_DIR}.tmp"
+  # keep this for now, since there seems to be memory limit issues in the ci VM
+  ROS_PARALLEL_JOBS: "-j2"
+  ROS_PARALLEL_TEST_JOBS: "-j1"
+  # only if specific dependencies are to be pulled
+  # UPSTREAM_WORKSPACE: file
+  # ROSINSTALL_FILENAME: ".rosinstall"
+
+ici_kinetic:
+  script: .ci_config/gitlab.sh
+  variables:
+    ROS_DISTRO: kinetic
