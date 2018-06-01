@@ -63,7 +63,11 @@ include_directories(${catkin_INCLUDE_DIRS})
 #############
 ## Install ##
 #############
-## todo: To be completed
+catkin_install_python(PROGRAMS
+                      {forallnodes}
+                      scripts/{nodeName}
+                      {endforallnodes}
+                      DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 # protected region user Cmake macros begin #
 # protected region user Cmake macros end #
