@@ -51,12 +51,6 @@ def convert(line, delimiter=None, **kwargs):
         # print acc
     return result_line
 
-def get_camelcase_name(context):
-    # print "here we are: processing {}".format(context)
-    # print "Node name: {}".format(context['name'])
-    return context['name'].title().replace("_", "")
-
-
 class CodeGenerator(EnhancedObject):
     """class responsible of the generation of a single file
 
@@ -128,8 +122,6 @@ class CodeGenerator(EnhancedObject):
             tag = "node" + attrib_node.title().replace("_", "")
             self.transformation_[tag] = self.get_node_attr(attrib_node)
 
-        self.log_warn("Conditions to handle later on")
-        self.transformation_['camelCaseNodeName'] = get_camelcase_name(self.nodes_spec_["attributes"])
         #self.log_error("Generated tags: \n {}".format(self.transformation_.keys()))
 
     # TODO empty self.transformation_loop_ before/when entering here
@@ -324,8 +316,27 @@ class CodeGenerator(EnhancedObject):
                 num_line, line = iter_enum_lines.next()
                 # self.log("Processing line [{}]: {}".format(num_line, line))
 
-                matches = self.get_all_tags(line)
+                # look for apply generator
+                # TODO presense of loop / conditional tag not handled.
+                matches = self.get_all_tags_pattern("apply", line)
+                for m in matches:
+                    operation = m[0].split("-")[1]
+                    # self.log("operation is: {}".format(operation))
+                    # make sure the operation exist
+                    if operation not in self.transformation_functions_:
+                        self.log_warn("Operator {} unknown and thus discarded".format(operation))
+                        continue
+                    try:
+                        res = self.transformation_functions_[operation](self.transformation_)
+                    except Exception as err:
+                        self.log_error("Exception detected in processing apply on line {} \n {}".format(line, err))
+                        raise
+                    # self.log_warn("result would be {}".format(res))
+                    # self.log_warn("Here we are")
+                    line = convert(line, **{m[0]: res})
 
+                # look for the other tags
+                matches = self.get_all_tags(line)
                 if not matches:
                     self.add_output_line(line)
                     num_line += 1

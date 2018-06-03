@@ -171,3 +171,19 @@ def str2bool(strg):
         Bool: corresponding boolean value
     """
     return strg.lower() in ("yes", "true", "t", "1")
+
+def capitalized_node_name(context):
+    """return the node name in capitalized format
+
+    Args:
+        context (dict): complete package and node transformation
+
+    Returns:
+        str: node name in capitalized format, underscore being removed.
+
+    Examples:
+        >>> context = {nodeName="another_node" frecuency="100"/>
+        >>> capitalized_node_name(context)
+        "AnotherNode"
+    """
+    return context['nodeName'].title().replace("_", "")

@@ -52,11 +52,11 @@
 #include <{nodeName}_common.cpp>
 
 /**
- * @class {camelCaseNodeName}ROS
+ * @class {apply-capitalized_node_name}ROS
  * @brief Class handling the connection with the ROS world.
  * It also implement the node life-cycle, and access to object {nodeName}-impl when appropriate
  */
-class {camelCaseNodeName}ROS
+class {apply-capitalized_node_name}ROS
 {
 public:
     ros::NodeHandle n_;
@@ -79,17 +79,17 @@ public:
     actionlib::SimpleActionServer<{type}Action> as_{name}_;
     {endforallactionServer}
 
-    {camelCaseNodeName}Data component_data_;
+    {apply-capitalized_node_name}Data component_data_;
     // todo confirm it should be always defined, even if not used.
-    {camelCaseNodeName}Config component_config_;
-    {camelCaseNodeName}Impl component_implementation_;
+    {apply-capitalized_node_name}Config component_config_;
+    {apply-capitalized_node_name}Impl component_implementation_;
 
     /**
      * @brief object constructor.
      */
-    {camelCaseNodeName}ROS() : np_("~")
+    {apply-capitalized_node_name}ROS() : np_("~")
                      {forallactionServer}
-                     , as_{name}_(n_, "{name}", boost::bind(&{camelCaseNodeName}Impl::callback_{name}, &component_implementation_, _1, &as_{name}_), false)
+                     , as_{name}_(n_, "{name}", boost::bind(&{apply-capitalized_node_name}Impl::callback_{name}, &component_implementation_, _1, &as_{name}_), false)
                      {endforallactionServer}
     {
         {ifactionServer}
@@ -100,7 +100,7 @@ public:
         {endforallactionServer}
         {ifdynParameter}
         // preparing dynamic reconfigure mechanism
-        f = boost::bind(&{camelCaseNodeName}ROS::configure_callback, this, _1, _2);
+        f = boost::bind(&{apply-capitalized_node_name}ROS::configure_callback, this, _1, _2);
         server.setCallback(f);
         {endifdynParameter}
         {forallpublisher}
@@ -115,11 +115,11 @@ public:
         {ifdirectSubscriber}
         // Handling direct subscriber
         {foralldirectSubscriber}
-        component_implementation_.passthrough.{name} = n_.subscribe("{name}", 1, &{camelCaseNodeName}Impl::directTopicCallback_{name}, &component_implementation_);
+        component_implementation_.passthrough.{name} = n_.subscribe("{name}", 1, &{apply-capitalized_node_name}Impl::directTopicCallback_{name}, &component_implementation_);
         {endforalldirectSubscriber}
         {endifdirectSubscriber}
         {forallsubscriber}
-        {name}_ = n_.subscribe("{name}", 1, &{camelCaseNodeName}ROS::topicCallback_{name}, this);
+        {name}_ = n_.subscribe("{name}", 1, &{apply-capitalized_node_name}ROS::topicCallback_{name}, this);
         {endforallsubscriber}
         {ifparameter}
         // handling parameters from the parameter server
@@ -138,7 +138,7 @@ public:
         std::string {name}_remap;
         np_.param("{name}_remap", {name}_remap, (std::string)"{name}");
         ROS_INFO_STREAM("Service server at direction " << {name}_remap);
-        {name}_ = n_.advertiseService<{type}::Request , {type}::Response>({name}_remap, boost::bind(&{camelCaseNodeName}Impl::callback_{name}, &component_implementation_,_1,_2,component_config_));
+        {name}_ = n_.advertiseService<{type}::Request , {type}::Response>({name}_remap, boost::bind(&{apply-capitalized_node_name}Impl::callback_{name}, &component_implementation_,_1,_2,component_config_));
         {endforallserviceServer}
         {forallserviceClient}
         std::string sc_{name}_remap;
@@ -228,7 +228,7 @@ public:
     /**
      * @brief object destructor
      */
-    ~{camelCaseNodeName}ROS()
+    ~{apply-capitalized_node_name}ROS()
     {
     }
 };
@@ -243,10 +243,10 @@ int main(int argc, char** argv)
 
     ros::AsyncSpinner spinner(1);
 
-    {camelCaseNodeName}ROS node;
+    {apply-capitalized_node_name}ROS node;
     node.configure();
 
-    ros::Timer timer = node.n_.createTimer(ros::Duration(1.0 / {nodeFrequency}), &{camelCaseNodeName}ROS::update, &node);
+    ros::Timer timer = node.n_.createTimer(ros::Duration(1.0 / {nodeFrequency}), &{apply-capitalized_node_name}ROS::update, &node);
 
     spinner.start();
 

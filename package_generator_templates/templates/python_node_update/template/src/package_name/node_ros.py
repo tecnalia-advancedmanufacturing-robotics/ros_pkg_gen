@@ -52,7 +52,7 @@ from {packageName} import {nodeName}_impl
 from copy import deepcopy
 
 # todo set a function to write correctly the name
-class {camelCaseNodeName}ROS(object):
+class {apply-capitalized_node_name}ROS(object):
     """
     ROS interface class, handling all communication with ROS
     """
@@ -60,9 +60,9 @@ class {camelCaseNodeName}ROS(object):
         """
         Attributes definition
         """
-        self.component_data_ = {nodeName}_impl.{camelCaseNodeName}Data()
-        self.component_config_ = {nodeName}_impl.{camelCaseNodeName}Config()
-        self.component_implementation_ = {nodeName}_impl.{camelCaseNodeName}Implementation()
+        self.component_data_ = {nodeName}_impl.{apply-capitalized_node_name}Data()
+        self.component_config_ = {nodeName}_impl.{apply-capitalized_node_name}Config()
+        self.component_implementation_ = {nodeName}_impl.{apply-capitalized_node_name}Implementation()
 
         {ifdynParameter}
         # preparing dynamic reconfigure mechanism
@@ -213,7 +213,7 @@ def main():
     """
     rospy.init_node("{nodeName}", anonymous=False)
 
-    node = {camelCaseNodeName}ROS()
+    node = {apply-capitalized_node_name}ROS()
     if not node.configure():
         rospy.logfatal("Could not configure the node")
         rospy.logfatal("Please check configuration parameters")
