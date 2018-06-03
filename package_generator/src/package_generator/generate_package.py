@@ -26,7 +26,7 @@ from package_generator.template_spec import TemplateSpec
 
 class PackageGenerator(EnhancedObject):
     """Handle the genration of a whole package
-    
+
     Attributes:
         file_generator_ (TYPE): Description
         package_path_ (TYPE): Description
@@ -40,14 +40,14 @@ class PackageGenerator(EnhancedObject):
     """
 
     def __init__(self, name="PackageGenerator"):
-        #  call super class constructor
-        super(PackageGenerator, self).__init__(name)
-
         """ Intialisation of the object
 
         Args:
             name (str, optional): Name of the component, for printing aspect
         """
+        #  call super class constructor
+        super(PackageGenerator, self).__init__(name)
+
         # path to the template to use
         self.template_path_ = None
         # base location of the package to create
@@ -83,7 +83,7 @@ class PackageGenerator(EnhancedObject):
 
         details = """A template should contain:
     * config/dictionary.yaml : the dictionary to be used
-    * [optional] config/function.yaml : additional functions used in the generation
+    * [optional] config/functions.py : additional functions used in the generation
     * template/* set of elements to be generated
 Revise the template, and compare to examples
         """
@@ -167,7 +167,7 @@ Revise the template, and compare to examples
             str_date = now.strftime("%Y_%m_%d_%H_%M_%S")
             self.path_pkg_backup_ = "/tmp/{}_{}".format(os.path.basename(self.package_path_), str_date)
             self.log_warn("Original package temporally stored in {}".format(self.path_pkg_backup_))
-            # todo check if the move succeeded
+            # TODO check if the move succeeded
             shutil.move(self.package_path_, self.path_pkg_backup_)
         else:
             self.log("Package to be created in {}".format(self.package_path_))
@@ -345,10 +345,9 @@ Revise the template, and compare to examples
             return is_ok
 
         # file to be generated.
-        # we check if "name" is in the filename (ie not a generic file).
+        # we check if "node" is in the filename (ie not a generic file).
         basename = os.path.basename(rel_path)
 
-        # todo handle this differently to avoid this large if - else
         if 'node' in basename:
             # this is a node specific file. Flag is_generic defines our strategy
             if is_generic:
@@ -361,7 +360,6 @@ Revise the template, and compare to examples
                 return True
 
         self.log("Handling template file {}".format(rel_path))
-
         # The only difference between generic and no generic is that
         # in the generic case we have to instanciate the node name
         if 'node' in basename:
@@ -423,8 +421,6 @@ Revise the template, and compare to examples
         else:
             msg = "Prb while generating file {} in {}"
             self.log_error(msg.format(rel_path, output_item))
-
-
         return is_ok
 
 USAGE = """ usage: package_generator package_spec package_template

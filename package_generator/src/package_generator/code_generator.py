@@ -139,7 +139,8 @@ class CodeGenerator(EnhancedObject):
             tag = "if" + item
             self.transformation_loop_[tag] = lambda_if(item)
 
-        self.log_warn("Conditions to handle later on")
+        # TODO check how to make this even generic,
+        # we should not assume these names are provided
         self.transformation_loop_['foralldependencies'] = lambda text: self.get_loop_dependencies(text)
         self.transformation_loop_['forallnodes'] = lambda text: self.get_loop_nodes(text)
 
