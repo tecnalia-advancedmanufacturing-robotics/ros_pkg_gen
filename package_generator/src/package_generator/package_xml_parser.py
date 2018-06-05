@@ -42,7 +42,7 @@ class PackageXMLParser(EnhancedObject):
         data_depend_ (list): list of package dependency
         data_node_ (list): list of node specification
         data_pack_ (dict): specifications of the package
-        dico_ (dict): Dictionary expected for node description
+        spec_ (TemplateSpec): Template specification
         is_dependency_complete_ (bool): whether dependencies were automatically added
         root_ (TYPE): root of the xml tree
     """
@@ -56,25 +56,25 @@ class PackageXMLParser(EnhancedObject):
         super(PackageXMLParser, self).__init__(name)
 
         self.root_ = None
-        self.dico_ = None
+        self.spec_ = None
         self.data_pack_ = dict()
         self.data_depend_ = list()
         self.data_node_ = list()
         self.active_node_ = -1
         self.is_dependency_complete_ = True
 
-    def set_dictionary(self, dico):
-        """set the dictionary to be used for parsing package spec
+    def set_template_spec(self, spec):
+        """set the template specifications
 
         Args:
-            dico (dict): Object containing the specs.
+            spec (TemplateSpec): Object containing the template specs.
         """
         expected_keys = ['package_attributes', 'node_interface', 'node_attributes']
         for item  in expected_keys:
-            if item not in dico:
+            if item not in spec.dico_:
                 self.log_error("Missing key {} in provided dictionary")
                 return False
-        self.dico_ = dico
+        self.spec_ = spec
         return True
 
     # todo: see how to put warning messages in the comment.
@@ -90,8 +90,12 @@ class PackageXMLParser(EnhancedObject):
         Deleted Parameters:
             Warning: on success the active node is placed on the first one
         """
-        if self.dico_ is None:
-            self.log("Cannot load a package decsription without dictionary")
+        if self.spec_ is None:
+            msg_err = "Cannot load a package description without template spec"
+            self.log_error(msg_err)
+            return False
+        if self.spec_.dico_ is None:
+            self.log("Cannot load a package description without dictionary")
             return False
         self.log("Parsing file: {}".format(filename))
 
@@ -248,7 +252,7 @@ class PackageXMLParser(EnhancedObject):
         """
         self.log("Package attributes: \n{}".format(self.root_.attrib))
 
-        attributes_package = self.dico_['package_attributes']
+        attributes_package = self.spec_.dico_['package_attributes']
 
         for attrib in attributes_package:
             assert attrib in self.root_.attrib.keys(), "Missing required attrib {} for package description".format(attrib)
@@ -272,7 +276,7 @@ class PackageXMLParser(EnhancedObject):
         """
         # self.log("Checking node interface {}".format(xml_interface.tag))
 
-        interface_node = self.dico_['node_interface'].keys()
+        interface_node = self.spec_.dico_['node_interface'].keys()
 
         assert xml_interface.tag in interface_node, "Unknown interface {}".format(xml_interface.tag)
 
@@ -280,7 +284,7 @@ class PackageXMLParser(EnhancedObject):
         interface_spec["type"] = xml_interface.tag
         interface_spec["attributes"] = dict()
 
-        attributes = self.dico_['node_interface'][xml_interface.tag]
+        attributes = self.spec_.dico_['node_interface'][xml_interface.tag]
 
         for attrib in attributes:
             # print "Checking for attributes {}".format(attrib)
@@ -308,7 +312,7 @@ class PackageXMLParser(EnhancedObject):
         loc_data_node = dict()
         loc_data_node['attributes'] = dict()
 
-        attributes_node = self.dico_['node_attributes']
+        attributes_node = self.spec_.dico_['node_attributes']
 
         for attrib in attributes_node:
             assert attrib in xml_node.attrib.keys(), "Missing required attribute {} for node description".format(attrib)
@@ -320,9 +324,9 @@ class PackageXMLParser(EnhancedObject):
             if attrib not in attributes_node:
                 self.log_warn("Provided attrib {} ignored".format(attrib))
 
-        interface_node = self.dico_['node_interface'].keys()
+        interface_node = self.spec_.dico_['node_interface'].keys()
 
-        self.log("Check: node interface is: {}".format(interface_node))
+        # self.log("Check: node interface is: {}".format(interface_node))
 
         loc_data_node['interface'] = dict()
         for item in interface_node:
@@ -348,6 +352,11 @@ class PackageXMLParser(EnhancedObject):
         self.data_depend_.append(xml_dep.text)
 
     def load_child_spec(self, xml_item):
+        """Load the spec of a child element in the tree
+
+        Args:
+            xml_item (TYPE): xml item to look at
+        """
         tag = xml_item.tag
         if tag == "node":
             self.data_node_.append(self.load_node_spec(xml_item))
@@ -505,8 +514,8 @@ def main():
         print "Could not load the template spec"
         return
 
-    print "Setting the dico to \n {}".format(spec.dico_)
-    if not package_parser.set_dictionary(spec.dico_):
+    print "Setting the template spec to \n {}".format(spec.dico_)
+    if not package_parser.set_template_spec(spec):
         print "Prb while setting the parser dictionary"
 
     filename = node_path + '/tests/data/demo.ros_package'

@@ -20,9 +20,12 @@ class TemplateSpec(EnhancedObject):
        generate
 
     Attributes:
+        dep_from_interface_ (function): to get the dependencies related to
+            a given interface
+        dep_from_template_ (function): to get the package dependencies
+            due to the template itself
         dico_ (dict): the package dictionary, expected to be used by
             the developer in the xml file
-
         transformation_functions_ (dict): list of additional functions that are
             provided by the Designer to complete the basic instructions
             directly deduced from the dictionary
@@ -39,6 +42,8 @@ class TemplateSpec(EnhancedObject):
 
         self.dico_ = dict()
         self.transformation_functions_ = dict()
+        self.dep_from_template_ = None
+        self.dep_from_interface_ = None
 
     def load_spec(self, folder_path):
         """Load all configuration information from a given folder path
@@ -111,7 +116,6 @@ class TemplateSpec(EnhancedObject):
         Returns:
             Bool: Operation success
         """
-
         try:
             with open(py_file) as open_file:
                 exec(open_file.read(), self.transformation_functions_)
@@ -120,6 +124,18 @@ class TemplateSpec(EnhancedObject):
             return False
 
         self.log("functions found: {}".format(self.transformation_functions_.keys()))
+
+        # checking package dependencies related functions.
+        fun_name = 'dependencies_from_template'
+        if fun_name in self.transformation_functions_.keys():
+            self.dep_from_template_ = self.transformation_functions_[fun_name]
+        else:
+            self.dep_from_template_ = None
+        fun_name = 'dependencies_from_interface'
+        if fun_name in self.transformation_functions_.keys():
+            self.dep_from_interface_ = self.transformation_functions_[fun_name]
+        else:
+            self.dep_from_interface_ = None
 
         return True
 
@@ -130,8 +146,8 @@ if __name__ == "__main__":
     print "Hello World"
 
     TSPEC = TemplateSpec()
-    cfg_path = "../../../package_generator_templates/templates/cpp_node_update/config/"
+    CFG_PATH = "../../../package_generator_templates/templates/cpp_node_update/config/"
 
-    TSPEC.load_spec(cfg_path)
+    TSPEC.load_spec(CFG_PATH)
     print "Done"
 

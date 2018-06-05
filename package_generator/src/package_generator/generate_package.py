@@ -147,7 +147,11 @@ Revise the template, and compare to examples
             self.log_error("Could not load the template spec")
             return False
 
-        self.xml_parser_.set_dictionary(self.spec_.dico_)
+        if not self.xml_parser_.set_template_spec(self.spec_):
+            msg_err = "Package spec not compatible with xml parser expectations"
+            self.log_error(msg_err)
+            return False
+
         if not self.xml_parser_.load(package_desc):
             msg_err = "Prb while parsing xml file {}".format(package_desc)
             self.log_error(msg_err)
@@ -181,7 +185,7 @@ Revise the template, and compare to examples
         self.log("Generating files specific to nodes")
         is_ok = True
         for id_node in range(nb_node):
-            self.log_error("Handling node {}".format(id_node))
+            # self.log_error("Handling node {}".format(id_node))
             if not self.xml_parser_.set_active_node(id_node):
                 is_ok = False
                 break

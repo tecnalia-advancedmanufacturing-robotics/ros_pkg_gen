@@ -528,7 +528,7 @@ class CodeGenerator(EnhancedObject):
 
         return True
 
-    # TODO how to catch an error
+    # TODO error should be checked
     def get_loop_gen(self, interface_type, text):
         output = list()
 
@@ -662,9 +662,13 @@ def main():
 
     if not spec.load_spec(dir_template_spec):
         print "Could not load the template spec"
+        print "Bye"
         return
 
-    xml_parser.set_dictionary(spec.dico_)
+    if not xml_parser.set_template_spec(spec):
+        print "template spec not compatible with parser requirements"
+        print "Bye"
+        return
 
     node_path = rospack.get_path('package_generator')
     filename = node_path + '/tests/data/demo.ros_package'

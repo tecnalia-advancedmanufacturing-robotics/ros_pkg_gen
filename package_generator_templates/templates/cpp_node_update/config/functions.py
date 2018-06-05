@@ -187,3 +187,38 @@ def capitalized_node_name(context):
         "AnotherNode"
     """
     return context['nodeName'].title().replace("_", "")
+
+def dependencies_from_template():
+    """provides the dependencies required by the template
+
+    Returns:
+        list: list of ROS package dependency required by the template
+    """
+    return ['dynamic_reconfigure']
+
+def dependencies_from_interface(interface_name, context):
+    """return package dependencies according to the interface name
+
+    Args:
+        interface_name (str): name of the interface to consider
+        context (list): list of dependencies related to such interface
+    """
+    list_dep = []
+
+    type_field = ['publisher', 'directPublisher', 'directSubscriber',
+                  'subscriber', 'serviceClient', 'serviceServer',
+                  'actionServer', 'actionClient']
+
+    if interface_name in type_field:
+        pkg_dep = get_package_type(context)
+        list_dep.append(pkg_dep)
+
+    if interface_name in ['actionClient', 'actionServer']:
+        list_dep.append('actionlib')
+        list_dep.append('actionlib_msgs')
+
+    if interface_name in ['listener', 'broadcaster']:
+        list_dep.append('tf')
+
+    if interface_name == 'dynParameter':
+        list_dep.append('dynamic_reconfigure')
