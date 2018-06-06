@@ -222,3 +222,5 @@ def dependencies_from_interface(interface_name, context):
 
     if interface_name == 'dynParameter':
         list_dep.append('dynamic_reconfigure')
+
+    return list_dep

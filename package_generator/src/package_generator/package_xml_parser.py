@@ -32,7 +32,7 @@ def remove_empty_line(text):
             res.append(line)
     return res
 
-# todo look at http://stackoverflow.com/questions/299588/validating-with-an-xml-schema-in-python
+# TODO look at http://stackoverflow.com/questions/299588/validating-with-an-xml-schema-in-python
 # for improving the xml format validation
 class PackageXMLParser(EnhancedObject):
     """load a package description and prepare appropriate access structure
@@ -77,7 +77,7 @@ class PackageXMLParser(EnhancedObject):
         self.spec_ = spec
         return True
 
-    # todo: see how to put warning messages in the comment.
+    # TODO: see how to put warning messages in the comment.
     def load(self, filename):
         """load a xml description provided in a file
 
@@ -115,135 +115,81 @@ class PackageXMLParser(EnhancedObject):
         except AssertionError, err:
             self.log_error("Prb while parsing the file: {}".format(err.args))
             return False
-        # todo if the previous operation return false,
-        # we should not do the following
+
         is_ok = self.extend_dependencies()
         if is_ok:
             # self.print_xml_parsed()
             self.active_node_ = 0
         return is_ok
 
-    # todo: using the same type tag for all interfaces would ease the process.
     def extend_dependencies(self):
-        """Extend dependencies depending on the interfaces used
+        """ Check if dependencies required by the package spec and
+            the used interface is effectively defined.
 
         Returns:
             Bool: Operation success
         """
-        for node in self.data_node_:
-            # can not loop this way, since all interface do not share
-            # the same type tag
-            # for type_interface in  self.node_interface_:
-            #    if type_interface == 'parameter':
-            #        continue
-            #    if node['interface'][type_interface]:
 
-            # gathering the dependencies provided by the interface
-            # for helping the developer, we collect the dependency,
-            # interface type, and interface name
+        # will gather package name and component requiring it
+        pkg_dependencies = dict()
 
-            pkg_dependencies = dict()
+        # check if dependencies are defined directly at the template level
+        if self.spec_.dep_from_template_ is not None:
+            try:
+                pkg_dep = self.spec_.dep_from_template_()
+            except TypeError as err:
+                err_msg = "Error while calling external function dep_from_template. \n"
+                err_msg += " exception: {} \n".format(err)
+                err_msg += " Discarding dependency checking"
+                self.log_error(err_msg)
+                pkg_dep = list()
+            self.log("template dependencies: \n {}".format(pkg_dep))
 
-            if node['interface']["publisher"]:
-                for item in node['interface']["publisher"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "publisher", "name":item["name"]})
+            for one_pack in pkg_dep:
+                if one_pack not in pkg_dependencies:
+                    pkg_dependencies[one_pack] = list()
+                pkg_dependencies[one_pack].append('template')
 
-            if node['interface']["directPublisher"]:
-                for item in node['interface']["directPublisher"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "directPublisher", "name":item["name"]})
+        # look now at the dependencies related to available interfaces
+        if self.spec_.dep_from_interface_ is not None:
+            for node in self.data_node_:
+                # self.log("Checking node with interface: \n {}".format(node['interface']))
+                for one_interface in node['interface']:
+                    for item in node['interface'][one_interface]:
+                        try:
+                            pkg_dep = self.spec_.dep_from_interface_(one_interface, item)
+                        except TypeError as err:
+                            err_msg = "Error while calling dep_from_interface external function. \n"
+                            err_msg += " input param : {}, {} \n".format(one_interface, item)
+                            err_msg += " exception: {} \n".format(err)
+                            err_msg += " Discarding dependency checking"
+                            self.log_error(err_msg)
+                            pkg_dep = list()
+                        # self.log("Found dependency: {}".format(pkg_dep))
+                        for one_pack in pkg_dep:
+                            if one_pack not in pkg_dependencies:
+                                pkg_dependencies[one_pack] = list()
+                            pkg_dependencies[one_pack].append("{}".format(item))
 
-            if node['interface']["directSubscriber"]:
-                for item in node['interface']["directSubscriber"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "directSubscriber", "name":item["name"]})
+        # all required dependencies gathered.
+        # Now we check if they are provided by the Developer.
+        self.log("Detected dependencies {}".format(pkg_dependencies.keys()))
+        missing_dep = dict()
+        for dependency in pkg_dependencies:
+            if dependency not in self.data_depend_:
+                missing_dep[dependency] = pkg_dependencies[dependency]
+        # self.log("List of missing dependencies {}".format(missing_dep))
 
-            if node['interface']["subscriber"]:
-                for item in node['interface']["subscriber"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "subscriber", "name":item["name"]})
-
-            if node['interface']["serviceClient"]:
-                for item in node['interface']["serviceClient"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "serviceClient", "name":item["name"]})
-
-            if node['interface']["serviceServer"]:
-                for item in node['interface']["serviceServer"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "serviceServer", "name":item["name"]})
-
-            if node['interface']["actionServer"]:
-                for item in node['interface']["actionServer"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "actionServer", "name":item["name"]})
-
-            if node['interface']["actionClient"]:
-                for item in node['interface']["actionClient"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "actionClient", "name":item["name"]})
-
-            if node['interface']["dynParameter"]:
-                pkg_dep = 'dynamic_reconfigure'
-                if pkg_dep not in pkg_dependencies:
-                    pkg_dependencies[pkg_dep] = list()
-                pkg_dependencies[pkg_dep].append({"type_interface": "dynParameter", "name":"dyn_recon"})
-            else:
-                # todo in the current setup, we always add the dependency
-                # to dynamic reconfigure, even if we do not use it
-                pkg_dep = 'dynamic_reconfigure'
-                if pkg_dep not in self.data_depend_:
-                    self.log_warn("Dependency on {} added for building".format(pkg_dep))
-                    self.data_depend_.append(pkg_dep)
-
-            if node['interface']["actionServer"] or node['interface']["actionClient"]:
-                pkg_deps = ['actionlib', 'actionlib_msgs']
-
-                for pkg_dep in pkg_deps:
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "action", "name":"action"})
-
-            if node['interface']["listener"] or node['interface']["broadcaster"]:
-                pkg_dep = 'tf'
-                if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                pkg_dependencies[pkg_dep].append({"type_interface": "tf", "name":"tf"})
-
-            self.log("List of detected dependencies {}".format(pkg_dependencies))
-            missing_dep = dict()
-            for dependency in pkg_dependencies:
-                if dependency not in self.data_depend_:
-                    missing_dep[dependency] = pkg_dependencies[dependency]
-            self.log("List of missing dependencies {}".format(missing_dep))
-
-            if missing_dep:
-                self.is_dependency_complete_ = False
-            for missing in missing_dep:
-                self.log_error("Dependency on {} not listed in xml file".format(missing))
-                self.log_error("Required at least for node {}".format(node["attributes"]["name"]))
-                for item in missing_dep[missing]:
-                    self.log_error("Used in interface {} named {}".format(item["type_interface"], item["name"]))
-                self.data_depend_.append(missing)
-                # adding the dependency to the xml tree
-                ET.SubElement(self.root_,"depend").text=missing
+        if missing_dep:
+            self.is_dependency_complete_ = False
+        for missing in missing_dep:
+            msg_err = "Dependency {} not listed in xml file \n".format(missing)
+            for item in missing_dep[missing]:
+                msg_err += "\t Required by {} \n".format(item)
+            self.log_error(msg_err)
+            self.data_depend_.append(missing)
+            # adding the dependency to the xml tree
+            ET.SubElement(self.root_, "depend").text = missing
 
         return True
 
@@ -307,7 +253,7 @@ class PackageXMLParser(EnhancedObject):
         Returns:
             dict: uploaded node attributes and possible interface
         """
-        # todo check as well component names
+        # TODO check as well component names
 
         loc_data_node = dict()
         loc_data_node['attributes'] = dict()
@@ -384,7 +330,7 @@ class PackageXMLParser(EnhancedObject):
         for child in self.root_:
             self.load_child_spec(child)
 
-        # todo should not always return true!
+        # TODO should not always return true!
         return True
 
     def print_xml_parsed(self):
@@ -504,10 +450,10 @@ def main():
     package_parser = PackageXMLParser()
     import rospkg
     rospack = rospkg.RosPack()
-    node_path = rospack.get_path('package_generator')
+    node_path = rospack.get_path('package_generator_templates')
 
     # the current example only contains the dictionary
-    dir_template_spec = node_path + "/sandbox/"
+    dir_template_spec = node_path + "/templates/cpp_node_update/config/"
     spec = TemplateSpec()
 
     if not spec.load_spec(dir_template_spec):
@@ -518,10 +464,13 @@ def main():
     if not package_parser.set_template_spec(spec):
         print "Prb while setting the parser dictionary"
 
+
+    node_path = rospack.get_path('package_generator')
     filename = node_path + '/tests/data/demo.ros_package'
     rospy.loginfo("Loading xml file {}".format(filename))
     if package_parser.load(filename):
         print "File loaded with success"
+        package_parser.print_xml_parsed()
         print "Rewritting the file"
         if not package_parser.write_xml("debug_ros_xml.xml"):
             print "could not write the xml file"
