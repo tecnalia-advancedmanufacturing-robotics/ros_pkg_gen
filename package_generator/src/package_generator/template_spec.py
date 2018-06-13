@@ -124,16 +124,21 @@ class TemplateSpec(EnhancedObject):
             return False
 
         self.log("functions found: {}".format(self.transformation_functions_.keys()))
+        # remove keys that are not associated to functions
+        del self.transformation_functions_['__doc__']
+        del self.transformation_functions_['__builtins__']
 
         # checking package dependencies related functions.
         fun_name = 'dependencies_from_template'
         if fun_name in self.transformation_functions_.keys():
             self.dep_from_template_ = self.transformation_functions_[fun_name]
+            del self.transformation_functions_[fun_name]
         else:
             self.dep_from_template_ = None
         fun_name = 'dependencies_from_interface'
         if fun_name in self.transformation_functions_.keys():
             self.dep_from_interface_ = self.transformation_functions_[fun_name]
+            del self.transformation_functions_[fun_name]
         else:
             self.dep_from_interface_ = None
 
