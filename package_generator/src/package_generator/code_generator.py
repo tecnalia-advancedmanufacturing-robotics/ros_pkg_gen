@@ -109,7 +109,11 @@ class CodeGenerator(EnhancedObject):
 
     # TODO empty self.transformation_ before/when entering here
     def generate_simple_tags(self):
-
+        """From the template dictionnary, generate the simple tags expected
+        To be used in the template
+        all package attribute will have a tag like "packageAttribute"
+        all node attributes will have a tag like "nodeAttribute"
+        """
         package_attributes = self.spec_.dico_['package_attributes']
 
         for attrib_pack in package_attributes:
@@ -126,7 +130,11 @@ class CodeGenerator(EnhancedObject):
 
     # TODO empty self.transformation_loop_ before/when entering here
     def generate_flow_tags(self):
-
+        """Generate the conditional and loop tags
+        The definiion is based on the possible interfaces of a given component
+        each possible interface will have defined tags like "ifinterface"
+        and "forallinterface"
+        """
         node_interface = self.spec_.dico_['node_interface'].keys()
 
         lambda_for = lambda d: lambda t: self.get_loop_gen(d, t)
@@ -211,7 +219,7 @@ class CodeGenerator(EnhancedObject):
             out_file.close()
 
         except IOError:
-            self.log_error("Prb while opening the output file {}".format(filename))
+            self.log_error("Prb while opening output file {}".format(filename))
             return False
         return True
 
@@ -311,6 +319,17 @@ class CodeGenerator(EnhancedObject):
         return matches
 
     def process_input(self, iter_enum_lines):
+        """Summary
+
+        Args:
+            iter_enum_lines (iterator): set of lines to process
+
+        Returns:
+            Boolean: operation suceess
+
+        Raises:
+            SyntaxError: when an item can not be corectly translated
+        """
         try:
             is_ok = True
             while is_ok:
@@ -421,9 +440,9 @@ class CodeGenerator(EnhancedObject):
                                            'text': error_msg})
 
                     # tag found. We know have a bunch of line to process
-                    # self.log("content to process in loop: \n{}".format(accumulated_line))
-                    # todo: should the loop tag be returning the generated code, or directly write in the
-                    # output? using process_loop imbricated, it is by default writting in it.
+                    # TODO should the loop tag be returning the generated code,
+                    # or directly write in the output? using process_loop
+                    # imbricated, it is by default writting in it.
                     is_ok = self.transformation_loop_[tag](accumulated_line)
                     continue
                 raise SyntaxError('SyntaxError',
@@ -446,9 +465,25 @@ class CodeGenerator(EnhancedObject):
         return False
 
     def get_package_attr(self, attr):
+        """Return the value of a package attribute
+
+        Args:
+            attr (str): the attribute we are looking for
+
+        Returns:
+            str: The value associated to that attribute
+        """
         return self.package_spec_[attr]
 
     def get_node_attr(self, attr):
+        """Retun the value of a node attribute
+
+        Args:
+            attr (str): the attribute we are looking for
+
+        Returns:
+            str: the associated value
+        """
         return self.nodes_spec_["attributes"][attr]
 
     # TODO remove that function that is not used anymore
@@ -457,14 +492,6 @@ class CodeGenerator(EnhancedObject):
         output = None
 
         include_set = set()
-
-        # gathering interface of all interfaces
-        # todo use smae tag to factorize.
-        # relevant_interfaces = ["publisher", "subscriber", "actionClient", "actionServer", "actionServer", "serviceServer", "serviceClient"]
-        # for item_interface in relevant_interfaces:
-        #     for item in self.nodes_spec_["interface"][item_interfaces]:
-        #         str_path = item['msg'].replace('::', '/')
-        #         include_set.add("#include <{}.h>".format(str_path))
 
         for item in self.nodes_spec_["interface"]["publisher"]:
             str_path = item['type'].replace('::', '/')
@@ -510,9 +537,15 @@ class CodeGenerator(EnhancedObject):
         else:
             return output
 
-    # TODO how should be handled the dependency inherent to the structure used?
-    # should it be manually added, or resulting in error?
     def get_loop_dependencies(self, text):
+        """Generate a code looping on each dependency defined.
+
+        Args:
+            text (str): multiline text to process
+
+        Returns:
+            Bool: operation success
+        """
         output = list()
         # self.log("Handling text: \n {}".format(text))
         for item in  self.dep_spec_:
@@ -530,6 +563,16 @@ class CodeGenerator(EnhancedObject):
 
     # TODO error should be checked
     def get_loop_gen(self, interface_type, text):
+        """Generate a a code looping on a given interface type
+
+        Args:
+            interface_type (str): name of the interface we are interested in
+            text (str): multiline text to process which instance of the given
+            interface
+
+        Returns:
+            Bool: Operation success
+        """
         output = list()
 
         # self.log("Handling text: \n {} with interface {}".format(text, interface_type))
@@ -586,7 +629,15 @@ class CodeGenerator(EnhancedObject):
 
     # todo unify the data format. Here it is provided as a unique string?
     def get_if_defined(self, interface_type, text):
+        """generate a code only if the given interface is beeing used
 
+        Args:
+            interface_type (str): interface name
+            text (str): multiline text to process if the interface is used.
+
+        Returns:
+            TYPE: Description
+        """
         # self.log("Handling text: \n {}".format(text))
         if isinstance(interface_type, str):
             list_type = [interface_type]
@@ -618,7 +669,14 @@ class CodeGenerator(EnhancedObject):
         return is_ok
 
     def get_loop_nodes(self, text):
+        """Process a code, looping on each component / node defined
 
+        Args:
+            text (str): multiline string to process
+
+        Returns:
+            Bool: Operation success
+        """
         # we copy locally the node spec to pop up at the end.
         bup = self.nodes_spec_
         all_node_spec = self.xml_parser_.get_nodes_spec()

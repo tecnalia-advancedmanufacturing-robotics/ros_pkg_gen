@@ -342,7 +342,7 @@ class GeneratedFileAnalysis(EnhancedObject):
                 self.log_error("Found protected area [{}] on line {}".format(pln.protected_tag_, pln.num_line_))
                 return False
 
-            id_line+=2
+            id_line += 2
         # Data correct, now we reduce the set to store the begining and the end
 
         # todo: this could be done taking out the element from the list progreassively
