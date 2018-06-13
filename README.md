@@ -87,20 +87,17 @@ rosrun great_multi_package_pub_sub node_sub sub_int:=/pub_int
 
 ## Current actions
 
-Todo:
-* update readme with externalized dictionary
-* adjust test files
-* adjust node_generator readme and template readme
-* see how to handle list and map from parameter server
-* retest all packages
-* remap for service client
-* cpp: change tf for a simple tf example, no action used
-* improve codeline management for error finding in templates
-* update: if the requested file is generated, refuse it, and mention the use of winmerge to handle it.
+* Short term:
+  * Update readme with externalized dictionary
+  * adjust test files with externalized dictionnary
+  * adjust node_generator readme and template readme
+  * see how to handle list and map from parameter server
+  * remap for service client
+  * improve codeline management for error finding in templates
+  * update: if the requested file is generated, refuse it
+  * apply more code static checking
 
-Longer Term:
-* Externalize as well apply function
-* Enable apply function out of loop
-* Consider use of Jinja
+* Longer Term:
+  * Consider use of Jinja
 
 
