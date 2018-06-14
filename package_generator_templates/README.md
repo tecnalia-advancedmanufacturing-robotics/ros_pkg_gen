@@ -16,7 +16,7 @@ So far a single package pattern is implemented, declined in its C++ and python v
 The component is assuming `ROS` is installed on the machine.
 
 ### Installing
-The installation procedure follows the standard operations as any ROS package do.
+The installation procedure follows the standard operations as any ROS package does.
 
 ### Use
 
@@ -37,35 +37,45 @@ The last argument (here `python_node_update`) can refer to a template supposed t
 ## The `{cpp|python}_node_update` patterns
 
 Both are jointly detailed since they both refer to the same node pattern.
-They both provide a node in which incoming messages (through subscription) are processed at a given frequency, and resulting in out-coming messages (through publication) sent at the same frequency.
+
+They both generate nodes in which incoming messages (through subscription) are processed at a given frequency, and resulting in out-coming messages (through publication) sent at the same frequency.
+
 If the pattern mainly restricts the node update policy for the publish/subscribe mechanism, it also enables to use _any_ of the other ROS communication means (i.e actions, services, tf).
 
-The main characteristics of this pattern are the following:
-* The ROS interface and the core node intelligence are explicitly separated:
- * in the C++ version, the interface is in `ros/src/[node_name]_ros.cpp`, and the node implementation is in `common/src/[node_name]_common.cpp`
- * in the python version, the interface is in `src/[package_name]/[node_name]_ros.py`, and the implementation in `src/[package_name]/[node_name]_impl.py`
- * Once the node generated, you **should** only complete the node implementation files.
-* The implementation class contains a class (`[node_name]Impl` in C++ and `[node_name]Implementation` in python) within which you should provide your contribution.
+The ROS interface and the core node intelligence are explicitly separated:
+* in the C++ version, the ROS interface is in `ros/src/[node_name]_ros.cpp`, and the node implementation is in `common/src/[node_name]_common.cpp`
+* in the python version, the ROS interface is in `src/[package_name]/[node_name]_ros.py`, and the implementation in `src/[package_name]/[node_name]_impl.py`
+* The ROS interface class handles the creation of all needed ROS interface. 
+* You **should** only complete the node implementation files.
 
-* When launched the ROS class will handle the creation of all needed ROS interface.
-* A method from the implementation class `configure` is called with all default value of the dynamically reconfigurable parameters
-* at a specified frequency an `update` method of the implementation is called.
-```
-void update([node_name]Data &data, [node_name]Config config)
-```
- `data` contains the latest messages received by the ROS interface, and the messages to be sent to the ROS world after the `update` method call.
- The latest dynamically reconfigurable parameters are provided with the `config` object.
+### Implementation file 
+The files `common/src/[node_name]_common.cpp` (C++) or `src/[package_name]/[node_name]_impl.py` (python) need to be filled by the Developer.
 
-The relevant structure to be aware of:
-* `class [NodeName]Config` : class containing parameters dynamically adjusted
-* `class [NodeName]Data` : class containing the input messages received and the output messages
-* `class [NodeName]Passthrough`: class gathering ROS interface components _violating_ the interface / implementation paradigm (such as topic management out of the update concept, actions, ...)
-* `class [NodeName]Implementation`: class to contain the Developer implementation of the node.
+It contains different classes automatically created:
 
-## package & Node specification
+| Class | Description |
+| ----- | ----------- |
+| `[NodeName]Config` | contains parameter variables (read from `rosparam` or dynamically adjusted) |
+| `[NodeName]Data` | contains the received messages and the messages to send |
+| `[NodeName]Passthrough` | gathers ROS interface components _violating_ the interface / implementation paradigm (such as topic management out of the update concept, actions, ...) |
+| `[NodeName]Impl` | contains the Developer implementation of the node |
 
-The package and node are described by their interface.
-This interface is defined in an `xml` file, following the syntax presented in the following example.
+
+**Only** class `[NodeName]Impl` should be modified.
+It is provided with two methods (described from the C++ pattern):
+
+
+| Method | Description |
+| ------ | ----------- |
+| `void configure([NodeName]Config config)` | enables to initialize the object given the configuration parameters contained in `config` |
+| `void update([NodeName]Data &data, [NodeName]Config config)` | `data` contains the latest messages received by the ROS interface. The Developer should put in that same object the messages to be sent to the ROS world after the `update` method call. Parameter variables are accessible with object `config`|
+
+The method `update` is called through the ROS file at the frequency specified by the Developer in the xml spec (see next section).
+
+## package & Nodes specification
+
+The package and nodes are described by their interface.
+This interface is defined in an `xml` file, following the syntax presented in this example.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -85,21 +95,24 @@ This interface is defined in an `xml` file, following the syntax presented in th
 </package>
 ```
 
-All the accepted (and required) attributes of a package tag are presented in the previous example.
+All accepted (and required) attributes of a package tag are presented in the previous example.
 
-A node tag is to be described by the attributes `name` and `frequency` (the update frequency, i.e the frequency of message subscription and publication).
-Then is introduced the ROS interface provided by the node:
+A node is described by the attributes `name` and `frequency` (the update frequency, i.e the frequency of message subscription and publication).
+
+Then is introduced the ROS interface provided by the node.
+The current pattern provides the following interfaces:
+
 * `publisher` and `subscriber` refer to the standard message publication and subscription.
-   Note that the access to received message and the publication of message output is driven by the update frequency.
-* `parameter` refers to parameters dynamically adjustable.
-   At each update call, they will be provided to the node implementation,
+   Note that the access to received messages and the publication of messages is driven by the update frequency.
+* `parameter` and `dynParameter` are parameters respectively obtained from `rosparam`, and the dynamical server.
+   At each update call, they will be provided to the node implementation.
 * `serviceServer` and `serviceClient` refer to the management of ROS services.
-   Note that the service client is indicated to complete the node interface. Since the service can be directly called by the node implementation, its handler has been placed in the `[NodeName]Passthrough`
+   Note that the service client is indicated to complete the node interface. Since the service can be directly called by the node implementation, its handler has been placed in `[NodeName]Passthrough`.
 *  `actionServer` and `actionClient`: Similarly, `actionServer` is defined in the `[NodeName]Passthrough` component, since the Developer may be willing to send action messages within the action callback.
 * `listener` and `broadcaster`: informs the node will either listen to `tf` or publish transforms to `tf`.
    Both variables are then available from the `[NodeName]Passthrough` component.
 * `directSubscriber` and `directPublisher` are not handled through the update mechanism.
-  They are added to satisfy impatient Developer that consider they can not wait a period for receiving a message or sending another.
+  They are added to satisfy impatient Developers that consider they can not wait a period for receiving a message or sending another.
   These components (implemented as traditional subscriber / publisher) are defined in the `[NodeName]Passthrough`.
 
 More spec:
@@ -114,7 +127,7 @@ More spec:
 
 ## Q & A
 
-**_Where should I wrote my content?_**
+**_Where should I wrote my code?_**
 
 In the implementation file, anywhere and _only_ where special text indicates it.
 ```
@@ -130,13 +143,16 @@ The code **should be in between** these contribution markers, and the two **boun
 
 This could be problematic in case of interface update: only the _"code protected"_ is maintained.
 
+----
 
 **_Can I change the other files, or write out of the protected areas?_**
 
 Yes you can!
 But then you do not follow the proposed pattern (or the pattern should be updated).
 
-**Warning**: if doing so, do not do a node update using the `package_generator`: any change out of the protected areas will be erased (but not totally lost, see bellow).
+**Warning**: if doing so, do not update the package using the `package_generator`: any change out of the protected areas will be erased (but not totally lost, see below).
+
+----
 
 **_I created an interface. I would like to update some components (remove some, add some, rename some, ...). Can I do it?_**
 
@@ -152,11 +168,13 @@ Note also that if you remove an interface from the xml, the Developer contributi
 Note finally that every time a package update is detected, the original package is temporally backed up in `/tmp`.
 That gives you additional chance to recover you package state before the update took place, in case needed.
 
-** _I want to update my package, but it contains files not present in the template_
+---
+
+**_I want to update my package, but it contains files not present in the template_**
 
 This can occur for example if you add a launch folder (current templates do not cover launch files).
 
-To maintain specific files during the update, the procedure is adding a file `.gen_maintained` at the root of the package folder.
+To maintain specific files during the update, the procedure is to add a file `.gen_maintained` at the root of the package folder.
 This file is searched and processed during the update.
 Any directory and files mentioned there will be restored.
 As an example:
