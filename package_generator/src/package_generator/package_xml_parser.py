@@ -97,7 +97,8 @@ class PackageXMLParser(EnhancedObject):
         if self.spec_.dico_ is None:
             self.log("Cannot load a package description without dictionary")
             return False
-        self.log("Parsing file: {}".format(filename))
+
+        # self.log("Parsing file: {}".format(filename))
 
         try:
             tree = ET.ElementTree(file=filename)
@@ -143,7 +144,7 @@ class PackageXMLParser(EnhancedObject):
                 err_msg += " Discarding dependency checking"
                 self.log_error(err_msg)
                 pkg_dep = list()
-            self.log("template dependencies: \n {}".format(pkg_dep))
+            # self.log("template dependencies: \n {}".format(pkg_dep))
 
             for one_pack in pkg_dep:
                 if one_pack not in pkg_dependencies:
@@ -173,7 +174,7 @@ class PackageXMLParser(EnhancedObject):
 
         # all required dependencies gathered.
         # Now we check if they are provided by the Developer.
-        self.log("Detected dependencies {}".format(pkg_dependencies.keys()))
+        # self.log("Detected dependencies {}".format(pkg_dependencies.keys()))
         missing_dep = dict()
         for dependency in pkg_dependencies:
             if dependency not in self.data_depend_:
@@ -196,7 +197,7 @@ class PackageXMLParser(EnhancedObject):
     def load_package_attribute(self):
         """Check and get the package attributes
         """
-        self.log("Package attributes: \n{}".format(self.root_.attrib))
+        # self.log("Package attributes: \n{}".format(self.root_.attrib))
 
         attributes_package = self.spec_.dico_['package_attributes']
 
@@ -423,9 +424,9 @@ class PackageXMLParser(EnhancedObject):
         """
         self.log("Writting xml into file {}".format(filename))
 
-        st = ET.tostring(self.root_, 'utf-8')
+        str_tmp = ET.tostring(self.root_, 'utf-8')
 
-        reparsed = minidom.parseString(st)
+        reparsed = minidom.parseString(str_tmp)
         res = reparsed.toprettyxml(indent="  ", encoding="utf-8")
         res = remove_empty_line(res)
 
@@ -444,15 +445,12 @@ def main():
         None: nothing
     """
     print "package xml parser trial"
-    #rospy.init_node('package_xml_parser', anonymous=True)
-    #rospy.loginfo("Package description sanity check")
 
     package_parser = PackageXMLParser()
     import rospkg
     rospack = rospkg.RosPack()
     node_path = rospack.get_path('package_generator_templates')
 
-    # the current example only contains the dictionary
     dir_template_spec = node_path + "/templates/cpp_node_update/config/"
     spec = TemplateSpec()
 

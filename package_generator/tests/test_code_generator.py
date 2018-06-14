@@ -19,6 +19,7 @@ import rospkg
 
 from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.code_generator import CodeGenerator
+from package_generator.template_spec import TemplateSpec
 
 
 class CodeGeneratorTest(unittest.TestCase):
@@ -30,76 +31,85 @@ class CodeGeneratorTest(unittest.TestCase):
         """
         Common initialization for all tester
         """
-        file_content = ('<?xml version="1.0" encoding="UTF-8"?>' '\n'
-                        '<package name="great_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO">' '\n'
-                        '   <node name="node_extended" frequency="100.0">' '\n'
-                        '       <publisher name="pub" type="std_msgs::Bool" description=""/>' '\n'
-                        '       <publisher name="pub_second" type="std_msgs::String" description=""/>' '\n'
-                        '       <subscriber name="sub_in" type="std_msgs::String" description="" />' '\n'
-                        '       <serviceClient name="service_client" type="std_srvs::Trigger" description=""/>' '\n'
-                        '       <serviceServer name="service_server" type="std_srvs::SetBool" description=""/>' '\n'
-                        '       <parameter name="param_one" type="std::string" value="Empty" description=""/>'  '\n'
-                        '       <parameter name="param_two" type="bool" value="1" description=""/>'  '\n'
-                        '       <actionServer name="action_server" type="bride_tutorials::TriggerPublish" description=""/>' '\n'
-                        '       <actionClient name="action_client" type="bride_tutorials::TriggerPublish" description=""/>' '\n'
-                        '   </node>' '\n'
-                        '<depend>std_msgs</depend>' '\n'
-                        '<depend>std_srvs</depend>' '\n'
-                        '<depend>bride_tutorials</depend>' '\n'
-                        '</package>' '\n')
+        file_content = (
+            '<?xml version="1.0" encoding="UTF-8"?>' '\n'
+            '<package name="great_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO">' '\n'
+            '   <node name="node_extended" frequency="100.0">' '\n'
+            '       <publisher name="pub" type="std_msgs::Bool" description=""/>' '\n'
+            '       <publisher name="pub_second" type="std_msgs::String" description=""/>' '\n'
+            '       <subscriber name="sub_in" type="std_msgs::String" description="" />' '\n'
+            '       <serviceClient name="service_client" type="std_srvs::Trigger" description=""/>' '\n'
+            '       <serviceServer name="service_server" type="std_srvs::SetBool" description=""/>' '\n'
+            '       <parameter name="param_one" type="std::string" value="Empty" description=""/>'  '\n'
+            '       <parameter name="param_two" type="bool" value="1" description=""/>'  '\n'
+            '       <actionServer name="action_server" type="bride_tutorials::TriggerPublish" description=""/>' '\n'
+            '       <actionClient name="action_client" type="bride_tutorials::TriggerPublish" description=""/>' '\n'
+            '   </node>' '\n'
+            '<depend>std_msgs</depend>' '\n'
+            '<depend>std_srvs</depend>' '\n'
+            '<depend>bride_tutorials</depend>' '\n'
+            '</package>' '\n')
 
-        print "File content: \n{}".format(file_content)
+        # print "File content: \n{}".format(file_content)
 
         self.dir_name = "/tmp/test_package_generator"
         if not os.path.exists(self.dir_name):
             print "Creating the repo {}".format(self.dir_name)
             os.makedirs(self.dir_name)
 
-        filename = self.dir_name + "/node_spec.ros_package"
-        with open(filename, 'w') as open_file:
+        file_xml = self.dir_name + "/node_spec.ros_package"
+        with open(file_xml, 'w') as open_file:
             open_file.write(file_content)
-
-        self.xml_parser = PackageXMLParser()
-        self.xml_parser.load(filename)
-        self.generator_ = CodeGenerator()
-        self.generator_.set_xml_parser(self.xml_parser)
-        self.generator_.reset_output_file()
 
         rospack = rospkg.RosPack()
         self.template_path_ = rospack.get_path('package_generator_templates')
+        self.template_path_ += "/templates/cpp_node_update/"
+
+        self.spec = TemplateSpec()
+        self.assertTrue(self.spec.load_spec(self.template_path_ + "config"))
+
+        self.xml_parser = PackageXMLParser()
+        self.assertTrue(self.xml_parser.set_template_spec(self.spec))
+        self.assertTrue(self.xml_parser.load(file_xml))
+
+        self.generator_ = CodeGenerator()
+        self.assertTrue(self.generator_.configure(self.xml_parser, self.spec))
+        self.generator_.reset_output_file()
+
 
     def test_apply_function(self):
         """
         To apply a function on a tag
         """
         filename = self.dir_name + "/template_test_apply_function.cpp"
-        file_content = ('{forallpublisher}' '\n'
-                        'name={name}' '\n'
-                        'pkg={apply-get_package_type} ' '\n'
-                        'type={apply-get_class_type}' '\n'
-                        'in one line: {name}: {apply-get_python_type}' '\n'
-                        'cpp path: {name}: {apply-get_cpp_path}' '\n'
-                        'more tricky: {name}: {apply-get_cpp_path} {unknowntag}' '\n'
-                        'more tricky: {name}: {apply-get_cpp_path} {apply-unknown}' '\n'
-                        '\n'
-                        '{endforallpublisher}')
+        file_content = (
+            '{forallpublisher}' '\n'
+            'name={name}' '\n'
+            'pkg={apply-get_package_type} ' '\n'
+            'type={apply-get_class_type}' '\n'
+            'in one line: {name}: {apply-get_python_type}' '\n'
+            'cpp path: {name}: {apply-get_cpp_path}' '\n'
+            'more tricky: {name}: {apply-get_cpp_path} {unknowntag}' '\n'
+            'more tricky: {name}: {apply-get_cpp_path} {apply-unknown}' '\n'
+            '\n'
+            '{endforallpublisher}')
 
         expected_output = (
-                          "name=pub" "\n"
-                          "pkg=std_msgs " "\n"
-                          "type=Bool" "\n"
-                          "in one line: pub: std_msgs.Bool" "\n"
-                          "cpp path: pub: std_msgs/Bool" "\n"
-                          "more tricky: pub: std_msgs/Bool {unknowntag}" "\n"
-                          "more tricky: pub: std_msgs/Bool {apply-unknown}" "\n"
-                          "" "\n"
-                          "name=pub_second" "\n"
-                          "pkg=std_msgs " "\n"
-                          "type=String" "\n"
-                          "in one line: pub_second: std_msgs.String" "\n"
-                          "cpp path: pub_second: std_msgs/String" "\n"
-                          "more tricky: pub_second: std_msgs/String {unknowntag}" "\n"
-                          "more tricky: pub_second: std_msgs/String {apply-unknown}" "\n")
+            "name=pub" "\n"
+            "pkg=std_msgs " "\n"
+            "type=Bool" "\n"
+            "in one line: pub: std_msgs.Bool" "\n"
+            "cpp path: pub: std_msgs/Bool" "\n"
+            "more tricky: pub: std_msgs/Bool {unknowntag}" "\n"
+            "more tricky: pub: std_msgs/Bool {apply-unknown}" "\n"
+            "" "\n"
+            "name=pub_second" "\n"
+            "pkg=std_msgs " "\n"
+            "type=String" "\n"
+            "in one line: pub_second: std_msgs.String" "\n"
+            "cpp path: pub_second: std_msgs/String" "\n"
+            "more tricky: pub_second: std_msgs/String {unknowntag}" "\n"
+            "more tricky: pub_second: std_msgs/String {apply-unknown}" "\n")
 
         with open(filename, 'w') as openfile:
             openfile.write(file_content)
@@ -179,16 +189,17 @@ class CodeGeneratorTest(unittest.TestCase):
         """
         filename = self.dir_name + "/template_test_multiple_tag.cpp"
 
-        file_content = ('Let us start !!!!' '\n'
-                        'hello {nodeName}' '\n'
-                        '    void update({nodeName}_data &data, {nodeName}_config config)' '\n'
-                        'Bye Bye' '\n'
-                        )
+        file_content = (
+            'Let us start !!!!' '\n'
+            'hello {nodeName}' '\n'
+            '    void update({nodeName}_data &data, {nodeName}_config config)' '\n'
+            'Bye Bye' '\n'
+            )
         expected_output = (
-                          "Let us start !!!!" "\n"
-                          "hello node_extended" "\n"
-                          "    void update(node_extended_data &data, node_extended_config config)" "\n"
-                          "Bye Bye" "\n")
+            "Let us start !!!!" "\n"
+            "hello node_extended" "\n"
+            "    void update(node_extended_data &data, node_extended_config config)" "\n"
+            "Bye Bye" "\n")
 
         with open(filename, 'w') as openfile:
             openfile.write(file_content)
@@ -205,23 +216,24 @@ class CodeGeneratorTest(unittest.TestCase):
         @return nothing
         """
         filename = self.dir_name + "/template_test_multiple_line.cpp"
-        file_content = ('Let us start !!!!' '\n'
-                        '{ifparam}' '\n'
-                        '<build_depend>dynamic_reconfigure</build_depend>' '\n'
-                        '<run_depend>dynamic_reconfigure</run_depend>' '\n'
-                        '{endifparam}' '\n'
-                        '{ifaction}' '\n'
-                        '<build_depend>actionlib</build_depend>' '\n'
-                        '<run_depend>actionlib</run_depend>' '\n'
-                        '{endifaction}' '\n'
-                        )
+        file_content = (
+            'Let us start !!!!' '\n'
+            '{ifparameter}' '\n'
+            '<build_depend>dynamic_reconfigure</build_depend>' '\n'
+            '<run_depend>dynamic_reconfigure</run_depend>' '\n'
+            '{endifparameter}' '\n'
+            '{ifactionServer}' '\n'
+            '<build_depend>actionlib</build_depend>' '\n'
+            '<run_depend>actionlib</run_depend>' '\n'
+            '{endifactionServer}' '\n'
+            )
         expected_output = (
-                          "Let us start !!!!" "\n"
-                          "<build_depend>dynamic_reconfigure</build_depend>" "\n"
-                          "<run_depend>dynamic_reconfigure</run_depend>" "\n"
-                          "<build_depend>actionlib</build_depend>" "\n"
-                          "<run_depend>actionlib</run_depend>" "\n"
-                           )
+            "Let us start !!!!" "\n"
+            "<build_depend>dynamic_reconfigure</build_depend>" "\n"
+            "<run_depend>dynamic_reconfigure</run_depend>" "\n"
+            "<build_depend>actionlib</build_depend>" "\n"
+            "<run_depend>actionlib</run_depend>" "\n"
+            )
 
         with open(filename, 'w') as openfile:
             openfile.write(file_content)
@@ -238,7 +250,7 @@ class CodeGeneratorTest(unittest.TestCase):
         @param      self The object
         @return nothing
         """
-        filename = self.template_path_ + '/templates/cpp_node_update/ros/src/node_ros.cpp'
+        filename = self.template_path_ + 'template/ros/src/node_ros.cpp'
 
         self.assertTrue(self.generator_.process_file(filename))
 
@@ -253,7 +265,7 @@ class CodeGeneratorTest(unittest.TestCase):
 
         @return { description_of_the_return_value }
         """
-        filename = self.template_path_ + '/templates/cpp_node_update/CMakeLists.txt'
+        filename = self.template_path_ + 'template/CMakeLists.txt'
 
         self.assertTrue(self.generator_.process_file(filename))
 
@@ -268,7 +280,7 @@ class CodeGeneratorTest(unittest.TestCase):
 
         @return { description_of_the_return_value }
         """
-        filename = self.template_path_ + '/templates/cpp_node_update/README.md'
+        filename = self.template_path_ + 'template/README.md'
 
         self.assertTrue(self.generator_.process_file(filename))
 
@@ -283,7 +295,7 @@ class CodeGeneratorTest(unittest.TestCase):
 
         @return nothing
         """
-        filename = self.template_path_ + '/templates/cpp_node_update/package.xml'
+        filename = self.template_path_ + 'template/package.xml'
 
         self.assertTrue(self.generator_.process_file(filename))
 

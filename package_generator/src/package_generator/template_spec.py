@@ -103,8 +103,8 @@ class TemplateSpec(EnhancedObject):
             self.log_error("Parsing Error detected: {}".format(err))
             return False
 
-        self.log("Data read: | \n {}".format(self.dico_))
-        pprint.pprint(self.dico_)
+        # self.log("Data read: | \n {}".format(self.dico_))
+        # pprint.pprint(self.dico_)
         return True
 
     def load_functions(self, py_file):
@@ -123,7 +123,7 @@ class TemplateSpec(EnhancedObject):
             self.log_error("IO Error: {}".format(err))
             return False
 
-        self.log("functions found: {}".format(self.transformation_functions_.keys()))
+        # self.log("functions found: {}".format(self.transformation_functions_.keys()))
         # remove keys that are not associated to functions
         del self.transformation_functions_['__doc__']
         del self.transformation_functions_['__builtins__']
