@@ -44,7 +44,10 @@ rosrun package_generator generate_package my_new_package_spec.ros_package python
 The template can be indicated either as:
 * an absolute path to a template directory
 * a relative path from the currently active directory
-* a directory name assumed to be existing in the template package (see the related [template readme][template_readme])
+* a directory name assumed to be existing in the template package
+
+The expected content of the xml file and the behavior of the generated code is described in [template package readme][template_readme].
+Please take 5 minutes to read it.
 
 [template_readme]: package_generator_templates/README.md
 
@@ -71,7 +74,7 @@ More details in the dedicated [Readme file](package_generator_templates/README.m
 rosrun great_multi_package_pub_sub node_sub sub_int:=/pub_in
 ```
 
-* for the service, the current implementation is configured to enable initial remapping
+* for services, the current implementation is configured to enable initial remapping
 ```
 rosrun great_package_services node_service_server _service_trigger_server_remap:=/service_client
 ```
@@ -79,26 +82,18 @@ rosrun great_package_services node_service_server _service_trigger_server_remap:
 ```
 rosrun actionlib axclient.py /do_action
 ```
-* for the action, I implemented:
+* actions can be also remapped :
 ```
 rosrun great_package_action_client node_action_client _ac_use_action_remap:=do_action
 ```
 
-* For the demo, we need to launch:
-```
-roscore
-rosrun great_multi_package_pub_sub node_pub
-rosrun great_multi_package_pub_sub node_sub sub_int:=/pub_int
-```
-
-## Current actions
+## Future work
 
 * Short term:
   * Update readme with externalized dictionary
-  * adjust test files with externalized dictionnary
   * adjust node_generator readme and template readme
   * see how to handle list and map from parameter server
-  * remap for service client
+  * check if remap for service client is implemented
   * improve codeline management for error finding in templates
   * update: if the requested file is generated, refuse it
   * apply more code static checking
