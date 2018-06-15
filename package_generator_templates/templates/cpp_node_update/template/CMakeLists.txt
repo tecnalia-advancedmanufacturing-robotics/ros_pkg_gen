@@ -18,14 +18,14 @@ find_package(catkin REQUIRED COMPONENTS
 {forallnodes}
 if ({packageName}_dyn_rec_files)
   list(APPEND {packageName}_dyn_rec_files cfg/{nodeName}.cfg)
-  message("Append of cfg/{nodeName}.cfg")
+  # message("Append of cfg/{nodeName}.cfg")
 else ()
   set({packageName}_dyn_rec_files cfg/{nodeName}.cfg)
-  message("Setting with cfg/{nodeName}.cfg")
+  # message("Setting with cfg/{nodeName}.cfg")
 endif ()
 {endforallnodes}
 
-message("Test: ${{packageName}_dyn_rec_files}")
+# message("Test: ${{packageName}_dyn_rec_files}")
 if ({packageName}_dyn_rec_files)
   generate_dynamic_reconfigure_options(${{packageName}_dyn_rec_files})
 endif ()

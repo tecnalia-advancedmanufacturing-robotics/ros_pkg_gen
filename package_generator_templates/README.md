@@ -45,10 +45,10 @@ If the pattern mainly restricts the node update policy for the publish/subscribe
 The ROS interface and the core node intelligence are explicitly separated:
 * in the C++ version, the ROS interface is in `ros/src/[node_name]_ros.cpp`, and the node implementation is in `common/src/[node_name]_common.cpp`
 * in the python version, the ROS interface is in `src/[package_name]/[node_name]_ros.py`, and the implementation in `src/[package_name]/[node_name]_impl.py`
-* The ROS interface class handles the creation of all needed ROS interface. 
+* The ROS interface class handles the creation of all needed ROS interface.
 * You **should** only complete the node implementation files.
 
-### Implementation file 
+### Implementation file
 The files `common/src/[node_name]_common.cpp` (C++) or `src/[package_name]/[node_name]_impl.py` (python) need to be filled by the Developer.
 
 It contains different classes automatically created:

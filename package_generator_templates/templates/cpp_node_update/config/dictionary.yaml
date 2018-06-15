@@ -1,4 +1,4 @@
-package_attributes: ["name", "author", "author_email", "description", "license"]
+package_attributes: ["name", "author", "author_email", "description", "license", "copyright"]
 node_attributes: ["name", "frequency"]
 
 node_interface:

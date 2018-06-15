@@ -8,7 +8,7 @@ To do so the input needed are:
   It contains the list of files to be automatically generated.
   The _Developer_ just has to select the template that best fits his needs.
 * An _interface specification_: a xml file describing mainly the interface of the package to create, according to the template.
-  This file is to be filled by the _Developer_, using the interface propsoed by the template, according to the concrete needs of the package he is willing to create
+  This file is to be filled by the _Developer_, using the interface proposed by the template, according to the concrete needs of the package he is willing to create
 
 **Author(s): Anthony Remazeilles**
 
@@ -19,12 +19,12 @@ To do so the input needed are:
 ## Getting started
 ### Prerequisites
 We assume [`ROS`][ros] is installed on the machine.
-Code is developped and tested so far under `ROS indigo` and `ROS kinetic`. 
+Code is developed and tested so far under `ROS indigo` and `ROS kinetic`.
 
 [ros]: http://www.ros.org/
 
 ### Installing
-The installation procedure follows the standard operations as any ROS package do.
+The installation procedure follows the standard operations as any ROS package does.
 
 ### Use
 
@@ -90,11 +90,10 @@ rosrun great_package_action_client node_action_client _ac_use_action_remap:=do_a
 ## Future work
 
 * Short term:
-  * Update readme with externalized dictionary
-  * adjust node_generator readme and template readme
+  * Describe how a Designer can create a template
   * see how to handle list and map from parameter server
   * check if remap for service client is implemented
-  * improve codeline management for error finding in templates
+  * improve code line management for error finding in templates
   * update: if the requested file is generated, refuse it
   * apply more code static checking
 
