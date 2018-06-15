@@ -429,7 +429,10 @@ Revise the template, and compare to examples
 
 USAGE = """ usage: package_generator package_spec package_template
 package_spec : xml description of the node(s) interface
-package_template : name of the template to use (so far located in sandbox)
+package_template : name of the template to use
+
+Packages template: either one defined in package `package_generator_templates`,
+                   either a path to a local one.
 """
 
 def main():
