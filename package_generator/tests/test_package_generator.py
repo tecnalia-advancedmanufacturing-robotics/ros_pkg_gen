@@ -16,6 +16,7 @@ import os
 from package_generator.generate_package import PackageGenerator
 from package_generator.code_generator import CodeGenerator
 from package_generator.package_xml_parser import PackageXMLParser
+from package_generator.template_spec import TemplateSpec
 
 class PackageGeneratorTest(unittest.TestCase):
     """Tests proposed for the Package generator module
@@ -26,23 +27,24 @@ class PackageGeneratorTest(unittest.TestCase):
         Common initialization for all tester
         """
 
-        file_content = ('<?xml version="1.0" encoding="UTF-8"?>' '\n'
-                        '<package name="great_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO">' '\n'
-                        '   <node name="node_extended" frequency="100.0">' '\n'
-                        '       <publisher name="pub" type="std_msgs::Bool" description=""/>' '\n'
-                        '       <publisher name="pub_second" type="std_msgs::String" description=""/>' '\n'
-                        '       <subscriber name="sub_in" type="std_msgs::String" description=""/>' '\n'
-                        '       <serviceClient name="service_client" type="std_srvs::Trigger" description=""/>' '\n'
-                        '       <serviceServer name="service_server" type="std_srvs::SetBool" description=""/>' '\n'
-                        '       <parameter name="param_one" type="std::string" value="Empty" description=""/>'  '\n'
-                        '       <parameter name="param_two" type="bool" value="1" description=""/>'  '\n'
-                        '       <actionServer name="action_server" type="bride_tutorials::TriggerPublish" description=""/>' '\n'
-                        '       <actionClient name="action_client" type="bride_tutorials::TriggerPublish" description=""/>' '\n'
-                        '   </node>'  '\n'
-                        '<depend>std_msgs</depend>'  '\n'
-                        '<depend>std_srvs</depend>'  '\n'
-                        '<depend>bride_tutorials</depend>'  '\n'
-                        '</package> ' '\n')
+        file_content = (
+            '<?xml version="1.0" encoding="UTF-8"?>' '\n'
+            '<package name="great_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO">' '\n'
+            '   <node name="node_extended" frequency="100.0">' '\n'
+            '       <publisher name="pub" type="std_msgs::Bool" description=""/>' '\n'
+            '       <publisher name="pub_second" type="std_msgs::String" description=""/>' '\n'
+            '       <subscriber name="sub_in" type="std_msgs::String" description=""/>' '\n'
+            '       <serviceClient name="service_client" type="std_srvs::Trigger" description=""/>' '\n'
+            '       <serviceServer name="service_server" type="std_srvs::SetBool" description=""/>' '\n'
+            '       <parameter name="param_one" type="std::string" value="Empty" description=""/>'  '\n'
+            '       <parameter name="param_two" type="bool" value="1" description=""/>'  '\n'
+            '       <actionServer name="action_server" type="bride_tutorials::TriggerPublish" description=""/>' '\n'
+            '       <actionClient name="action_client" type="bride_tutorials::TriggerPublish" description=""/>' '\n'
+            '   </node>'  '\n'
+            '<depend>std_msgs</depend>'  '\n'
+            '<depend>std_srvs</depend>'  '\n'
+            '<depend>bride_tutorials</depend>'  '\n'
+            '</package> ' '\n')
 
         file_content_multi = (
             '<?xml version="1.0" encoding="UTF-8"?>' '\n'
@@ -71,7 +73,7 @@ class PackageGeneratorTest(unittest.TestCase):
             '<depend>bride_tutorials</depend>'  '\n'
             '</package> ' '\n')
 
-        print "File content: \n{}".format(file_content)
+        # print "File content: \n{}".format(file_content)
 
         self.dir_name = "/tmp/test_package_generator"
         if not os.path.exists(self.dir_name):
@@ -93,7 +95,7 @@ class PackageGeneratorTest(unittest.TestCase):
         import rospkg
         rospack = rospkg.RosPack()
         self.node_path_ = rospack.get_path('package_generator_templates')
-        self.path_template_ = self.node_path_ + "/templates/cpp_node_update"
+        self.path_template_ = self.node_path_ + "/templates/cpp_node_update/"
 
     def test_package_generator(self):
         """direct call to the package genator component, with appropriate info
@@ -112,50 +114,6 @@ class PackageGeneratorTest(unittest.TestCase):
             os.makedirs(output_path)
         self.assertTrue(gen.generate_package(self.package_spec_, output_path))
 
-    def test_readme_multi_nodes(self):
-        """test the generation of a readme file involving multiple nodes spec.
-        """
-
-        xml_parser = PackageXMLParser()
-        self.assertTrue(xml_parser.load(self.multi_node_package_spec_))
-
-        file_generator = CodeGenerator()
-        file_generator.set_xml_parser(xml_parser)
-
-        readme_file = self.path_template_ + "/README.md"
-        output_file = self.dir_name + "/test_README.md"
-
-        self.assertTrue(file_generator.generate_file(readme_file, output_file))
-
-    def test_cmake_multi_nodes(self):
-        """test generation of a CMakeLists file involving multiple nodes spec.
-        """
-
-        xml_parser = PackageXMLParser()
-        self.assertTrue(xml_parser.load(self.multi_node_package_spec_))
-
-        file_generator = CodeGenerator()
-        file_generator.set_xml_parser(xml_parser)
-
-        readme_file = self.path_template_ + "/CMakeLists.txt"
-        output_file = self.dir_name + "/test_CMakeLists.txt"
-
-        self.assertTrue(file_generator.generate_file(readme_file, output_file))
-
-    def test_package_multi_nodes(self):
-        """test generation of a package file involving multiple nodes spec.
-        """
-
-        xml_parser = PackageXMLParser()
-        self.assertTrue(xml_parser.load(self.multi_node_package_spec_))
-
-        file_generator = CodeGenerator()
-        file_generator.set_xml_parser(xml_parser)
-
-        readme_file = self.path_template_ + "/package.xml"
-        output_file = self.dir_name + "/test_package.xml"
-
-        self.assertTrue(file_generator.generate_file(readme_file, output_file))
 
     def test_package_generator_multi_nodes(self):
         """direct call to the package genator component, with appropriate info
@@ -173,6 +131,63 @@ class PackageGeneratorTest(unittest.TestCase):
         if not os.path.exists(output_path):
             os.makedirs(output_path)
         self.assertTrue(gen.generate_package(self.multi_node_package_spec_, output_path))
+
+    def test_readme_multi_nodes(self):
+        """test the generation of a readme file involving multiple nodes spec.
+        """
+
+        spec = TemplateSpec()
+        self.assertTrue(spec.load_spec(self.path_template_ + "config"))
+
+        xml_parser = PackageXMLParser()
+        self.assertTrue(xml_parser.set_template_spec(spec))
+        self.assertTrue(xml_parser.load(self.multi_node_package_spec_))
+
+        file_generator = CodeGenerator()
+        self.assertTrue(file_generator.configure(xml_parser, spec))
+
+        readme_file = self.path_template_ + "template/README.md"
+        output_file = self.dir_name + "/test_README.md"
+
+        self.assertTrue(file_generator.generate_file(readme_file, output_file))
+
+    def test_cmake_multi_nodes(self):
+        """test generation of a CMakeLists file involving multiple nodes spec.
+        """
+
+        spec = TemplateSpec()
+        self.assertTrue(spec.load_spec(self.path_template_ + "config"))
+
+        xml_parser = PackageXMLParser()
+        self.assertTrue(xml_parser.set_template_spec(spec))
+        self.assertTrue(xml_parser.load(self.multi_node_package_spec_))
+
+        file_generator = CodeGenerator()
+        self.assertTrue(file_generator.configure(xml_parser, spec))
+
+        readme_file = self.path_template_ + "template/CMakeLists.txt"
+        output_file = self.dir_name + "/test_CMakeLists.txt"
+
+        self.assertTrue(file_generator.generate_file(readme_file, output_file))
+
+    def test_package_multi_nodes(self):
+        """test generation of a package file involving multiple nodes spec.
+        """
+
+        spec = TemplateSpec()
+        self.assertTrue(spec.load_spec(self.path_template_ + "config"))
+
+        xml_parser = PackageXMLParser()
+        self.assertTrue(xml_parser.set_template_spec(spec))
+        self.assertTrue(xml_parser.load(self.multi_node_package_spec_))
+
+        file_generator = CodeGenerator()
+        self.assertTrue(file_generator.configure(xml_parser, spec))
+
+        readme_file = self.path_template_ + "template/package.xml"
+        output_file = self.dir_name + "/test_package.xml"
+
+        self.assertTrue(file_generator.generate_file(readme_file, output_file))
 
 
 if __name__ == '__main__':

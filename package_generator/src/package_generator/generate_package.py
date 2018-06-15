@@ -12,7 +12,6 @@ For full terms see https://www.gnu.org/licenses/gpl.txt
 """
 
 from termcolor import colored
-import inspect
 import os
 import datetime
 import shutil
@@ -22,9 +21,22 @@ import rospkg
 from package_generator.code_generator import CodeGenerator
 from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.file_update_management import GeneratedFileAnalysis
+from package_generator.enhanced_object import EnhancedObject
+from package_generator.template_spec import TemplateSpec
 
-class PackageGenerator(object):
+class PackageGenerator(EnhancedObject):
     """Handle the genration of a whole package
+
+    Attributes:
+        file_generator_ (TYPE): Description
+        package_path_ (TYPE): Description
+        path_pkg_backup_ (TYPE): Description
+        spec_ (TemplateSpec): configuration of the template model
+        template_path_ (TYPE): Description
+        xml_parser_ (TYPE): Description
+
+    Deleted Attributes:
+        name_ (TYPE): Description
     """
 
     def __init__(self, name="PackageGenerator"):
@@ -33,47 +45,20 @@ class PackageGenerator(object):
         Args:
             name (str, optional): Name of the component, for printing aspect
         """
-        # instance name
-        self.name_ = name
+        #  call super class constructor
+        super(PackageGenerator, self).__init__(name)
+
         # path to the template to use
         self.template_path_ = None
         # base location of the package to create
         self.package_path_ = None
-        # parser ofthe package description
+        # parser of the package description
         self.xml_parser_ = None
+        self.spec_ = None
         # generic file generator
         self.file_generator_ = None
         # if the package already existed, location of the package backup
         self.path_pkg_backup_ = None
-
-    def log(self, text):
-        """display log message with the class name in parameter
-
-        Args:
-            text (str): the string to display
-        """
-        print "[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text
-
-    def log_warn(self, text):
-        """display warn message with the class name in parameter
-
-        Args:
-            text (str): the string to display
-
-        """
-        print colored("[{}::{}] ".format(self.name_,
-                                         inspect.stack()[1][3]) + text,
-                                         'yellow')
-
-    def log_error(self, text):
-        """display error message with the class name in parameter
-
-        Args:
-            text (str): the string to display
-        """
-        print colored("[{}::{}] ".format(self.name_,
-                                         inspect.stack()[1][3]) + text,
-                                         'red')
 
     def set_package_template(self, template_path):
         """set the package template
@@ -83,17 +68,49 @@ class PackageGenerator(object):
 
         Returns:
             Bool: True if basic sanity checks are done with success
-
-        Deleted Parameters:
-            debug (bool, optional): to get additional information on the package provided
         """
-
         if not os.path.exists(template_path):
-            self.log_error("Template path ({}) is incorrect ".format(template_path))
+            msg = "Template path ({}) is incorrect ".format(template_path)
+            self.log_error(msg)
             return False
 
         if not os.path.isdir(template_path):
-            self.log_error("Template path ({}) is not a directory ".format(template_path))
+            msg = "Template path ({}) is not a directory ".format(template_path)
+            self.log_error(msg)
+            return False
+
+        # check if minimum information is present.
+
+        details = """A template should contain:
+    * config/dictionary.yaml : the dictionary to be used
+    * [optional] config/functions.py : additional functions used in the generation
+    * template/* set of elements to be generated
+Revise the template, and compare to examples
+        """
+
+        is_ok = True
+        # check for directories
+        required_folders = ["config", "template"]
+        for item in required_folders:
+            req_folder = template_path + "/" + item
+            if not os.path.isdir(req_folder):
+                msg_err = "Error \n Expecting to have folder " + item
+                msg_err += " in " + template_path
+                self.log_error(msg_err)
+                is_ok = False
+
+        # check for files
+        required_files = ["config/dictionary.yaml"]
+        for item in required_files:
+            req_file = template_path + "/" + item
+            if not os.path.isfile(req_file):
+                msg_err = "Error.\n Expecting to have file " + item
+                msg_err += " in " + template_path
+                self.log_error(msg_err)
+                is_ok = False
+
+        if not is_ok:
+            self.log_error("\n{}".format(details))
             return False
 
         self.template_path_ = template_path
@@ -109,43 +126,40 @@ class PackageGenerator(object):
         Returns:
             Bool: True if the operation succeeded
         """
-
         self.path_pkg_backup_ = None
 
         if not os.path.exists(output_path):
-            self.log_error("Template path ({}) is incorrect ".format(output_path))
+            msg_err = "Template path ({}) is incorrect ".format(output_path)
+            self.log_error(msg_err)
             return False
 
         if not os.path.isdir(output_path):
-            self.log_error("Template path ({}) is not a directory ".format(output_path))
+            msg_err = "Template path ({}) not a directory ".format(output_path)
+            self.log_error(msg_err)
             return False
 
+        self.spec_ = TemplateSpec()
         self.xml_parser_ = PackageXMLParser()
         self.file_generator_ = CodeGenerator()
 
-        if not self.xml_parser_.load(package_desc):
-            self.log_error("Prb while parsing the xml description in file {}".format(package_desc))
+        dir_template_spec = self.template_path_ + "/config/"
+        if not self.spec_.load_spec(dir_template_spec):
+            self.log_error("Could not load the template spec")
             return False
 
-        nb_node = self.xml_parser_.get_number_nodes()
-        self.log("Number of nodes defined: {}".format(nb_node))
+        if not self.xml_parser_.set_template_spec(self.spec_):
+            msg_err = "Package spec not compatible with xml parser expectations"
+            self.log_error(msg_err)
+            return False
 
-        self.file_generator_.set_xml_parser(self.xml_parser_)
+        if not self.xml_parser_.load(package_desc):
+            msg_err = "Prb while parsing xml file {}".format(package_desc)
+            self.log_error(msg_err)
+            return False
+
+        self.file_generator_.configure(self.xml_parser_, self.spec_)
 
         package_name = self.xml_parser_.get_package_spec()["name"]
-
-        # before creating anything, check if the minimum files are defined
-        package_content = os.listdir(self.template_path_)
-        is_ok = True
-        package_required_template = ["CMakeLists.txt", "package.xml"]
-
-        for item in package_required_template:
-            if not item in package_content:
-                self.log_error("Missing required template {}".format(item))
-                is_ok = False
-
-        if not is_ok:
-            return False
 
         self.package_path_ = output_path + "/" + package_name
 
@@ -157,11 +171,15 @@ class PackageGenerator(object):
             str_date = now.strftime("%Y_%m_%d_%H_%M_%S")
             self.path_pkg_backup_ = "/tmp/{}_{}".format(os.path.basename(self.package_path_), str_date)
             self.log_warn("Original package temporally stored in {}".format(self.path_pkg_backup_))
-            # todo check if the move succeeded
+            # TODO check if the move succeeded
             shutil.move(self.package_path_, self.path_pkg_backup_)
         else:
             self.log("Package to be created in {}".format(self.package_path_))
             os.makedirs(self.package_path_)
+
+        package_content = os.listdir(self.template_path_ + "/template")
+        nb_node = self.xml_parser_.get_number_nodes()
+        self.log("Number of nodes defined: {}".format(nb_node))
 
         # launching the file generation, except common files
         self.log("Generating files specific to nodes")
@@ -174,11 +192,12 @@ class PackageGenerator(object):
             node_name = self.xml_parser_.data_node_[id_node]["attributes"]["name"]
             self.log_warn("Handling files for node {}".format(node_name))
 
-            # redoing the xml parser setting to take into consideration the new active node
-            self.file_generator_.set_xml_parser(self.xml_parser_)
+            # reconfiguring the generator to adjust to the new active node
+            self.file_generator_.configure(self.xml_parser_, self.spec_)
 
             for item in package_content:
-                is_ok = self.generate_content(self.template_path_ + '/' + item, False)
+                file_generic = self.template_path_ + '/template/' + item
+                is_ok = self.generate_content(file_generic, False)
                 if not is_ok:
                     break
         if not is_ok:
@@ -188,7 +207,8 @@ class PackageGenerator(object):
         is_ok = True
         # todo should we do something with the active_node file?
         for item in package_content:
-            is_ok = self.generate_content(self.template_path_ + '/' + item, True)
+            file_generic = self.template_path_ + '/template/' + item
+            is_ok = self.generate_content(file_generic, True)
             if not is_ok:
                 break
 
@@ -196,7 +216,6 @@ class PackageGenerator(object):
             return False
 
         # we store the model into the directory model
-
         path = self.package_path_ + "/model"
         if not os.path.exists(path):
             os.makedirs(path)
@@ -309,7 +328,7 @@ class PackageGenerator(object):
         # get the package name
         package_name = self.xml_parser_.get_package_spec()["name"]
 
-        rel_path = os.path.relpath(input_item, self.template_path_)
+        rel_path = os.path.relpath(input_item, self.template_path_ + "/template")
         # check if the name 'package_name is present in the name'
         rel_path = rel_path.replace('package_name', package_name)
         output_item = self.package_path_ + '/' + rel_path
@@ -330,10 +349,9 @@ class PackageGenerator(object):
             return is_ok
 
         # file to be generated.
-        # we check if "name" is in the filename (ie not a generic file).
+        # we check if "node" is in the filename (ie not a generic file).
         basename = os.path.basename(rel_path)
 
-        # todo handle this differently to avoid this large if - else
         if 'node' in basename:
             # this is a node specific file. Flag is_generic defines our strategy
             if is_generic:
@@ -346,7 +364,6 @@ class PackageGenerator(object):
                 return True
 
         self.log("Handling template file {}".format(rel_path))
-
         # The only difference between generic and no generic is that
         # in the generic case we have to instanciate the node name
         if 'node' in basename:
@@ -408,13 +425,14 @@ class PackageGenerator(object):
         else:
             msg = "Prb while generating file {} in {}"
             self.log_error(msg.format(rel_path, output_item))
-
-
         return is_ok
 
 USAGE = """ usage: package_generator package_spec package_template
 package_spec : xml description of the node(s) interface
-package_template : name of the template to use (so far located in sandbox)
+package_template : name of the template to use
+
+Packages template: either one defined in package `package_generator_templates`,
+                   either a path to a local one.
 """
 
 def main():
@@ -463,14 +481,14 @@ def main():
 
         if os.path.isdir(path_attempt):
             path_template = path_attempt
-            print "Loading model from path {}".format(path_template)
+            print "Loading template from path {}".format(path_template)
         else:
             # searching in the template package
             rospack = rospkg.RosPack()
             try:
                 node_path = rospack.get_path('package_generator_templates')
                 path_template = node_path + "/templates/" + path_template
-                msg = "Template to be defined in template package: {}"
+                msg = "Loading template from template package: {}"
                 print msg.format(path_template)
             except rospkg.common.ResourceNotFound as error:
                 msg = "Package package_generator_templates not found in rospack"

@@ -10,9 +10,8 @@ Distributed under the GNU GPL v3.
 For full terms see https://www.gnu.org/licenses/gpl.txt
 """
 
-from termcolor import colored
-import inspect
 from copy import deepcopy
+from package_generator.enhanced_object import EnhancedObject
 
 # define a protected line
 # with all the current field
@@ -22,7 +21,6 @@ from copy import deepcopy
 # begining and end of line as well
 
 class ProtectedArea(object):
-
     """Definition of a protected area, as a list of code line
 
     Attributes:
@@ -33,6 +31,8 @@ class ProtectedArea(object):
     """
 
     def __init__(self):
+        """Object constructor
+        """
         self.num_line_start_ = -1
         self.num_line_stop_ = -1
         self.protected_lines_ = []
@@ -68,7 +68,7 @@ class ProtectedArea(object):
         self.protected_lines_ = all_lines[self.num_line_start_:self.num_line_stop_-1]
         return True
 
-class ProtectedLine(object):
+class ProtectedLine(EnhancedObject):
     """Description of a protected line
     Attributes:
         comment_format_ (list): 2 strings respectively for the begin / end of the comment
@@ -78,15 +78,16 @@ class ProtectedLine(object):
         protection_pattern_ (str): tag used to detected protected area start / stop
     """
     def __init__(self, name="ProtectedLine"):
-        """Summary
+        """Object constructor
         """
+        super(ProtectedLine, self).__init__(name)
+
         self.delimitor_ = []
         self.num_line_ = -1
         self.protected_tag_ = ""
         self.protection_pattern_ = ""
         self.comment_format_ = []
         self.line_ = None
-        self.name_ = name
 
     def __repr__(self):
         output = "<ProtectedLine "
@@ -107,35 +108,6 @@ class ProtectedLine(object):
         output += "comment_format: {} ".format(self.comment_format_)
         output += ">"
         return output
-
-    def log(self, text):
-        """display log message with the class name in parameter
-
-        Args:
-            text (str): the string to display
-        """
-        print "[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text
-
-    def log_warn(self, text):
-        """display warn message with the class name in parameter
-
-        Args:
-            text (str): the string to display
-
-        """
-        print colored("[{}::{}] ".format(self.name_,
-                                         inspect.stack()[1][3]) + text,
-                                         'yellow')
-
-    def log_error(self, text):
-        """display error message with the class name in parameter
-
-        Args:
-            text (str): the string to display
-        """
-        print colored("[{}::{}] ".format(self.name_,
-                                         inspect.stack()[1][3]) + text,
-                                         'red')
 
     def set_line_content(self, line):
         """ set the line content
@@ -273,14 +245,14 @@ class ProtectedLine(object):
         # self.log("Protected tag set to: {}".format(self.protected_tag_))
         return True
 
-class GeneratedFileAnalysis(object):
+class GeneratedFileAnalysis(EnhancedObject):
     """Handle a generated file, wrt to protected areas
     """
     def __init__(self, name="GeneratedFileAnalysis",
                  protected_pattern="protected region",
                  protected_tags=None):
-        # instance name
-        self.name_ = name
+        super(GeneratedFileAnalysis, self).__init__(name)
+
         # pattern text used fro delimiting user code
         self.protected_pattern_ = protected_pattern
         # tag to delimit the begining and the end of a user code
@@ -289,33 +261,14 @@ class GeneratedFileAnalysis(object):
         # areas extracted, stored wrt to the tag used.
         self.extracted_areas_ = dict()
 
-
-    def log(self, text):
-        """ display log message with the class name in parameter
-        text the string to display
-        """
-        print "[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text
-
-    def log_warn(self, text):
-        """ display warn message with the class name in parameter
-        text the string to display
-        """
-        print colored("[{}::{}] ".format(self.name_,
-                                         inspect.stack()[1][3]) + text,
-                      'yellow')
-
-    def log_error(self, text):
-        """display warn message with the class name in parameter
-
-        Args:
-            text (str): String to display
-
-        """
-        print colored("[{}::{}] ".format(self.name_,
-                                         inspect.stack()[1][3]) + text, 'red')
-
     def extract_protected_region(self, filename):
         """Extract the protected areas from a file given in parameters
+
+        Args:
+            filename (str): file to open
+
+        Returns:
+            Bool: Operation success
         """
         lines_in_file = list()
         try:
@@ -389,7 +342,7 @@ class GeneratedFileAnalysis(object):
                 self.log_error("Found protected area [{}] on line {}".format(pln.protected_tag_, pln.num_line_))
                 return False
 
-            id_line+=2
+            id_line += 2
         # Data correct, now we reduce the set to store the begining and the end
 
         # todo: this could be done taking out the element from the list progreassively
@@ -399,7 +352,7 @@ class GeneratedFileAnalysis(object):
             pa.set(all_protected_lines[id_line], all_protected_lines[id_line + 1], lines_in_file)
             self.extracted_areas_[pa.tag_] = pa
 
-            id_line+=2
+            id_line += 2
 
         self.log("Number of protected area collected: {}".format(len(self.extracted_areas_)))
 

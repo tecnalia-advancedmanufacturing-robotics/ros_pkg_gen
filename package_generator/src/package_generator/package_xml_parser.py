@@ -13,32 +13,28 @@ For full terms see https://www.gnu.org/licenses/gpl.txt
 import rospy
 import xml.etree.cElementTree as ET
 from xml.dom import minidom
-from termcolor import colored
-import inspect
 
-
-def str2bool(strg):
-    """Summary
-
-    Args:
-        strg (str): string containing a boolean value
-
-    Returns:
-        Bool: corresponding boolean value
-    """
-    return strg.lower() in ("yes", "true", "t", "1")
+from package_generator.enhanced_object import EnhancedObject
+from package_generator.template_spec import TemplateSpec
 
 def remove_empty_line(text):
+    """Remove empty line within a multiline string
+
+    Args:
+        text (str): Mutliline string to process
+
+    Returns:
+        str: String with empty lines removed
+    """
     res = list()
     for line in text.splitlines():
         if line.strip():
             res.append(line)
     return res
 
-# todo look at http://stackoverflow.com/questions/299588/validating-with-an-xml-schema-in-python
+# TODO look at http://stackoverflow.com/questions/299588/validating-with-an-xml-schema-in-python
 # for improving the xml format validation
-
-class PackageXMLParser(object):
+class PackageXMLParser(EnhancedObject):
     """load a package description and prepare appropriate access structure
 
     Attributes:
@@ -46,69 +42,42 @@ class PackageXMLParser(object):
         data_depend_ (list): list of package dependency
         data_node_ (list): list of node specification
         data_pack_ (dict): specifications of the package
-        interface_spec_ (dict): authorized tag for a node interface spec
-        is_dependency_complete_ (bool): whether depedencies were automatically added
-        name_ (str): object name
-        node_attributes_ (list): authorized tags for a node spec
-        node_interface_ (list): authorized interface types
-        package_attributes_ (list): Description
+        spec_ (TemplateSpec): Template specification
+        is_dependency_complete_ (bool): whether dependencies were automatically added
         root_ (TYPE): root of the xml tree
-
     """
     def __init__(self, name="PackageXMLParser"):
+        """object constructor
 
-        self.name_ = name
+        Args:
+            name (str, optional): component name
+        """
+        #  call super class constructor
+        super(PackageXMLParser, self).__init__(name)
+
         self.root_ = None
-        self.package_attributes_ = ["name", "author", "author_email",
-                                    "description", "license"]
-        self.node_attributes_ = ["name", "frequency"]
-        self.node_interface_ = ["publisher", "subscriber",
-                                "serviceClient", "serviceServer",
-                                "parameter", "dynParameter",
-                                "actionServer", "actionClient",
-                                "listener", "broadcaster",
-                                "directPublisher", "directSubscriber",]
-
-        self.interface_spec_ = {
-            "publisher": ["name", "type", "description"],
-            "directPublisher": ["name", "type", "description"],
-            "subscriber": ["name", "type", "description"],
-            "directSubscriber": ["name", "type", "description"],
-            "serviceClient": ["name", "type", "description"],
-            "serviceServer": ["name", "type", "description"],
-            "parameter": ["name", "type", "value", "description"],
-            "dynParameter": ["name", "type", "value", "description"],
-            "actionServer": ["name", "type", "description"],
-            "actionClient": ["name", "type", "description"],
-            "listener": ["name", "description"],
-            "broadcaster": ["name", "description"]
-        }
-
+        self.spec_ = None
         self.data_pack_ = dict()
         self.data_depend_ = list()
         self.data_node_ = list()
         self.active_node_ = -1
         self.is_dependency_complete_ = True
 
-    def log(self, text):
-        """ display log message with the class name in parameter
-        text the string to display
-        """
-        print "[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text
+    def set_template_spec(self, spec):
+        """set the template specifications
 
-    def log_warn(self, text):
-        """ display warn message with the class name in parameter
-        text the string to display
+        Args:
+            spec (TemplateSpec): Object containing the template specs.
         """
-        print colored("[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text, 'yellow')
+        expected_keys = ['package_attributes', 'node_interface', 'node_attributes']
+        for item  in expected_keys:
+            if item not in spec.dico_:
+                self.log_error("Missing key {} in provided dictionary")
+                return False
+        self.spec_ = spec
+        return True
 
-    def log_error(self, text):
-        """ display warn message with the class name in parameter
-        text the string to display
-        """
-        print colored("[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text, 'red')
-
-    # todo: see how to put warning messages in the comment.
+    # TODO: see how to put warning messages in the comment.
     def load(self, filename):
         """load a xml description provided in a file
 
@@ -121,7 +90,15 @@ class PackageXMLParser(object):
         Deleted Parameters:
             Warning: on success the active node is placed on the first one
         """
-        self.log("Parsing file: {}".format(filename))
+        if self.spec_ is None:
+            msg_err = "Cannot load a package description without template spec"
+            self.log_error(msg_err)
+            return False
+        if self.spec_.dico_ is None:
+            self.log("Cannot load a package description without dictionary")
+            return False
+
+        # self.log("Parsing file: {}".format(filename))
 
         try:
             tree = ET.ElementTree(file=filename)
@@ -135,144 +112,96 @@ class PackageXMLParser(object):
         self.root_ = tree.getroot()
 
         try:
-            is_ok = self.sanity_check(verbose=True)
+            is_ok = self.load_all_spec()
         except AssertionError, err:
             self.log_error("Prb while parsing the file: {}".format(err.args))
             return False
-        # todo if the previous operation return false,
-        # we should not do the following
+
         is_ok = self.extend_dependencies()
         if is_ok:
-            self.print_xml_parsed()
+            # self.print_xml_parsed()
             self.active_node_ = 0
         return is_ok
 
-    # todo: using the same type tag for all interfaces would ease the process.
     def extend_dependencies(self):
-        for node in self.data_node_:
-            # can not loop this way, since all interface do not share
-            # the same type tag
-            # for type_interface in  self.node_interface_:
-            #    if type_interface == 'parameter':
-            #        continue
-            #    if node['interface'][type_interface]:
+        """ Check if dependencies required by the package spec and
+            the used interface is effectively defined.
 
-            # gathering the dependencies provided by the interface
-            # for helping the developer, we collect the dependency,
-            # interface type, and interface name
+        Returns:
+            Bool: Operation success
+        """
 
-            pkg_dependencies = dict()
+        # will gather package name and component requiring it
+        pkg_dependencies = dict()
 
-            if node['interface']["publisher"]:
-                for item in node['interface']["publisher"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "publisher", "name":item["name"]})
+        # check if dependencies are defined directly at the template level
+        if self.spec_.dep_from_template_ is not None:
+            try:
+                pkg_dep = self.spec_.dep_from_template_()
+            except TypeError as err:
+                err_msg = "Error while calling external function dep_from_template. \n"
+                err_msg += " exception: {} \n".format(err)
+                err_msg += " Discarding dependency checking"
+                self.log_error(err_msg)
+                pkg_dep = list()
+            # self.log("template dependencies: \n {}".format(pkg_dep))
 
-            if node['interface']["directPublisher"]:
-                for item in node['interface']["directPublisher"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "directPublisher", "name":item["name"]})
+            for one_pack in pkg_dep:
+                if one_pack not in pkg_dependencies:
+                    pkg_dependencies[one_pack] = list()
+                pkg_dependencies[one_pack].append('template')
 
-            if node['interface']["directSubscriber"]:
-                for item in node['interface']["directSubscriber"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "directSubscriber", "name":item["name"]})
+        # look now at the dependencies related to available interfaces
+        if self.spec_.dep_from_interface_ is not None:
+            for node in self.data_node_:
+                # self.log("Checking node with interface: \n {}".format(node['interface']))
+                for one_interface in node['interface']:
+                    for item in node['interface'][one_interface]:
+                        try:
+                            pkg_dep = self.spec_.dep_from_interface_(one_interface, item)
+                        except TypeError as err:
+                            err_msg = "Error while calling dep_from_interface external function. \n"
+                            err_msg += " input param : {}, {} \n".format(one_interface, item)
+                            err_msg += " exception: {} \n".format(err)
+                            err_msg += " Discarding dependency checking"
+                            self.log_error(err_msg)
+                            pkg_dep = list()
+                        # self.log("Found dependency: {}".format(pkg_dep))
+                        for one_pack in pkg_dep:
+                            if one_pack not in pkg_dependencies:
+                                pkg_dependencies[one_pack] = list()
+                            pkg_dependencies[one_pack].append("{}".format(item))
 
+        # all required dependencies gathered.
+        # Now we check if they are provided by the Developer.
+        # self.log("Detected dependencies {}".format(pkg_dependencies.keys()))
+        missing_dep = dict()
+        for dependency in pkg_dependencies:
+            if dependency not in self.data_depend_:
+                missing_dep[dependency] = pkg_dependencies[dependency]
+        # self.log("List of missing dependencies {}".format(missing_dep))
 
-            if node['interface']["subscriber"]:
-                for item in node['interface']["subscriber"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "subscriber", "name":item["name"]})
-
-            if node['interface']["serviceClient"]:
-                for item in node['interface']["serviceClient"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "serviceClient", "name":item["name"]})
-
-            if node['interface']["serviceServer"]:
-                for item in node['interface']["serviceServer"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "serviceServer", "name":item["name"]})
-
-            if node['interface']["actionServer"]:
-                for item in node['interface']["actionServer"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "actionServer", "name":item["name"]})
-
-            if node['interface']["actionClient"]:
-                for item in node['interface']["actionClient"]:
-                    pkg_dep = item['type'].split("::")[0]
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "actionClient", "name":item["name"]})
-
-            if node['interface']["dynParameter"]:
-                pkg_dep = 'dynamic_reconfigure'
-                if pkg_dep not in pkg_dependencies:
-                    pkg_dependencies[pkg_dep] = list()
-                pkg_dependencies[pkg_dep].append({"type_interface": "dynParameter", "name":"dyn_recon"})
-            else:
-                # todo in the current setup, we always add the dependency
-                # to dynamic reconfigure, even if we do not use it
-                pkg_dep = 'dynamic_reconfigure'
-                if pkg_dep not in self.data_depend_:
-                    self.log_warn("Dependency on {} added for building".format(pkg_dep))
-                    self.data_depend_.append(pkg_dep)
-
-            if node['interface']["actionServer"] or node['interface']["actionClient"]:
-                pkg_deps = ['actionlib', 'actionlib_msgs']
-
-                for pkg_dep in pkg_deps:
-                    if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                    pkg_dependencies[pkg_dep].append({"type_interface": "action", "name":"action"})
-
-            if node['interface']["listener"] or node['interface']["broadcaster"]:
-                pkg_dep = 'tf'
-                if pkg_dep not in pkg_dependencies:
-                        pkg_dependencies[pkg_dep] = list()
-                pkg_dependencies[pkg_dep].append({"type_interface": "tf", "name":"tf"})
-
-            self.log("List of detected dependencies {}".format(pkg_dependencies))
-            missing_dep = dict()
-            for dependency in pkg_dependencies:
-                if dependency not in self.data_depend_:
-                    missing_dep[dependency] = pkg_dependencies[dependency]
-            self.log("List of missing dependencies {}".format(missing_dep))
-
-            if missing_dep:
-                self.is_dependency_complete_ = False
-            for missing in missing_dep:
-                self.log_error("Dependency on {} not listed in xml file".format(missing))
-                self.log_error("Required at least for node {}".format(node["attributes"]["name"]))
-                for item in missing_dep[missing]:
-                    self.log_error("Used in interface {} named {}".format(item["type_interface"], item["name"]))
-                self.data_depend_.append(missing)
-                # adding the dependency to the xml tree
-                ET.SubElement(self.root_,"depend").text=missing
+        if missing_dep:
+            self.is_dependency_complete_ = False
+        for missing in missing_dep:
+            msg_err = "Dependency {} not listed in xml file \n".format(missing)
+            for item in missing_dep[missing]:
+                msg_err += "\t Required by {} \n".format(item)
+            self.log_error(msg_err)
+            self.data_depend_.append(missing)
+            # adding the dependency to the xml tree
+            ET.SubElement(self.root_, "depend").text = missing
 
         return True
 
-    def sanity_check_package_attribute(self):
-        """Check the package attributes are the ones expected
+    def load_package_attribute(self):
+        """Check and get the package attributes
         """
-        self.log("Package attributes: \n{}".format(self.root_.attrib))
+        # self.log("Package attributes: \n{}".format(self.root_.attrib))
 
-        for attrib in self.package_attributes_:
+        attributes_package = self.spec_.dico_['package_attributes']
+
+        for attrib in attributes_package:
             assert attrib in self.root_.attrib.keys(), "Missing required attrib {} for package description".format(attrib)
             # self.log("package attribute {} set to {}".format(attrib, self.root_.attrib[attrib]))
             self.data_pack_[attrib] = self.root_.attrib[attrib]
@@ -280,10 +209,10 @@ class PackageXMLParser(object):
         # self.log("Requested package description correct")
 
         for attrib in self.root_.attrib.keys():
-            if attrib not in self.package_attributes_:
+            if attrib not in attributes_package:
                 self.log_warn("Provided attrib {} ignored".format(attrib))
 
-    def sanity_check_node_interface(self, xml_interface):
+    def load_one_node_interface(self, xml_interface):
         """Check and store a node interface
 
         Args:
@@ -293,15 +222,18 @@ class PackageXMLParser(object):
             dict: the node interface
         """
         # self.log("Checking node interface {}".format(xml_interface.tag))
-        assert xml_interface.tag in self.node_interface_, "Unknown interface {}".format(xml_interface.tag)
-        assert xml_interface.tag in self.interface_spec_.keys(), "Interface {} not fully described".format(xml_interface.tag)
+
+        interface_node = self.spec_.dico_['node_interface'].keys()
+
+        assert xml_interface.tag in interface_node, "Unknown interface {}".format(xml_interface.tag)
 
         interface_spec = dict()
         interface_spec["type"] = xml_interface.tag
         interface_spec["attributes"] = dict()
 
-        # depending on the interface type, the check is different
-        for attrib in self.interface_spec_[xml_interface.tag]:
+        attributes = self.spec_.dico_['node_interface'][xml_interface.tag]
+
+        for attrib in attributes:
             # print "Checking for attributes {}".format(attrib)
             assert attrib in xml_interface.attrib.keys(), 'Missing required attribute {} for {} interface. Check line {}'.format(attrib, xml_interface.tag, xml_interface.attrib)
             interface_spec["attributes"][attrib] = xml_interface.attrib[attrib]
@@ -309,32 +241,47 @@ class PackageXMLParser(object):
         # self.log("Requested interface for {} correct".format(xml_interface.tag))
 
         for attrib in xml_interface.attrib.keys():
-            if attrib not in self.interface_spec_[xml_interface.tag]:
+            if attrib not in attributes:
                 self.log_warn("Provided attrib {} of interface {} ignored (check {})".format(attrib, xml_interface.tag, xml_interface.attrib))
         return interface_spec
 
-    def sanity_check_node(self, xml_node):
-        # todo check as well component names
+    def load_node_spec(self, xml_node):
+        """Load the node specification
+
+        Args:
+            xml_node (TYPE): xml description of the node
+
+        Returns:
+            dict: uploaded node attributes and possible interface
+        """
+        # TODO check as well component names
 
         loc_data_node = dict()
         loc_data_node['attributes'] = dict()
-        for attrib in self.node_attributes_:
+
+        attributes_node = self.spec_.dico_['node_attributes']
+
+        for attrib in attributes_node:
             assert attrib in xml_node.attrib.keys(), "Missing required attribute {} for node description".format(attrib)
             loc_data_node['attributes'][attrib] = xml_node.attrib[attrib]
 
         # self.log("Requested node description correct")
 
         for attrib in xml_node.attrib.keys():
-            if attrib not in self.node_attributes_:
+            if attrib not in attributes_node:
                 self.log_warn("Provided attrib {} ignored".format(attrib))
 
+        interface_node = self.spec_.dico_['node_interface'].keys()
+
+        # self.log("Check: node interface is: {}".format(interface_node))
+
         loc_data_node['interface'] = dict()
-        for item in self.node_interface_:
+        for item in interface_node:
             loc_data_node['interface'][item] = list()
 
         for child in xml_node:
             # self.log("Checking for {}".format(child))
-            child_interface = self.sanity_check_node_interface(child)
+            child_interface = self.load_one_node_interface(child)
             # self.log("Adding entry for type {}".format(child_interface["type"]))
             # self.log("Within: {}".format(loc_data_node['interface']))
 
@@ -342,39 +289,54 @@ class PackageXMLParser(object):
 
         return loc_data_node
 
-    def sanity_check_dependency(self, xml_dep):
+    def load_one_dependency(self, xml_dep):
+        """Summary
+
+        Args:
+            xml_dep (TYPE): Description
+        """
         assert xml_dep.text, "Missing dependency text"
         self.data_depend_.append(xml_dep.text)
 
-    def sanity_check_child(self, xml_item):
+    def load_child_spec(self, xml_item):
+        """Load the spec of a child element in the tree
+
+        Args:
+            xml_item (TYPE): xml item to look at
+        """
         tag = xml_item.tag
         if tag == "node":
-            self.data_node_.append(self.sanity_check_node(xml_item))
+            self.data_node_.append(self.load_node_spec(xml_item))
         elif tag == "depend":
-            self.sanity_check_dependency(xml_item)
+            self.load_one_dependency(xml_item)
         else:
             self.log_error("Unknown tag {}".format(tag))
 
-    def sanity_check(self, verbose=False):
+    def load_all_spec(self):
         """
         checking the sanity of the xml file
-        @param verbose whether additional info is being displayed
+
+        Args:
+            verbose (bool, optional): whether additional info is being displayed
+
+        Returns:
+            TYPE: Description
         """
-        if verbose:
-            self.log("XML sanity check")
 
         if not self.root_:
             return False
 
-        self.sanity_check_package_attribute()
+        self.load_package_attribute()
 
         for child in self.root_:
-            self.sanity_check_child(child)
+            self.load_child_spec(child)
 
-        # todo should not always return true!
+        # TODO should not always return true!
         return True
 
     def print_xml_parsed(self):
+        """Prin the xml file that has been parsed
+        """
         self.log("**************")
         self.log("XML parsed: ")
         self.log("**************")
@@ -383,15 +345,29 @@ class PackageXMLParser(object):
         self.log("{}".format(self.data_depend_))
         self.log("**************")
         self.log("{}".format(self.data_node_))
-        return True
 
     def get_nodes_spec(self):
+        """Return all nodes spec
+
+        Returns:
+            list: All nodes description
+        """
         return self.data_node_
 
     def get_package_spec(self):
+        """Return the package spec
+
+        Returns:
+            dict: list of attributes of the package
+        """
         return self.data_pack_
 
     def get_dependency_spec(self):
+        """Get all the dependencies defined
+
+        Returns:
+            List: all dependencies defined
+        """
         return self.data_depend_
 
     def get_number_nodes(self):
@@ -428,6 +404,11 @@ class PackageXMLParser(object):
         return True
 
     def get_active_node_spec(self):
+        """Provide all the spec of a given node
+
+        Returns:
+            TYPE: Description
+        """
         assert self.active_node_ != -1, "No active node defined"
         assert self.active_node_ < len(self.data_node_), "Active node {} should be less then {}".format(self.active_node_, len(self.data_node_))
         return self.data_node_[self.active_node_]
@@ -443,9 +424,9 @@ class PackageXMLParser(object):
         """
         self.log("Writting xml into file {}".format(filename))
 
-        st = ET.tostring(self.root_, 'utf-8')
+        str_tmp = ET.tostring(self.root_, 'utf-8')
 
-        reparsed= minidom.parseString(st)
+        reparsed = minidom.parseString(str_tmp)
         res = reparsed.toprettyxml(indent="  ", encoding="utf-8")
         res = remove_empty_line(res)
 
@@ -456,21 +437,42 @@ class PackageXMLParser(object):
                 file_handler.write("{}\n".format(item))
         return True
 
-# todo the content of the main should be adapted to be a sanity check instead
+# TODO the content of the main should be adapted to be a sanity check instead
 def main():
-    rospy.init_node('package_xml_parser', anonymous=True)
-    rospy.loginfo("Package description sanity check")
+    """Main only used for trial purposes
+
+    Returns:
+        None: nothing
+    """
+    print "package xml parser trial"
 
     package_parser = PackageXMLParser()
     import rospkg
     rospack = rospkg.RosPack()
-    node_path = rospack.get_path('package_generator')
+    node_path = rospack.get_path('package_generator_templates')
 
-    filename = node_path + '/tests/extended.ros_package'
+    dir_template_spec = node_path + "/templates/cpp_node_update/config/"
+    spec = TemplateSpec()
+
+    if not spec.load_spec(dir_template_spec):
+        print "Could not load the template spec"
+        return
+
+    print "Setting the template spec to \n {}".format(spec.dico_)
+    if not package_parser.set_template_spec(spec):
+        print "Prb while setting the parser dictionary"
+
+
+    node_path = rospack.get_path('package_generator')
+    filename = node_path + '/tests/data/demo.ros_package'
     rospy.loginfo("Loading xml file {}".format(filename))
     if package_parser.load(filename):
-        rospy.loginfo("File loaded with success")
+        print "File loaded with success"
+        package_parser.print_xml_parsed()
+        print "Rewritting the file"
+        if not package_parser.write_xml("debug_ros_xml.xml"):
+            print "could not write the xml file"
     else:
-        rospy.logerr("Prb while loading the xml file")
+        print "Prb while loading the xml file"
 
-    rospy.loginfo("Bye bye")
+    print "Bye bye"

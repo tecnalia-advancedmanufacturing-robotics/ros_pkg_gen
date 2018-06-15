@@ -23,24 +23,24 @@
 #include <{apply-get_cpp_path}Action.h>
 {endforallactionClient}
 {endifactionClient}
-{ifdynParam}
+{ifdynParameter}
 #include <dynamic_reconfigure/server.h>
 #include <{packageName}/{nodeName}Config.h>
 
-{endifdynParam}
+{endifdynParameter}
 // ROS message & services includes
 {forallpublisher}
 #include <{apply-get_cpp_path}.h>
 {endforallpublisher}
-{foralldirectpublisher}
+{foralldirectPublisher}
 #include <{apply-get_cpp_path}.h>
-{endforalldirectpublisher}
+{endforalldirectPublisher}
 {forallsubscriber}
 #include <{apply-get_cpp_path}.h>
 {endforallsubscriber}
-{foralldirectsubscriber}
+{foralldirectSubscriber}
 #include <{apply-get_cpp_path}.h>
-{endforalldirectsubscriber}
+{endforalldirectSubscriber}
 {forallserviceServer}
 #include <{apply-get_cpp_path}.h>
 {endforallserviceServer}
@@ -52,20 +52,20 @@
 #include <{nodeName}_common.cpp>
 
 /**
- * @class {camelCaseNodeName}ROS
+ * @class {apply-capitalized_node_name}ROS
  * @brief Class handling the connection with the ROS world.
  * It also implement the node life-cycle, and access to object {nodeName}-impl when appropriate
  */
-class {camelCaseNodeName}ROS
+class {apply-capitalized_node_name}ROS
 {
 public:
     ros::NodeHandle n_;
     ros::NodeHandle np_;
 
-    {ifdynParam}
+    {ifdynParameter}
     dynamic_reconfigure::Server<{packageName}::{nodeName}Config> server;
     dynamic_reconfigure::Server<{packageName}::{nodeName}Config>::CallbackType f;
-    {endifdynParam}
+    {endifdynParameter}
     {forallpublisher}
     ros::Publisher {name}_;
     {endforallpublisher}
@@ -79,20 +79,18 @@ public:
     actionlib::SimpleActionServer<{type}Action> as_{name}_;
     {endforallactionServer}
 
-    {camelCaseNodeName}Data component_data_;
+    {apply-capitalized_node_name}Data component_data_;
     // todo confirm it should be always defined, even if not used.
-    {camelCaseNodeName}Config component_config_;
-    {camelCaseNodeName}Impl component_implementation_;
+    {apply-capitalized_node_name}Config component_config_;
+    {apply-capitalized_node_name}Impl component_implementation_;
 
     /**
      * @brief object constructor.
      */
-    {camelCaseNodeName}ROS() : np_("~")
-                     {ifaction}
+    {apply-capitalized_node_name}ROS() : np_("~")
                      {forallactionServer}
-                     , as_{name}_(n_, "{name}", boost::bind(&{camelCaseNodeName}Impl::callback_{name}, &component_implementation_, _1, &as_{name}_), false)
+                     , as_{name}_(n_, "{name}", boost::bind(&{apply-capitalized_node_name}Impl::callback_{name}, &component_implementation_, _1, &as_{name}_), false)
                      {endforallactionServer}
-                     {endifaction}
     {
         {ifactionServer}
         // launching action servers
@@ -100,47 +98,47 @@ public:
         {forallactionServer}
         as_{name}_.start();
         {endforallactionServer}
-        {ifdynParam}
+        {ifdynParameter}
         // preparing dynamic reconfigure mechanism
-        f = boost::bind(&{camelCaseNodeName}ROS::configure_callback, this, _1, _2);
+        f = boost::bind(&{apply-capitalized_node_name}ROS::configure_callback, this, _1, _2);
         server.setCallback(f);
-        {endifdynParam}
+        {endifdynParameter}
         {forallpublisher}
         {name}_ = n_.advertise<{type}>("{name}", 1);
         {endforallpublisher}
-        {ifdirectpublisher}
+        {ifdirectPublisher}
         // Handling direct publisher
-        {foralldirectpublisher}
+        {foralldirectPublisher}
         component_implementation_.passthrough.{name} = n_.advertise<{type}>("{name}", 1);
-        {endforalldirectpublisher}
-        {endifdirectpublisher}
-        {ifdirectsubscriber}
+        {endforalldirectPublisher}
+        {endifdirectPublisher}
+        {ifdirectSubscriber}
         // Handling direct subscriber
-        {foralldirectsubscriber}
-        component_implementation_.passthrough.{name} = n_.subscribe("{name}", 1, &{camelCaseNodeName}Impl::directTopicCallback_{name}, &component_implementation_);
-        {endforalldirectsubscriber}
-        {endifdirectsubscriber}
+        {foralldirectSubscriber}
+        component_implementation_.passthrough.{name} = n_.subscribe("{name}", 1, &{apply-capitalized_node_name}Impl::directTopicCallback_{name}, &component_implementation_);
+        {endforalldirectSubscriber}
+        {endifdirectSubscriber}
         {forallsubscriber}
-        {name}_ = n_.subscribe("{name}", 1, &{camelCaseNodeName}ROS::topicCallback_{name}, this);
+        {name}_ = n_.subscribe("{name}", 1, &{apply-capitalized_node_name}ROS::topicCallback_{name}, this);
         {endforallsubscriber}
-        {ifparam}
+        {ifparameter}
         // handling parameters from the parameter server
-        {endifparam}
-        {forallparam}
+        {endifparameter}
+        {forallparameter}
         np_.param("{name}", component_config_.{name}, ({type}){apply-get_cpp_param_value});
-        {endforallparam}
-        {ifdynParam}
+        {endforallparameter}
+        {ifdynParameter}
         // handling dynamic parameters
-        {endifdynParam}
-        {foralldynParam}
+        {endifdynParameter}
+        {foralldynParameter}
         np_.param("{name}", component_config_.{name}, ({type}){apply-get_cpp_param_value});
-        {endforalldynParam}
+        {endforalldynParameter}
         {forallserviceServer}
         // to enable service name adjustment when loading the node
         std::string {name}_remap;
         np_.param("{name}_remap", {name}_remap, (std::string)"{name}");
         ROS_INFO_STREAM("Service server at direction " << {name}_remap);
-        {name}_ = n_.advertiseService<{type}::Request , {type}::Response>({name}_remap, boost::bind(&{camelCaseNodeName}Impl::callback_{name}, &component_implementation_,_1,_2,component_config_));
+        {name}_ = n_.advertiseService<{type}::Request , {type}::Response>({name}_remap, boost::bind(&{apply-capitalized_node_name}Impl::callback_{name}, &component_implementation_,_1,_2,component_config_));
         {endforallserviceServer}
         {forallserviceClient}
         std::string sc_{name}_remap;
@@ -173,7 +171,7 @@ public:
     }
 
     {endforallsubscriber}
-    {ifdynParam}
+    {ifdynParameter}
     /**
      * @brief callback called when a dynamically reconfigurable parameter is changed
      * @param config the parameter structure to be updated
@@ -181,12 +179,12 @@ public:
      */
     void configure_callback({packageName}::{nodeName}Config &config, uint32_t level)
     {
-        {foralldynParam}
+        {foralldynParameter}
         component_config_.{name} = config.{name};
-        {endforalldynParam}
+        {endforalldynParameter}
     }
 
-    {endifdynParam}
+    {endifdynParameter}
     /**
      * @brief configure function called after node creation.
      */
@@ -230,7 +228,7 @@ public:
     /**
      * @brief object destructor
      */
-    ~{camelCaseNodeName}ROS()
+    ~{apply-capitalized_node_name}ROS()
     {
     }
 };
@@ -245,10 +243,10 @@ int main(int argc, char** argv)
 
     ros::AsyncSpinner spinner(1);
 
-    {camelCaseNodeName}ROS node;
+    {apply-capitalized_node_name}ROS node;
     node.configure();
 
-    ros::Timer timer = node.n_.createTimer(ros::Duration(1.0 / {nodeFrequency}), &{camelCaseNodeName}ROS::update, &node);
+    ros::Timer timer = node.n_.createTimer(ros::Duration(1.0 / {nodeFrequency}), &{apply-capitalized_node_name}ROS::update, &node);
 
     spinner.start();
 

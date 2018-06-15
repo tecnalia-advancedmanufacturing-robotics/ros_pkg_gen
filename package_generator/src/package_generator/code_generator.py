@@ -10,40 +10,26 @@ Distributed under the GNU GPL v3.
 For full terms see https://www.gnu.org/licenses/gpl.txt
 """
 
-from termcolor import colored
-import inspect
 import re
 from package_generator.package_xml_parser import PackageXMLParser
+from package_generator.enhanced_object import EnhancedObject
+from package_generator.template_spec import TemplateSpec
 
-import string
-
-class FormatterNoKeyError(string.Formatter):
-    """formatter not generating error when a key is unknown
-
-    Attributes:
-        default (TYPE): Description
-    """
-    def __init__(self, default='{{{0}}}'):
-        self.default = default
-
-    def get_value(self, key, args, kwds):
-        if isinstance(key, str):
-            return kwds.get(key, self.default.format(key))
-        else:
-            string.Formatter.get_value(key, args, kwds)
-
-def convert(line, delimiter=['{', '}'], **kwargs):
+def convert(line, delimiter=None, **kwargs):
     """equivalant to format, with provided delimiter
        and without issue with unknown keys
 
     Args:
         line (str): string to process
         delimiter (list, optional): two char to segment the tags
-        **kwargs: dictionnary to use
+        **kwargs: dictionary to use
 
     Returns:
         str: the converted string
     """
+
+    if delimiter is None:
+        delimiter = ['{', '}']
     result_line = line
 
     for key, value in kwargs.iteritems():
@@ -65,193 +51,114 @@ def convert(line, delimiter=['{', '}'], **kwargs):
         # print acc
     return result_line
 
-def get_package_type(context):
-    return context['type'].split("::")[0]
-
-def get_class_type(context):
-    return context['type'].split("::")[1]
-
-def get_python_type(context):
-    return context['type'].replace("::", ".")
-
-def get_cpp_path(context):
-    return context['type'].replace("::", "/")
-
-def get_camelcase_name(context):
-    # print "here we are: processing {}".format(context)
-    # print "Node name: {}".format(context['name'])
-    return context['name'].title().replace("_", "")
-
-def get_py_param_type(context):
-    param_type = context['type']
-    if param_type not in ['std::string', 'string', 'int', 'double', 'bool']:
-        raise SyntaxError("Invalid type for param {}".format(param_type))
-    if param_type in ['std::string', 'string']:
-        return 'str_t'
-    if param_type == 'int':
-        return 'int_t'
-    if param_type == 'double':
-        return 'double_t'
-    if param_type == 'bool':
-        return 'bool_t'
-
-def str2bool(strg):
-    """Summary
-
-    Args:
-        strg (str): string containing a boolean value
-
-    Returns:
-        Bool: corresponding boolean value
-    """
-    return strg.lower() in ("yes", "true", "t", "1")
-
-# todo should this be merged with the previous one?
-def get_py_param_value_to_remove(context):
-    param_type = context['type']
-    if param_type not in ['std::string', 'string', 'int', 'double', 'bool']:
-        msg = "Invalid type for param {}".format(param_type)
-        msg += "\n autorized type: std::string, string, int, double, bool]"
-        raise SyntaxError(msg)
-    if param_type in ['std::string', 'string']:
-        return context['value']
-    if param_type == 'int':
-        return context['value']
-    if param_type == 'double':
-        return context['value']
-    if param_type == 'bool':
-        return "{}".format(str2bool(context['value']))
-
-def get_py_param_value(context):
-    param_type = context['type']
-    if param_type not in ['std::string', 'string', 'int', 'double', 'bool']:
-        msg = "Invalid type for param {}".format(param_type)
-        msg += "\n autorized type: std::string, string, int, double, bool]"
-        raise SyntaxError(msg)
-    if param_type in ['std::string', 'string']:
-        return "\"{}\"".format(context['value'])
-    if param_type == 'bool':
-        return "{}".format(str2bool(context['value']))
-    return context['value']
-
-def get_cpp_param_value(context):
-    param_type = context['type']
-    if param_type not in ['std::string', 'string', 'int', 'double', 'bool']:
-        msg = "Invalid type for param {}".format(param_type)
-        msg += "\n autorized type: [std::string, string, int, double, bool]"
-        raise SyntaxError(msg)
-    if param_type in ['std::string', 'string']:
-        return "\"{}\"".format(context['value'])
-    if param_type == 'bool':
-        if str2bool(context['value']):
-            return "true"
-        else:
-            return "false"
-    return context['value']
-
-
-class CodeGenerator(object):
-    """class responsible of the generation of a whole ROS package
+class CodeGenerator(EnhancedObject):
+    """class responsible of the generation of a single file
 
     Attributes:
-        dep_spec_ (TYPE): Description
-        formatter_ (TYPE): Description
-        name_ (TYPE): Description
-        nodes_spec_ (TYPE): Description
-        package_spec_ (TYPE): Description
-        tmp_buffer_ (TYPE): Description
-        transformation_ (TYPE): Description
-        transformation_loop_ (TYPE): Description
-        xml_parser_ (TYPE): Description
+        dep_spec_ (list): list of dependency of the package
+        nodes_spec_ (list): spec of each node
+        package_spec_ (dict): specification of the package
+        spec_ (TemplateSpec): specification of the template
+        tmp_buffer_ (list): will contain the generated file
+        transformation_ (dict): mapping instruction tag to generation function
+        transformation_functions_ (dict): mapping inst. fun to gen. fun
+        transformation_loop_ (dict): mapping instruction flow to gen. functions
+        xml_parser_ (PackageXMLParser): Parsed xml Developer specification
+
     """
     def __init__(self, name="CodeGenerator"):
-        self.name_ = name
+        #  call super class constructor
+        super(CodeGenerator, self).__init__(name)
 
-        self.transformation_ = {
-            'packageName' : lambda: self.get_package_attr("name"),
-            'packageDescription' : lambda: self.get_package_attr("description"),
-            'packageAuthor' : lambda: self.get_package_attr("author"),
-            'packageAuthorEmail' : lambda: self.get_package_attr("author_email"),
-            'packageLicense' : lambda: self.get_package_attr("license"),
-            'nodeName' : lambda: self.get_node_attr("name"),
-            "camelCaseNodeName": lambda: get_camelcase_name(self.nodes_spec_["attributes"]),
-            'nodeFrequency' : lambda: self.get_node_attr("frequency")#,
-        }
+        self.transformation_ = dict()
+        self.transformation_loop_ = dict()
+        self.transformation_functions_ = dict()
 
-        self.transformation_loop_ = {
-            'forallpublisher' : lambda text: self.get_loop_gen("publisher", text),
-            'foralldirectpublisher' : lambda text: self.get_loop_gen("directPublisher", text),
-            'foralldirectsubscriber' : lambda text: self.get_loop_gen("directSubscriber", text),
-            'forallsubscriber' : lambda text: self.get_loop_gen("subscriber", text),
-            'forallserviceServer' : lambda text: self.get_loop_gen("serviceServer", text),
-            'forallserviceClient' : lambda text: self.get_loop_gen("serviceClient", text),
-            'forallactionServer' : lambda text: self.get_loop_gen("actionServer", text),
-            'forallactionClient' : lambda text: self.get_loop_gen("actionClient", text),
-            'foralllistener' : lambda text: self.get_loop_gen("listener", text),
-            'forallbroadcaster' : lambda text: self.get_loop_gen("broadcaster", text),
-            'foralldependencies' : lambda text: self.get_loop_dependencies(text),
-            'forallnodes' : lambda text: self.get_loop_nodes(text),
-            'forallparam' : lambda text: self.get_loop_gen("parameter", text),
-            'ifparam' : lambda text: self.get_if_defined("parameter", text),
-            'foralldynParam' : lambda text: self.get_loop_gen("dynParameter", text),
-            'ifdynParam' : lambda text: self.get_if_defined("dynParameter", text),
-            'ifpublisher' : lambda text: self.get_if_defined("publisher", text),
-            'ifdirectpublisher' : lambda text: self.get_if_defined("directPublisher", text),
-            'ifdirectsubscriber' :  lambda text: self.get_if_defined("directSubscriber", text),
-            'ifsubscriber' :  lambda text: self.get_if_defined("subscriber", text),
-            'ifaction' : lambda text: self.get_if_defined(["actionClient", "actionServer"], text),
-            'ifserviceServer' : lambda text: self.get_if_defined(["serviceServer"], text),
-            'ifserviceClient' : lambda text: self.get_if_defined(["serviceClient"], text),
-            'ifactionServer' : lambda text: self.get_if_defined(["actionServer"], text),
-            'ifactionClient' : lambda text: self.get_if_defined(["actionClient"], text),
-            'iflistener' : lambda text: self.get_if_defined(["listener"], text),
-            'ifbroadcaster' : lambda text: self.get_if_defined(["broadcaster"], text)
-        }
-
-        self.transformation_functions_ = {
-            'get_package_type' : lambda context : get_package_type(context),
-            'get_class_type' : lambda context : get_class_type(context),
-            'get_python_type' : lambda context : get_python_type(context),
-            'get_cpp_path' : lambda context : get_cpp_path(context),
-            'get_py_param_value': lambda context : get_py_param_value(context),
-            'get_cpp_param_value': lambda context : get_cpp_param_value(context),
-            'get_py_param_type': lambda context : get_py_param_type(context)
-        }
-
+        self.spec_ = None
         self.tmp_buffer_ = list()
         self.xml_parser_ = None
         self.nodes_spec_ = None
         self.package_spec_ = None
         self.dep_spec_ = None
 
-        self.formatter_ = FormatterNoKeyError()
-
-    def log(self, text):
-        """ display log message with the class name in parameter
-        text the string to display
-        """
-        print "[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text
-
-    def log_warn(self, text):
-        """ display warn message with the class name in parameter
-        text the string to display
-        """
-        print colored("[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text, 'yellow')
-
-    def log_error(self, text):
-        """ display warn message with the class name in parameter
-        text the string to display
-        """
-        print colored("[{}::{}] ".format(self.name_, inspect.stack()[1][3]) + text, 'red')
-
-    def set_xml_parser(self, parser):
-        """set the xml parser object
+    def configure(self, parser, spec):
+        """set the required information to configure the generator
 
         Args:
-            parser (PackageXMLParser): the parser of interest
+            parser (PackageXMLParser): XML node description parsed
+            spec (TemplateSpec): configuration of the template
+
+        Returns:
+            Bool: Operation success
         """
-        self.xml_parser_ = parser
-        self.get_xml_parsing()
+        try:
+            self.xml_parser_ = parser
+            self.get_xml_parsing()
+
+            self.spec_ = spec
+
+            # generating the tags
+            self.generate_simple_tags()
+            self.generate_flow_tags()
+            self.generate_apply_functions()
+            self.tmp_buffer_[:] = []
+        except AssertionError, err:
+            self.log_error("Prb during configuration: {}".format(err))
+            return False
+        return True
+
+    # TODO empty self.transformation_ before/when entering here
+    def generate_simple_tags(self):
+        """From the template dictionnary, generate the simple tags expected
+        To be used in the template
+        all package attribute will have a tag like "packageAttribute"
+        all node attributes will have a tag like "nodeAttribute"
+        """
+        package_attributes = self.spec_.dico_['package_attributes']
+
+        for attrib_pack in package_attributes:
+            tag = "package" + attrib_pack.title().replace("_", "")
+            self.transformation_[tag] = self.get_package_attr(attrib_pack)
+
+        node_attributes = self.spec_.dico_['node_attributes']
+
+        for attrib_node in node_attributes:
+            tag = "node" + attrib_node.title().replace("_", "")
+            self.transformation_[tag] = self.get_node_attr(attrib_node)
+
+        #self.log_error("Generated tags: \n {}".format(self.transformation_.keys()))
+
+    # TODO empty self.transformation_loop_ before/when entering here
+    def generate_flow_tags(self):
+        """Generate the conditional and loop tags
+        The definiion is based on the possible interfaces of a given component
+        each possible interface will have defined tags like "ifinterface"
+        and "forallinterface"
+        """
+        node_interface = self.spec_.dico_['node_interface'].keys()
+
+        lambda_for = lambda d: lambda t: self.get_loop_gen(d, t)
+        lambda_if = lambda u: lambda v: self.get_if_defined(u, v)
+
+        for item in node_interface:
+            # self.log_warn("Adding tag for {}".format(item))
+            tag = "forall" + item
+            self.transformation_loop_[tag] = lambda_for(item)
+            tag = "if" + item
+            self.transformation_loop_[tag] = lambda_if(item)
+
+        # TODO check how to make this even generic,
+        # we should not assume these names are provided
+        self.transformation_loop_['foralldependencies'] = lambda text: self.get_loop_dependencies(text)
+        self.transformation_loop_['forallnodes'] = lambda text: self.get_loop_nodes(text)
+
+    # TODO empty self.transformation_functions_ before/when entering here
+    def generate_apply_functions(self):
+        """Get the transformation functions defined with the template config
+        TODO : is ir worth doing so?
+        """
+        for fun in self.spec_.transformation_functions_:
+            self.transformation_functions_[fun] = self.spec_.transformation_functions_[fun]
 
     def get_xml_parsing(self):
         """ set the xml parser, and extract the relevant input from it
@@ -312,13 +219,9 @@ class CodeGenerator(object):
             out_file.close()
 
         except IOError:
-            self.log_error("Prb while opening the output file {}".format(filename))
+            self.log_error("Prb while opening output file {}".format(filename))
             return False
         return True
-
-    # def process_multi_line_string(self, stringfile):
-    #     for item in stringfile.splitlines():
-    #         self.add_output_line(self.process_line(item))
 
     def process_file(self, filename):
         """
@@ -335,6 +238,10 @@ class CodeGenerator(object):
         if self.xml_parser_ is None:
             self.log_error("XML parser not defined")
             return False
+        if self.spec_ is None:
+            self.log_error("Template spec missing")
+            return False
+
         lines_in_file = list()
         try:
             with open(filename) as input_file:
@@ -344,7 +251,7 @@ class CodeGenerator(object):
         except IOError:
             self.log_error("Prb while opening file {}".format(filename))
             return False
-        # self.log("File to process contains {} lines".format(len(lines_in_file)))
+        # self.log("File to process has {} lines".format(len(lines_in_file)))
 
         # generate an iterator on the enumerated content of the lines list
         iter_enum_lines = iter(enumerate(lines_in_file, start=1))
@@ -412,20 +319,50 @@ class CodeGenerator(object):
         return matches
 
     def process_input(self, iter_enum_lines):
+        """Summary
+
+        Args:
+            iter_enum_lines (iterator): set of lines to process
+
+        Returns:
+            Boolean: operation suceess
+
+        Raises:
+            SyntaxError: when an item can not be corectly translated
+        """
         try:
             is_ok = True
             while is_ok:
                 num_line, line = iter_enum_lines.next()
                 # self.log("Processing line [{}]: {}".format(num_line, line))
 
-                matches = self.get_all_tags(line)
+                # look for apply generator
+                # TODO presense of loop / conditional tag not handled.
+                matches = self.get_all_tags_pattern("apply", line)
+                for m in matches:
+                    operation = m[0].split("-")[1]
+                    # self.log("operation is: {}".format(operation))
+                    # make sure the operation exist
+                    if operation not in self.transformation_functions_:
+                        self.log_warn("Operator {} unknown and thus discarded".format(operation))
+                        continue
+                    try:
+                        res = self.transformation_functions_[operation](self.transformation_)
+                    except Exception as err:
+                        self.log_error("Exception detected in processing apply on line {} \n {}".format(line, err))
+                        raise
+                    # self.log_warn("result would be {}".format(res))
+                    # self.log_warn("Here we are")
+                    line = convert(line, **{m[0]: res})
 
+                # look for the other tags
+                matches = self.get_all_tags(line)
                 if not matches:
                     self.add_output_line(line)
                     num_line += 1
                     continue
 
-                # the line has a tag
+                # self.log("the line has a tag")
                 # check for a loop tag
                 loop_tag_found = False
                 tags = [tag for tag, _ in matches]
@@ -434,6 +371,9 @@ class CodeGenerator(object):
                     loop_tag_found = loop_tag_found or item in tags
                     end_item = 'end' + item
                     loop_tag_found = loop_tag_found or end_item in tags
+
+                # TODO see get_loop_gen to add the apply mechanism
+                # on the upper context aroud here
 
                 if len(matches) > 1:
                     # multiple matches.
@@ -444,10 +384,10 @@ class CodeGenerator(object):
 
                 if not loop_tag_found:
                     for tag, indent in matches:
-                        #self.log("found tag |{}| at line {}:col {}".format(tag, num_line, indent))
+                        # self.log("found tag |{}| at line {}:col {}".format(tag, num_line, indent))
 
                         if tag in self.transformation_.keys():
-                            replacement = self.transformation_[tag]()
+                            replacement = self.transformation_[tag]
                             line = convert(line, **{tag: replacement})
                         else:
                             # todo here we could publish the line
@@ -459,7 +399,7 @@ class CodeGenerator(object):
                     # else:
                     #    print colored("Line empty: |{}|".format(line), "blue")
 
-                    # todo why do I increase num_line here? Isn t it done automatically?
+                    # TODO why do I increase num_line here? Isn t it done automatically?
                     num_line += 1
                     continue
 
@@ -480,20 +420,17 @@ class CodeGenerator(object):
                         while not tag_found:
                             # todo: avoid using an accumulated line here.
                             sub_num_line, sub_line = iter_enum_lines.next()
-                            # print "Sub Checking line: {}".format(sub_line)
+                            # self.log("Sub Checking line: {}".format(sub_line))
 
                             sub_matches = self.get_all_tags(sub_line)
                             subtags = [tagg for tagg, _ in sub_matches]
 
-                            if not matches:
-                                accumulated_line += sub_line + '\n'
-                                continue
                             if search_tag in subtags:
                                 tag_found = True
                                 break
-                            else:
-                                accumulated_line += sub_line + '\n'
-                                continue
+                            accumulated_line += sub_line + '\n'
+                            continue
+
                     except StopIteration, e:
                         error_msg = "missing closing tag {} openned on line {}".format(search_tag, num_line)
                         raise SyntaxError('Syntax ERROR',
@@ -503,52 +440,58 @@ class CodeGenerator(object):
                                            'text': error_msg})
 
                     # tag found. We know have a bunch of line to process
-                    # print "content to process in loop: \n{}".format(accumulated_line)
-                    # todo: should the loop tag be returning the generated code, or directly write in the
-                    # output? using process_loop imbricated, it is by default writting in it.
-
+                    # TODO should the loop tag be returning the generated code,
+                    # or directly write in the output? using process_loop
+                    # imbricated, it is by default writting in it.
                     is_ok = self.transformation_loop_[tag](accumulated_line)
-
                     continue
                 raise SyntaxError('SyntaxError',
                                   {'filename': 'unknown',
                                    'lineno': "{}".format(num_line),
                                    'offset': "{}".format(indent),
                                    'text': "unknown tag {}".format(tag)})
-        except AssertionError, e:
-            self.log_error("Assertion Error on line {}: {}".format(num_line, e.args))
+        except AssertionError, err:
+            self.log_error("Assertion Error on line {}: {}".format(num_line, err.args))
             return False
-        except SyntaxError, e:
-            self.log_error("Syntax Error on line {}: {}".format(num_line, e.args))
+        except SyntaxError, err:
+            self.log_error("Syntax Error on line {}: {}".format(num_line, err.args))
             return False
-        except StopIteration, e:
+        except StopIteration, err:
             # self.log("All file has been processed")
             return True
-        except Exception, e:
-            self.log_error("Error detected around line {}: {}".format(num_line, e.args))
+        except Exception, err:
+            self.log_error("Error detected around line {}: {}".format(num_line, err.args))
         self.log_error("This should not be reached...")
         return False
 
     def get_package_attr(self, attr):
+        """Return the value of a package attribute
+
+        Args:
+            attr (str): the attribute we are looking for
+
+        Returns:
+            str: The value associated to that attribute
+        """
         return self.package_spec_[attr]
 
     def get_node_attr(self, attr):
+        """Retun the value of a node attribute
+
+        Args:
+            attr (str): the attribute we are looking for
+
+        Returns:
+            str: the associated value
+        """
         return self.nodes_spec_["attributes"][attr]
 
-    # todo remove that function and use the apply tag instead
-    # function kept in case it could be defined as an external function for simplification
+    # TODO remove that function that is not used anymore
+    # function kept as exmaple if externalizing makes sense
     def get_include_interface(self):
         output = None
 
         include_set = set()
-
-        # gathering interface of all interfaces
-        # todo use smae tag to factorize.
-        # relevant_interfaces = ["publisher", "subscriber", "actionClient", "actionServer", "actionServer", "serviceServer", "serviceClient"]
-        # for item_interface in relevant_interfaces:
-        #     for item in self.nodes_spec_["interface"][item_interfaces]:
-        #         str_path = item['msg'].replace('::', '/')
-        #         include_set.add("#include <{}.h>".format(str_path))
 
         for item in self.nodes_spec_["interface"]["publisher"]:
             str_path = item['type'].replace('::', '/')
@@ -594,11 +537,15 @@ class CodeGenerator(object):
         else:
             return output
 
-    # todo how should be handled the dependency inherent to the structure used?
-    # should it be manually added, or resulting in error?
-    # manually handled for dyn rec & action, similar point of view to consider
-    # for other types
     def get_loop_dependencies(self, text):
+        """Generate a code looping on each dependency defined.
+
+        Args:
+            text (str): multiline text to process
+
+        Returns:
+            Bool: operation success
+        """
         output = list()
         # self.log("Handling text: \n {}".format(text))
         for item in  self.dep_spec_:
@@ -614,24 +561,29 @@ class CodeGenerator(object):
 
         return True
 
-    # todo we loose the access to all information.
-    # Added manually the node name. More may be needed.
-    # todo how to catch an error
+    # TODO error should be checked
     def get_loop_gen(self, interface_type, text):
+        """Generate a a code looping on a given interface type
+
+        Args:
+            interface_type (str): name of the interface we are interested in
+            text (str): multiline text to process which instance of the given
+            interface
+
+        Returns:
+            Bool: Operation success
+        """
         output = list()
 
         # self.log("Handling text: \n {} with interface {}".format(text, interface_type))
-        node_name = self.nodes_spec_["attributes"]["name"]
-
         assert interface_type in self.nodes_spec_["interface"], "Requested interface type {} unknown".format(interface_type)
 
         # computing all upperlayer spec
-        # todo this could be avoided and done once
-        # todo here is not considered the aditional functions
-        # todo we could aonly do this when item exists in any case
+        # TODO this could be avoided and done once
+        # We could only do this when item exists in any case
         context_upper = dict()
         for key in self.transformation_:
-            context_upper[key] = self.transformation_[key]()
+            context_upper[key] = self.transformation_[key]
 
         for item in self.nodes_spec_["interface"][interface_type]:
             # self.log("Handling {} {}".format(interface_type, item))
@@ -641,13 +593,13 @@ class CodeGenerator(object):
             #self.log_warn("Extended item {}".format(context_extended))
             for line in text.splitlines():
                 # self.log("Handling line {}".format(line))
-                # todo: there is a risk of inserting empty lines
+                # TODO: there is a risk of inserting empty lines
                 # maybe not, since imbricated cases are not considered yet
                 # we can not have a for_all  if endif end_for_all
                 line_processed = convert(line, **context_extended)
 
                 # check for apply operator
-                # todo remove the loop on apply, that is useless
+                # TODO remove the loop on apply, that is useless
                 matches = self.get_all_tags_pattern("apply", line_processed)
                 if matches:
                     # self.log_warn("Found matches: {}".format(matches))
@@ -670,14 +622,22 @@ class CodeGenerator(object):
                 output.append(line_processed)
 
         self.add_output_lines(output)
-        # self.log_error("Sanity check: Is dictionnary extended?\n {}".format(self.nodes_spec_["interface"][interface_type]))
+        # self.log_error("Sanity check: Is dictinnary extended?\n {}".format(self.nodes_spec_["interface"][interface_type]))
         # self.log("created: {}".format(type(output)))
         # todo no false case?
         return True
 
     # todo unify the data format. Here it is provided as a unique string?
     def get_if_defined(self, interface_type, text):
+        """generate a code only if the given interface is beeing used
 
+        Args:
+            interface_type (str): interface name
+            text (str): multiline text to process if the interface is used.
+
+        Returns:
+            TYPE: Description
+        """
         # self.log("Handling text: \n {}".format(text))
         if isinstance(interface_type, str):
             list_type = [interface_type]
@@ -709,7 +669,14 @@ class CodeGenerator(object):
         return is_ok
 
     def get_loop_nodes(self, text):
+        """Process a code, looping on each component / node defined
 
+        Args:
+            text (str): multiline string to process
+
+        Returns:
+            Bool: Operation success
+        """
         # we copy locally the node spec to pop up at the end.
         bup = self.nodes_spec_
         all_node_spec = self.xml_parser_.get_nodes_spec()
@@ -722,6 +689,7 @@ class CodeGenerator(object):
 
         for item in all_node_spec:
             self.nodes_spec_ = item
+            self.generate_simple_tags()
 
             iter_enum_lines = iter(enumerate(input_line, start=1))
             is_ok = self.process_input(iter_enum_lines)
@@ -730,30 +698,54 @@ class CodeGenerator(object):
                 break
 
         self.nodes_spec_ = bup
+        self.generate_simple_tags()
         return is_ok
 
 def main():
+    """main only defined for debugging purposes
 
+    Returns:
+        None: nothing
+    """
     gen = CodeGenerator()
     xml_parser = PackageXMLParser()
 
     import rospkg
     rospack = rospkg.RosPack()
-    node_path = rospack.get_path('package_generator')
+    node_path = rospack.get_path('package_generator_templates')
 
-    #filename = '/home/anthony/code/kinetic/rosin/sandbox/extended.ros_package'
-    filename = node_path + '/tests/extended.ros_package'
+    dir_template_spec = node_path + "/templates/cpp_node_update/config"
+
+    spec = TemplateSpec()
+
+    if not spec.load_spec(dir_template_spec):
+        print "Could not load the template spec"
+        print "Bye"
+        return
+
+    if not xml_parser.set_template_spec(spec):
+        print "template spec not compatible with parser requirements"
+        print "Bye"
+        return
+
+    node_path = rospack.get_path('package_generator')
+    filename = node_path + '/tests/data/demo.ros_package'
 
     if not xml_parser.load(filename):
         print "Error while parsing the xml file {}".format(filename)
         print "Bye"
         return
 
-    filename = node_path + '/sandbox/template_interface.cpp'
-    gen.set_xml_parser(xml_parser)
+    xml_parser.set_active_node(0)
+    gen.configure(xml_parser, spec)
+
+    node_path = rospack.get_path('package_generator_templates')
+
+    filename = node_path + '/templates/cpp_node_update/template/README.md'
+
     gen.reset_output_file()
     if gen.process_file(filename):
-        output_file = "test.cpp"
+        output_file = "README.md"
         gen.write_output_file(output_file)
         print "Output written in file {}".format(output_file)
     else:
