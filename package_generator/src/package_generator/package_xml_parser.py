@@ -510,7 +510,6 @@ def main_generate_xml():
     Returns:
         int: negative value on error
     """
-
     rospack = rospkg.RosPack()
 
     try:
@@ -518,7 +517,8 @@ def main_generate_xml():
         default_templates_path = node_path + "/templates/"
     except rospkg.common.ResourceNotFound as error:
         msg = "Package package_generator_templates not found in rospack"
-        print colored(msg, "red")
+        print colored(msg, "yellow")
+        print colored("{}".format(error), "yellow")
         default_templates_path = None
 
     available_templates = None
@@ -535,10 +535,27 @@ def main_generate_xml():
         print "Bye bye"
         return -1
 
-
     path_template = sys.argv[1]
     package_spec = sys.argv[2]
-    path_current = os.getcwd()
+
+    # check first if the provided filename is correct
+    # we do not accept the name to be an existing file
+
+    if os.path.isfile(package_spec):
+        print colored("file {} already exists".format(package_spec), "red")
+        print colored("Please select another filename, or remove the file")
+        print "Bye Bye"
+        return -1
+
+    # if relative path or absolute path, check the containing folder exists
+    folder = os.path.dirname(package_spec)
+
+    if folder and not os.path.isdir(folder):
+        msg_err = "file {} cannot be created in {}".format(package_spec, folder)
+        print colored(msg_err, "red")
+        print colored("Please adjust parameter")
+        print "Bye Bye"
+        return -1
 
     # searching for the template location
     if os.path.isabs(path_template):
@@ -546,24 +563,21 @@ def main_generate_xml():
     else:
         # relative path.
         # either from the current path, or from the template package
+        path_current = os.getcwd()
         path_attempt = path_current + "/" + path_template
 
         if os.path.isdir(path_attempt):
             path_template = path_attempt
             print "Loading template from path {}".format(path_template)
         else:
-            # searching in the template package
-            rospack = rospkg.RosPack()
-            try:
-                node_path = rospack.get_path('package_generator_templates')
-                path_template = node_path + "/templates/" + path_template
+            if path_template in available_templates:
+                path_template = default_templates_path + path_template
                 msg = "Loading template from template package: {}"
                 print msg.format(path_template)
-            except rospkg.common.ResourceNotFound as error:
-                msg = "Package package_generator_templates not found in rospack"
+            else:
+                msg = "Template name not found in package_generator_templates"
                 print colored(msg, "red")
-                print colored("{}".format(error), "red")
-                print colored("Generation likely to fail", "red")
+                print colored("Please verify your setup", "red")
                 return -1
 
     package_parser = PackageXMLParser()
@@ -583,17 +597,3 @@ def main_generate_xml():
     package_parser.generate_xml_from_spec(package_spec)
 
     print colored("Bye bye", "green")
-
-    # node_path = rospack.get_path('package_generator')
-    # filename = node_path + '/tests/data/demo.ros_package'
-    # rospy.loginfo("Loading xml file {}".format(filename))
-    # if package_parser.load(filename):
-    #     print "File loaded with success"
-    #     package_parser.print_xml_parsed()
-    #     print "Rewritting the file"
-    #     if not package_parser.write_xml("debug_ros_xml.xml"):
-    #         print "could not write the xml file"
-    # else:
-    #     print "Prb while loading the xml file"
-
-    # print "Bye bye"
