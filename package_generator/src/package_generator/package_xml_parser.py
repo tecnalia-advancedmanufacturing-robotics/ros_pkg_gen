@@ -10,7 +10,10 @@ Distributed under the GNU GPL v3.
 For full terms see https://www.gnu.org/licenses/gpl.txt
 """
 
-import rospy
+from termcolor import colored
+import sys
+import os
+import rospkg
 import xml.etree.cElementTree as ET
 from xml.dom import minidom
 
@@ -437,42 +440,160 @@ class PackageXMLParser(EnhancedObject):
                 file_handler.write("{}\n".format(item))
         return True
 
-# TODO the content of the main should be adapted to be a sanity check instead
-def main():
-    """Main only used for trial purposes
+
+    def generate_xml_from_spec(self, filename):
+        """Generate an xml file based on the template dictionary
+
+        Args:
+            filename (str): filename where xml skeleton is to be written
+
+        Returns:
+            Bool: Operation success
+        """
+
+        if self.spec_ is None:
+            self.log_error("Template spec is missing")
+            return False
+
+        xml_pack = ET.Element('package')
+        for item in self.spec_.dico_['package_attributes']:
+            xml_pack.set(item, '')
+
+        xml_node = ET.SubElement(xml_pack, "node")
+        for item in self.spec_.dico_['node_attributes']:
+            xml_node.set(item, '')
+
+        for item in self.spec_.dico_['node_interface']:
+            xml_one_interface = ET.SubElement(xml_node, item)
+            for item_attrib in self.spec_.dico_['node_interface'][item]:
+                xml_one_interface.set(item_attrib, '')
+
+        if self.spec_.dep_from_template_ is None:
+            xml_dep = ET.SubElement(xml_pack, "depend")
+            xml_dep.text = ""
+        else:
+            try:
+                pkg_dep = self.spec_.dep_from_template_()
+            except TypeError as err:
+                err_msg = "Error while calling external function dep_from_template. \n"
+                err_msg += " exception: {} \n".format(err)
+                err_msg += " Discarding dependency checking"
+                self.log_error(err_msg)
+                pkg_dep = [""]
+
+            for item in pkg_dep:
+                xml_dep = ET.SubElement(xml_pack, "depend")
+                xml_dep.text = item
+
+        data_string = ET.tostring(xml_pack, 'utf-8')
+        reparsed = minidom.parseString(data_string)
+        res = reparsed.toprettyxml(indent="  ", encoding="utf-8")
+
+        self.log("generating template: \n {} \n".format(res))
+
+        with open(filename, 'w') as file_handler:
+            file_handler.write("{}".format(res))
+
+        return True
+
+USAGE = """ usage: generate_xml_skel package_template xml_skeleton
+package_template : name of the template to use
+xml_skeleton: xml description of the node(s) interface
+
+Packages template: either one defined in package `package_generator_templates`,
+                   either a path to a local one.
+"""
+
+def main_generate_xml():
+    """Generate a xml package description based on a template spec
 
     Returns:
-        None: nothing
+        int: negative value on error
     """
-    print "package xml parser trial"
+
+    rospack = rospkg.RosPack()
+
+    try:
+        node_path = rospack.get_path('package_generator_templates')
+        default_templates_path = node_path + "/templates/"
+    except rospkg.common.ResourceNotFound as error:
+        msg = "Package package_generator_templates not found in rospack"
+        print colored(msg, "red")
+        default_templates_path = None
+
+    available_templates = None
+    # look for the templates available
+    if default_templates_path is not None:
+        available_templates = os.listdir(default_templates_path)
+
+    if len(sys.argv) != 3:
+        print colored("Wrong input parameters !", "red")
+        print colored(USAGE, "yellow")
+        if available_templates is not None:
+            msg = "Available templates are: {}"
+            print colored(msg.format(available_templates), 'yellow')
+        print "Bye bye"
+        return -1
+
+
+    path_template = sys.argv[1]
+    package_spec = sys.argv[2]
+    path_current = os.getcwd()
+
+    # searching for the template location
+    if os.path.isabs(path_template):
+        print "Loading model from absolute path {}".format(path_template)
+    else:
+        # relative path.
+        # either from the current path, or from the template package
+        path_attempt = path_current + "/" + path_template
+
+        if os.path.isdir(path_attempt):
+            path_template = path_attempt
+            print "Loading template from path {}".format(path_template)
+        else:
+            # searching in the template package
+            rospack = rospkg.RosPack()
+            try:
+                node_path = rospack.get_path('package_generator_templates')
+                path_template = node_path + "/templates/" + path_template
+                msg = "Loading template from template package: {}"
+                print msg.format(path_template)
+            except rospkg.common.ResourceNotFound as error:
+                msg = "Package package_generator_templates not found in rospack"
+                print colored(msg, "red")
+                print colored("{}".format(error), "red")
+                print colored("Generation likely to fail", "red")
+                return -1
 
     package_parser = PackageXMLParser()
-    import rospkg
-    rospack = rospkg.RosPack()
-    node_path = rospack.get_path('package_generator_templates')
 
-    dir_template_spec = node_path + "/templates/cpp_node_update/config/"
+    dir_template_spec = path_template + "/config/"
     spec = TemplateSpec()
 
     if not spec.load_spec(dir_template_spec):
-        print "Could not load the template spec"
-        return
+        print colored("Could not load the template spec", "red")
+        return -1
 
     print "Setting the template spec to \n {}".format(spec.dico_)
     if not package_parser.set_template_spec(spec):
-        print "Prb while setting the parser dictionary"
+        print colored("Prb while setting the parser dictionary", "red")
+        return -1
 
+    package_parser.generate_xml_from_spec(package_spec)
 
-    node_path = rospack.get_path('package_generator')
-    filename = node_path + '/tests/data/demo.ros_package'
-    rospy.loginfo("Loading xml file {}".format(filename))
-    if package_parser.load(filename):
-        print "File loaded with success"
-        package_parser.print_xml_parsed()
-        print "Rewritting the file"
-        if not package_parser.write_xml("debug_ros_xml.xml"):
-            print "could not write the xml file"
-    else:
-        print "Prb while loading the xml file"
+    print colored("Bye bye", "green")
 
-    print "Bye bye"
+    # node_path = rospack.get_path('package_generator')
+    # filename = node_path + '/tests/data/demo.ros_package'
+    # rospy.loginfo("Loading xml file {}".format(filename))
+    # if package_parser.load(filename):
+    #     print "File loaded with success"
+    #     package_parser.print_xml_parsed()
+    #     print "Rewritting the file"
+    #     if not package_parser.write_xml("debug_ros_xml.xml"):
+    #         print "could not write the xml file"
+    # else:
+    #     print "Prb while loading the xml file"
+
+    # print "Bye bye"

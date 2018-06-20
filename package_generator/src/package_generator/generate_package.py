@@ -427,9 +427,9 @@ Revise the template, and compare to examples
             self.log_error(msg.format(rel_path, output_item))
         return is_ok
 
-USAGE = """ usage: package_generator package_spec package_template
-package_spec : xml description of the node(s) interface
-package_template : name of the template to use
+USAGE = """ usage: generate_package package_spec package_template
+package_spec: xml description of the node(s) interface
+package_template: name of the template to use
 
 Packages template: either one defined in package `package_generator_templates`,
                    either a path to a local one.
@@ -440,6 +440,9 @@ def main():
     @brief Entry point of the package.
     Generates a package, given a specified structure
     @return nothing
+
+    Returns:
+        int: negative value on error
     """
 
     # checking available templates
@@ -476,7 +479,7 @@ def main():
         print "Loading model from absolute path {}".format(path_template)
     else:
         # relative path.
-        # either from the curent path, or from the template package
+        # either from the current path, or from the template package
         path_attempt = path_current + "/" + path_template
 
         if os.path.isdir(path_attempt):
@@ -484,7 +487,6 @@ def main():
             print "Loading template from path {}".format(path_template)
         else:
             # searching in the template package
-            rospack = rospkg.RosPack()
             try:
                 node_path = rospack.get_path('package_generator_templates')
                 path_template = node_path + "/templates/" + path_template

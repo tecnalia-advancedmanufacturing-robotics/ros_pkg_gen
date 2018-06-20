@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package name="demo_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO">
+<package name="demo_package" author="Anthony Remazeilles" author_email="anthony.remazeilles@tecnalia.com" description="The extended package" license="TODO" copyright="Tecnalia Research and Innovation">
   <node name="node_extended" frequency="100.0">
     <publisher name="pub_bool" type="std_msgs::Bool" description="boolean publisher"/>
     <subscriber name="sub_string" type="std_msgs::String" description="subcription to a string"/>
