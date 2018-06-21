@@ -233,7 +233,7 @@ class CodeGenerator(EnhancedObject):
         Returns:
             Bools: True on sucess
         """
-        self.log("Generating file {}".format(filename))
+        # self.log("Generating file {}".format(filename))
 
         if self.xml_parser_ is None:
             self.log_error("XML parser not defined")

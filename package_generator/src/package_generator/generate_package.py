@@ -334,12 +334,12 @@ Revise the template, and compare to examples
         output_item = self.package_path_ + '/' + rel_path
 
         if os.path.isdir(input_item):
-            self.log("Handling folder {}".format(rel_path))
+            # self.log("Handling folder {}".format(rel_path))
             if os.path.exists(output_item):
                 # self.log_warn("Directory {} already exists".format(output_item))
                 pass
             else:
-                self.log("Creating directory {}".format(rel_path))
+                # self.log("Creating directory {}".format(rel_path))
                 os.makedirs(output_item)
 
             for item in os.listdir(input_item):
@@ -404,7 +404,9 @@ Revise the template, and compare to examples
 
             # no we know if an update is needed
             if is_ok and is_update_needed:
-                self.log("Updating file {} in {}".format(rel_path, output_item))
+                # self.log("Updating file {} in {}".format(rel_path, output_item))
+                self.log("Updating file {}".format(rel_path))
+
                 is_ok = self.file_generator_.generate_file(input_item)
                 if is_ok:
                     self.log("Merging with previous version")
@@ -427,9 +429,9 @@ Revise the template, and compare to examples
             self.log_error(msg.format(rel_path, output_item))
         return is_ok
 
-USAGE = """ usage: package_generator package_spec package_template
-package_spec : xml description of the node(s) interface
-package_template : name of the template to use
+USAGE = """ usage: generate_package package_spec package_template
+package_spec: xml description of the node(s) interface
+package_template: name of the template to use
 
 Packages template: either one defined in package `package_generator_templates`,
                    either a path to a local one.
@@ -440,6 +442,9 @@ def main():
     @brief Entry point of the package.
     Generates a package, given a specified structure
     @return nothing
+
+    Returns:
+        int: negative value on error
     """
 
     # checking available templates
@@ -449,7 +454,8 @@ def main():
         default_templates_path = node_path + "/templates/"
     except rospkg.common.ResourceNotFound as error:
         msg = "Package package_generator_templates not found in rospack"
-        print colored(msg, "red")
+        print colored(msg, "yellow")
+        print colored("{}".format(error), "yellow")
         default_templates_path = None
 
     available_templates = None
@@ -469,33 +475,29 @@ def main():
     package_spec = sys.argv[1]
     path_template = sys.argv[2]
 
-    path_current = os.getcwd()
-
     # searching for the template location
     if os.path.isabs(path_template):
         print "Loading model from absolute path {}".format(path_template)
     else:
         # relative path.
-        # either from the curent path, or from the template package
+        # either from the current path, or from the template package
+        path_current = os.getcwd()
         path_attempt = path_current + "/" + path_template
 
         if os.path.isdir(path_attempt):
             path_template = path_attempt
             print "Loading template from path {}".format(path_template)
         else:
-            # searching in the template package
-            rospack = rospkg.RosPack()
-            try:
-                node_path = rospack.get_path('package_generator_templates')
-                path_template = node_path + "/templates/" + path_template
+            if path_template in available_templates:
+                path_template = default_templates_path + path_template
                 msg = "Loading template from template package: {}"
                 print msg.format(path_template)
-            except rospkg.common.ResourceNotFound as error:
-                msg = "Package package_generator_templates not found in rospack"
+            else:
+                msg = "Template name not found in package_generator_templates"
                 print colored(msg, "red")
-                print colored("{}".format(error), "red")
-                print colored("Generation likely to fail", "red")
+                print colored("Please verify your setup", "red")
                 return -1
+
     gen = PackageGenerator()
 
     if not gen.set_package_template(path_template):

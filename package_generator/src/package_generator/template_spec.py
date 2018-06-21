@@ -155,4 +155,3 @@ if __name__ == "__main__":
 
     TSPEC.load_spec(CFG_PATH)
     print "Done"
-
