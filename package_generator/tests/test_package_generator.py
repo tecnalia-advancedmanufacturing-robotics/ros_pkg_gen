@@ -29,7 +29,7 @@ class PackageGeneratorTest(unittest.TestCase):
 
         file_content = (
             '<?xml version="1.0" encoding="UTF-8"?>' '\n'
-            '<package name="great_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO">' '\n'
+            '<package name="great_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO" copyright="TRI">' '\n'
             '   <node name="node_extended" frequency="100.0">' '\n'
             '       <publisher name="pub" type="std_msgs::Bool" description=""/>' '\n'
             '       <publisher name="pub_second" type="std_msgs::String" description=""/>' '\n'
@@ -48,7 +48,7 @@ class PackageGeneratorTest(unittest.TestCase):
 
         file_content_multi = (
             '<?xml version="1.0" encoding="UTF-8"?>' '\n'
-            '<package name="great_multi_node_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO">' '\n'
+            '<package name="great_multi_node_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO" copyright="TRI">' '\n'
             '   <node name="node_extended" frequency="100.0">' '\n'
             '       <publisher name="pub" eventHandler="" type="std_msgs::Bool" description=""/>' '\n'
             '       <publisher name="pub_second" eventHandler="" type="std_msgs::String" description=""/>' '\n'
