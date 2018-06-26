@@ -6,8 +6,7 @@
 @brief generate the disctionnary for the package generator
 
 Copyright (C) 2018 Tecnalia Research and Innovation
-Distributed under the GNU GPL v3.
-For full terms see https://www.gnu.org/licenses/gpl.txt
+Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 """
 from package_generator.enhanced_object import EnhancedObject
 import yaml

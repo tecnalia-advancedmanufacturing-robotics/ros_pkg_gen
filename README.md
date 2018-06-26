@@ -10,11 +10,14 @@ To do so the input needed are:
 * An _interface specification_: a xml file describing mainly the interface of the package to create, according to the template.
   This file is to be filled by the _Developer_, using the interface proposed by the template, according to the concrete needs of the package he is willing to create
 
-**Author(s): Anthony Remazeilles**
+**Author**: Anthony Remazeilles
 
-**Maintainer: Anthony Remazeilles, anthony.remazeilles@tecnalia.com**
+**Maintainer**: Anthony Remazeilles, anthony.remazeilles@tecnalia.com
 
-**Affiliation: Tecnalia Research and Innovation, Spain**
+**Affiliation** : Tecnalia Research and Innovation, Spain
+
+**License**: This project is under the NPOSL-3.0 License.
+See [LICENSE.md](LICENSE.md) for more details.
 
 ## Getting started
 ### Prerequisites

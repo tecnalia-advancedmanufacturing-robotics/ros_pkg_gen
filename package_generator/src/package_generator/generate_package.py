@@ -7,8 +7,7 @@
  generates the package according to the xml definition
 
 Copyright (C) 2017 Tecnalia Research and Innovation
-Distributed under the GNU GPL v3.
-For full terms see https://www.gnu.org/licenses/gpl.txt
+Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 """
 
 from termcolor import colored

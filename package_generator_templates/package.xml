@@ -8,9 +8,8 @@
   <author email="anthony.remazeilles@tecnalia.com">Anthony Remazeilles</author>
 
   <!-- One license tag required, multiple allowed, one license per tag -->
-  <!-- Commonly used license strings: -->
-  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
-  <license>TODO</license>
+  <license>NPOSL-3.0</license>
+  <author email="anthony.remazeilles@tecnalia.com">Anthony Remazeilles</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 </package>
