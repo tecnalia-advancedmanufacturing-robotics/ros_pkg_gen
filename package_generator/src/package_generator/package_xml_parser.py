@@ -488,11 +488,12 @@ class PackageXMLParser(EnhancedObject):
         reparsed = minidom.parseString(data_string)
         res = reparsed.toprettyxml(indent="  ", encoding="utf-8")
 
-        self.log("generating template: \n {} \n".format(res))
+        # self.log("generating template: \n {} \n".format(res))
 
         with open(filename, 'w') as file_handler:
             file_handler.write("{}".format(res))
-
+        self.log("XML skeleton written in file {}".format(filename))
+        self.log("Edit the file, remove or comment unused interface")
         return True
 
 USAGE = """ usage: generate_xml_skel package_template xml_skeleton
@@ -588,7 +589,7 @@ def main_generate_xml():
         print colored("Could not load the template spec", "red")
         return -1
 
-    print "Setting the template spec to \n {}".format(spec.dico_)
+    # print "Setting the template spec to \n {}".format(spec.dico_)
     if not package_parser.set_template_spec(spec):
         print colored("Prb while setting the parser dictionary", "red")
         return -1
