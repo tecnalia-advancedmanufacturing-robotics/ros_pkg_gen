@@ -104,4 +104,17 @@ rosrun great_package_action_client node_action_client _ac_use_action_remap:=do_a
 * Longer Term:
   * Consider use of Jinja
 
+## Acknowledgements
 
+
+This development is supported by the European Union’s Horizon 2020 project [ROSIN][rosin_website].
+This project has received funding from the European Union’s Horizon 2020 research and innovation programme under
+grant agreement No 732287.
+
+The opinions and arguments expressed reflect only the author‘s view and reflect in no way the European Commission‘s opinions.
+The European Commission is not responsible for any use that may be made of the information it contains.
+
+[![ROSIN website][rosin_logo]][rosin_website]
+
+[rosin_logo]: http://rosin-project.eu/wp-content/uploads/2017/03/Logo_ROSIN_CMYK-Website.png
+[rosin_website]: http://rosin-project.eu/ "Go to website"
