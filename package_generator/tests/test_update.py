@@ -6,8 +6,7 @@
 @brief test the management of update of existing node
 
 Copyright (C) 2017 Tecnalia Research and Innovation
-Distributed under the GNU GPL v3.
-For full terms see https://www.gnu.org/licenses/gpl.txt
+Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 """
 
 import unittest

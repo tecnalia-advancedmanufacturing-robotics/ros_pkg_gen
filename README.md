@@ -10,11 +10,14 @@ To do so the input needed are:
 * An _interface specification_: a xml file describing mainly the interface of the package to create, according to the template.
   This file is to be filled by the _Developer_, using the interface proposed by the template, according to the concrete needs of the package he is willing to create
 
-**Author(s): Anthony Remazeilles**
+**Author**: Anthony Remazeilles
 
-**Maintainer: Anthony Remazeilles, anthony.remazeilles@tecnalia.com**
+**Maintainer**: Anthony Remazeilles, anthony.remazeilles@tecnalia.com
 
-**Affiliation: Tecnalia Research and Innovation, Spain**
+**Affiliation** : Tecnalia Research and Innovation, Spain
+
+**License**: This project is under the NPOSL-3.0 License.
+See [LICENSE.md](LICENSE.md) for more details.
 
 ## Getting started
 ### Prerequisites
@@ -101,4 +104,17 @@ rosrun great_package_action_client node_action_client _ac_use_action_remap:=do_a
 * Longer Term:
   * Consider use of Jinja
 
+## Acknowledgements
 
+
+This development is supported by the European Union’s Horizon 2020 project [ROSIN][rosin_website].
+This project has received funding from the European Union’s Horizon 2020 research and innovation programme under
+grant agreement No 732287.
+
+The opinions and arguments expressed reflect only the author‘s view and reflect in no way the European Commission‘s opinions.
+The European Commission is not responsible for any use that may be made of the information it contains.
+
+[![ROSIN website][rosin_logo]][rosin_website]
+
+[rosin_logo]: http://rosin-project.eu/wp-content/uploads/2017/03/Logo_ROSIN_CMYK-Website.png
+[rosin_website]: http://rosin-project.eu/ "Go to website"

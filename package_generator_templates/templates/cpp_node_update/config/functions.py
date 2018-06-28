@@ -6,8 +6,7 @@
 @brief List of aditional functions that can be used in the template
 
 Copyright (C) 2018 Tecnalia Research and Innovation
-Distributed under the GNU GPL v3.
-For full terms see https://www.gnu.org/licenses/gpl.txt
+Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 """
 
 def get_package_type(context):

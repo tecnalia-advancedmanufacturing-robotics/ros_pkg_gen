@@ -4,11 +4,14 @@ This package gathers templates proposed for the `package_generator`.
 So far a single package pattern is implemented, declined in its C++ and python version, named `cpp_node_update` and `python_node_update`.
 
 
-**Author(s): Anthony Remazeilles**
+**Author**: Anthony Remazeilles
 
-**Maintainer: Anthony Remazeilles, anthony.remazeilles@tecnalia.com**
+**Maintainer**: Anthony Remazeilles, anthony.remazeilles@tecnalia.com
 
-**Affiliation: Tecnalia Research and Innovation, Spain**
+**Affiliation**: Tecnalia Research and Innovation, Spain
+
+**License**: This project is under the NPOSL-3.0 License.
+See [LICENSE.md](../LICENSE.md) for more details.
 
 
 ## Getting Started

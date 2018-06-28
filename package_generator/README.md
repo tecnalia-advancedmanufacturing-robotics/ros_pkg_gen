@@ -6,11 +6,14 @@ This package contains the needed python scripts for generating a package, using 
 
 The available patterns are available in the package [package_generator_templates](../package_generator_templates/README.md).
 
-**Author(s): Anthony Remazeilles**
+**Author**: Anthony Remazeilles
 
-**Maintainer: Anthony Remazeilles, anthony.remazeilles@tecnalia.com**
+**Maintainer**: Anthony Remazeilles, anthony.remazeilles@tecnalia.com
 
-**Affiliation: Tecnalia Research and Innovation, Spain**
+**Affiliation**: Tecnalia Research and Innovation, Spain
+
+**License**: This project is under the NPOSL-3.0 License.
+See [LICENSE.md](../LICENSE.md) for more details.
 
 ## Installation and Usage
 
