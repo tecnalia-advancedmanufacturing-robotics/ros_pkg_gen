@@ -189,7 +189,7 @@ class PackageXMLParser(EnhancedObject):
             msg_err = "Dependency {} not listed in xml file \n".format(missing)
             for item in missing_dep[missing]:
                 msg_err += "\t Required by {} \n".format(item)
-            self.log_error(msg_err)
+            self.log_warn(msg_err)
             self.data_depend_.append(missing)
             # adding the dependency to the xml tree
             ET.SubElement(self.root_, "depend").text = missing
@@ -207,8 +207,6 @@ class PackageXMLParser(EnhancedObject):
             assert attrib in self.root_.attrib.keys(), "Missing required attrib {} for package description".format(attrib)
             # self.log("package attribute {} set to {}".format(attrib, self.root_.attrib[attrib]))
             self.data_pack_[attrib] = self.root_.attrib[attrib]
-
-        # self.log("Requested package description correct")
 
         for attrib in self.root_.attrib.keys():
             if attrib not in attributes_package:
@@ -236,7 +234,6 @@ class PackageXMLParser(EnhancedObject):
         attributes = self.spec_.dico_['node_interface'][xml_interface.tag]
 
         for attrib in attributes:
-            # print "Checking for attributes {}".format(attrib)
             assert attrib in xml_interface.attrib.keys(), 'Missing required attribute {} for {} interface. Check line {}'.format(attrib, xml_interface.tag, xml_interface.attrib)
             interface_spec["attributes"][attrib] = xml_interface.attrib[attrib]
 
@@ -337,7 +334,7 @@ class PackageXMLParser(EnhancedObject):
         return True
 
     def print_xml_parsed(self):
-        """Prin the xml file that has been parsed
+        """Print the xml file that has been parsed
         """
         self.log("**************")
         self.log("XML parsed: ")
@@ -597,3 +594,4 @@ def main_generate_xml():
     package_parser.generate_xml_from_spec(package_spec)
 
     print colored("Bye bye", "green")
+    return 0
