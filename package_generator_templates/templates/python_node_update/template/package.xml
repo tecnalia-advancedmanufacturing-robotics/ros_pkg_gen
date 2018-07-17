@@ -9,8 +9,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>rospy</depend>
-
   <!-- user dependencies -->
   {foralldependencies}
   <depend>{dependencyName}</depend>
