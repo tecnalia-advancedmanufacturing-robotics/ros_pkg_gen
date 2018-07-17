@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package name="py_dummy_package" author="anthony" author_email="anthony@todo.todo" description="Dummy package containing various interface" license="TODO">
+<package name="py_dummy_package" author="anthony" author_email="anthony@todo.todo" description="Dummy package containing various interface" license="TODO" copyright="2018 Tecnalia Research and Innovation">
    <node name="first_node" frequency="50.0">
        <publisher name="is_config_changed" type="std_msgs::Bool" description="Inform whether the config changed"/>
        <publisher name="complete_name" type="std_msgs::String" description="name and surname"/>

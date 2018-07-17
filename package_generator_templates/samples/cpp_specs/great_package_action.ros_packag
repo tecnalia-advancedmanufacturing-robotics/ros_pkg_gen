@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package name="great_package_action" author="anthony" author_email="anthony@todo.todo" description="Package handling actions" license="TODO">
+<package name="great_package_action" author="anthony" author_email="anthony@todo.todo" description="Package handling actions" license="TODO" copyright="2018 Tecnalia Research and Innovation">
     <node name="node_action_server" frequency="100.0">
         <actionServer name="do_action" type="actionlib::Test" description="compute goal + goal by incrementing of 1 the result at each iteration (sleeping 1sec between each iteration)"/>
     </node>

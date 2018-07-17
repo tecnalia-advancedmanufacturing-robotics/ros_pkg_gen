@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package name="py_param_package" author="anthony" author_email="anthony@todo.todo" description="Illustration of parameter management" license="lsbd">
+<package name="py_param_package" author="anthony" author_email="anthony@todo.todo" description="Illustration of parameter management" license="lsbd" copyright="2018 Tecnalia Research and Innovation">
    <node name="node" frequency="10.0">
        <dynParameter name="dyn_prm_string" type="std::string" value="Empty" description="string handled through dyn reconfigure"/>
        <dynParameter name="dyn_param_bool" type="bool" value="1" description="boolean handled through dynamic reconfigure"/>
