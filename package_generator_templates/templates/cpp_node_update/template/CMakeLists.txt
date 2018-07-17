@@ -5,7 +5,6 @@ project({packageName})
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
   {foralldependencies}
   {dependencyName}
   {endforalldependencies}
@@ -54,7 +53,6 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(common/include)
 include_directories(common/src)
 include_directories(${catkin_INCLUDE_DIRS})
 
