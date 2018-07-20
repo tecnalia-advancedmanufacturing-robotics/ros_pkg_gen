@@ -192,6 +192,15 @@ class CodeGenerator(EnhancedObject):
         """
         self.tmp_buffer_ += buffer_line
 
+    def get_len_gen_file(self):
+        """Returns the number of lines of the generated file
+
+        Returns:
+            Int: numbe rof lines in the file
+        """
+        return len(self.tmp_buffer_)
+
+
     def write_output_file(self, filename=None):
         """write the generated code
 
@@ -274,7 +283,13 @@ class CodeGenerator(EnhancedObject):
         if output_file is None:
             return True
 
-        return self.write_output_file(output_file)
+        nb_line = self.get_len_gen_file()
+
+        # self.log_error("File length: {}".format(nb_line))
+        # We decide not writting a file if it does not exist
+        if nb_line > 0:
+            return self.write_output_file(output_file)
+        return True
 
     def has_tag(self, line):
         """
