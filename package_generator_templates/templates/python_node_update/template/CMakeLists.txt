@@ -19,7 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 catkin_python_setup()
 
-# This could be simplified with a test across nodes.
+{ifdynParameter}
 {forallnodes}
 if ({packageName}_dyn_rec_files)
   list(APPEND {packageName}_dyn_rec_files cfg/{nodeName}.cfg)
@@ -34,6 +34,7 @@ endif ()
 if ({packageName}_dyn_rec_files)
   generate_dynamic_reconfigure_options(${{packageName}_dyn_rec_files})
 endif ()
+{endifdynParameter}
 
 ###################################
 ## catkin specific configuration ##

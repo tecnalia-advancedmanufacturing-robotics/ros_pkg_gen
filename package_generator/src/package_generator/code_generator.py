@@ -265,12 +265,13 @@ class CodeGenerator(EnhancedObject):
         iter_enum_lines = iter(enumerate(lines_in_file, start=1))
         return self.process_input(iter_enum_lines)
 
-    def generate_file(self, file_template, output_file=None):
+    def generate_file(self, file_template, output_file=None, force_write=False):
         """generate a file and store it where specified
 
         Args:
             file_template (str): template to follow
             output_file (str): where to store the generated code
+            force_write (bool, optional): if set, forces the file writting even if empty
 
         Returns:
             Bool: True on success
@@ -286,8 +287,8 @@ class CodeGenerator(EnhancedObject):
         nb_line = self.get_len_gen_file()
 
         # self.log_error("File length: {}".format(nb_line))
-        # We decide not writting a file if it does not exist
-        if nb_line > 0:
+        # We decide not writting a file if it is empty, unless forced to do so
+        if force_write or nb_line > 0:
             return self.write_output_file(output_file)
         return True
 

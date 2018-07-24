@@ -371,9 +371,14 @@ Revise the template, and compare to examples
         rel_path = os.path.join(os.path.dirname(rel_path), basename)
         output_item = os.path.join(os.path.dirname(output_item), basename)
 
+        # Normally an empty file should not be written
+        # The exception is currently only for the special python file __init__.py
+        is_write_forced = (os.path.basename(output_item) == '__init__.py')
+
         if self.path_pkg_backup_ is None:
             self.log("Generating file {} in {}".format(rel_path, output_item))
-            is_ok = self.file_generator_.generate_file(input_item, output_item)
+            is_ok = self.file_generator_.generate_file(input_item, output_item,
+                                                       force_write=is_write_forced)
 
             return self.handle_status_and_advise(input_item, output_item, is_ok)
 
@@ -386,7 +391,7 @@ Revise the template, and compare to examples
             msg = "File {} not previously existing. Just write it"
             self.log_warn(msg.format(rel_path))
 
-            is_ok = self.file_generator_.generate_file(input_item, output_item)
+            is_ok = self.file_generator_.generate_file(input_item, output_item, is_write_forced)
             return self.handle_status_and_advise(input_item, output_item, is_ok)
 
         # File already existing. Processing previous version
@@ -415,6 +420,9 @@ Revise the template, and compare to examples
                 if self.file_generator_.get_len_gen_file() == 0:
                     msg = "New generated file empty. No code maintained from previous version"
                     self.log_warn(msg)
+                    # we write it if forced
+                    if is_write_forced:
+                        is_ok = self.file_generator_.write_output_file(output_item)
                 else:
                     self.log("Merging with previous version")
                     self.file_generator_.tmp_buffer_ = file_analyzor.update_file(self.file_generator_.tmp_buffer_)
@@ -422,7 +430,7 @@ Revise the template, and compare to examples
                 return self.handle_status_and_advise(input_item, output_item, is_ok)
 
         # Although the file existed before, we do not have to maintain it
-        is_ok = self.file_generator_.generate_file(input_item, output_item)
+        is_ok = self.file_generator_.generate_file(input_item, output_item, is_write_forced)
         return self.handle_status_and_advise(input_item, output_item, is_ok)
 
     def handle_status_and_advise(self, input_file, output_file, gen_flag):
@@ -443,9 +451,12 @@ Revise the template, and compare to examples
             return False
         # so the file generation went well
         if self.file_generator_.get_len_gen_file() == 0:
-            msg = "File {} not written since empty".format(output_file)
-            self.log_warn(msg)
-            return True
+            # Only file __init__.py is kept empty
+            if os.path.basename(output_file) != '__init__.py':
+                msg = "File {} not written since empty".format(output_file)
+                self.log_warn(msg)
+                self.log_warn("Check: {}".format(os.path.basename(output_file)))
+                return True
         # file has content
         file_status = os.stat(input_file)
         os.chmod(output_file, file_status.st_mode)

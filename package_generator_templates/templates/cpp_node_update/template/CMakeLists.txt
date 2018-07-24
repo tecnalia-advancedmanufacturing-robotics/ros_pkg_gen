@@ -14,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
 # protected region additional user defined REQUIREMENTS begin #
 # protected region additional user defined REQUIREMENTS end #
 
-# This could be simplified with a test across nodes.
+{ifdynParameter}
 {forallnodes}
 if ({packageName}_dyn_rec_files)
   list(APPEND {packageName}_dyn_rec_files cfg/{nodeName}.cfg)
@@ -29,6 +29,7 @@ endif ()
 if ({packageName}_dyn_rec_files)
   generate_dynamic_reconfigure_options(${{packageName}_dyn_rec_files})
 endif ()
+{endifdynParameter}
 
 ###################################
 ## catkin specific configuration ##
@@ -64,8 +65,10 @@ include_directories(${catkin_INCLUDE_DIRS})
 add_executable({nodeName} ros/src/{nodeName}_ros.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
+{ifdynParameter}
 add_dependencies({nodeName} ${PROJECT_NAME}_gencfg)
 add_dependencies({nodeName} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+{endifdynParameter}
 ## Specify libraries to link a library or executable target against
 target_link_libraries({nodeName} ${catkin_LIBRARIES}
 )
