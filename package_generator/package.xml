@@ -1,15 +1,14 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>package_generator</name>
   <version>0.0.0</version>
-  <description>The package_generator package</description>
+  <description>
+    The package_generator package
+  </description>
 
-  <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <maintainer email="anthony.remazeilles@tecnalia.com">Anthony Remazeilles</maintainer>
 
-
-  <!-- One license tag required, multiple allowed, one license per tag -->
-    <license>NPOSL-3.0</license>
+  <license>NPOSL-3.0</license>
 
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
@@ -22,22 +21,9 @@
   <!-- Example: -->
   <author email="anthony.remazeilles@tecnalia.com">Anthony Remazeilles</author>
 
-
-  <!-- The *_depend tags are used to specify dependencies -->
-  <!-- Dependencies can be catkin packages or system dependencies -->
-  <!-- Examples: -->
-  <!-- Use build_depend for packages you need at compile time: -->
-  <!--   <build_depend>message_generation</build_depend> -->
-  <!-- Use buildtool_depend for build tool packages: -->
-  <!--   <buildtool_depend>catkin</buildtool_depend> -->
-  <!-- Use run_depend for packages you need at runtime: -->
-  <!--   <run_depend>message_runtime</run_depend> -->
-  <!-- Use test_depend for packages you need only for testing: -->
-  <!--   <test_depend>gtest</test_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>rospy</build_depend>
-  <run_depend>python-termcolor</run_depend>
-  <run_depend>rospy</run_depend>
+  <depend>rospy</depend>
+  <exec_depend>python-termcolor</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
