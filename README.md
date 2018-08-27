@@ -28,6 +28,13 @@ Code is developed and tested so far under `ROS indigo` and `ROS kinetic`.
 
 ### Installing
 The installation procedure follows the standard operations as any ROS package does.
+```shell
+# Assuming ~/catkin_ws is the workspace in which the the repository has been dowloaded
+cd ~/catkin_ws
+sudo rosdep init
+rosdep update
+rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO
+```
 
 ### Use
 
