@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package name="great_package_tf" author="anthony" author_email="anthony@todo.todo" description="Package using actions and tf" license="TODO">
-    <node name="node_listen" frequency="100.0">
-        <listener name="tf_listener" description="listener example"/>
-   </node>
+<package name="great_package_tf" author="anthony" author_email="anthony@todo.todo" description="Package using actions and tf" license="TODO" copyright="2018 Tecnalia Research and Innovation">
+	<node name="node_listen" frequency="100.0">
+		<listener name="tf_listener" description="listener example"/>
+	</node>
     <node name="node_broadcast" frequency="100.0">
         <broadcaster name="tf_broadcaster" description="broadcaster example"/>
    </node>
-    <depend>tf</depend>
+   <depend>tf</depend>
 </package>

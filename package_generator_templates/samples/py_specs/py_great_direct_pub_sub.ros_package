@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package name="py_great_direct_pub_sub" author="anthony" author_email="anthony@todo.todo" description="Package using direct topic communication" license="TODO">
+<package name="py_great_direct_pub_sub" author="anthony" author_email="anthony@todo.todo" description="Package using direct topic communication" license="TODO" copyright="2018 Tecnalia Research and Innovation">
     <node name="node_direct_pub" frequency="50">
         <directPublisher name="num_reset" type="std_msgs::Int32" description="To inform when value is reset to 0"/>
         <publisher name="counter" type="std_msgs::Int32" description="Value incremented of 1, bounded to 50"/>

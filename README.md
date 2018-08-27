@@ -52,6 +52,12 @@ The template can be indicated either as:
 The expected content of the xml file and the behavior of the generated code is described in [template package readme][template_readme].
 Please take 5 minutes to read it.
 
+You can generate automatically the structure of the xml file using the script `generate_xml_skel`:
+```
+rosrun package_generator generate_xml_skel cpp_node_update my_new_package_spec.ros_package
+```
+A basic structure of template speciication (to be then filled) is then genrated, based on the template considered.
+
 [template_readme]: package_generator_templates/README.md
 
 ## content

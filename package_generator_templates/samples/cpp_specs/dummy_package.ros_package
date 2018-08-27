@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package name="dummy_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO">
+<package name="dummy_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" copyright="2018 Tecnalia Research and Innovation" license="TODO">
    <node name="name_transformer" frequency="50.0">
        <publisher name="is_config_changed" type="std_msgs::Bool" description="Inform whether the config changed"/>
        <publisher name="complete_name" type="std_msgs::String" description="name and surname"/>
