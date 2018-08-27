@@ -39,7 +39,7 @@ rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO
 ### Use
 
 We assume we are at the ROS workspace root, and that the current git repository is accessible from the ROS workspace.
-```
+```shell
 source devel/setup.bash
 # go to the place where we would like to place the new package
 cd src
