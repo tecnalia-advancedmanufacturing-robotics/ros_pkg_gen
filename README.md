@@ -19,6 +19,10 @@ To do so the input needed are:
 **License**: This project is under the NPOSL-3.0 License.
 See [LICENSE.md](LICENSE.md) for more details.
 
+<a href="http://www.youtube.com/watch?feature=player_embedded&v=qsNkYGQBW8U
+" target="_blank"><img src="http://img.youtube.com/vi/qsNkYGQBW8U/0.jpg" 
+alt="ROS Package Generator demo" width="560" height="315" border="0" /></a>
+
 ## Getting started
 ### Prerequisites
 We assume [`ROS`][ros] is installed on the machine.
