@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package name="py_great_actions" author="anthony" author_email="anthony@todo.todo" description="Package handling actions and tf" license="TODO">
-    <node name="node_action_server" frequency="100.0">
-        <actionServer name="do_action" type="actionlib::Test" description="compute the double of the number received as goal"/>
-        <listener name="tf_listener" description="check pose of frame and publish it in the update loop"/>
-   </node>
-   <node name="node_action_client" frequency="100.0">
-        <actionClient name="use_action" type="actionlib::Test" description="Used to compute 2 plus 2"/>
-        <broadcaster name="tf_broadcaster" description="fake frame updated at each update cycle"/>
-   </node>
-    <depend>actionlib</depend>
-    <depend>geometry_msgs</depend>
+<package name="py_great_actions" author="anthony" author_email="anthony@todo.todo" description="Package handling actions and tf" license="TODO" copyright="2018 Tecnalia Research and Innovation">
+  <node name="node_action_server" frequency="100.0">
+    <actionServer name="do_action" type="actionlib::Test" description="compute the double of the number received as goal"/>
+    <listener name="tf_listener" description="check pose of frame and publish it in the update loop"/>
+  </node>
+  <node name="node_action_client" frequency="100.0">
+    <actionClient name="use_action" type="actionlib::Test" description="Used to compute 2 plus 2"/>
+    <broadcaster name="tf_broadcaster" description="fake frame updated at each update cycle"/>
+  </node>
+  <depend>actionlib</depend>
+  <depend>geometry_msgs</depend>
 </package>
