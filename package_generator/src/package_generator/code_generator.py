@@ -192,6 +192,15 @@ class CodeGenerator(EnhancedObject):
         """
         self.tmp_buffer_ += buffer_line
 
+    def get_len_gen_file(self):
+        """Returns the number of lines of the generated file
+
+        Returns:
+            Int: numbe rof lines in the file
+        """
+        return len(self.tmp_buffer_)
+
+
     def write_output_file(self, filename=None):
         """write the generated code
 
@@ -256,12 +265,13 @@ class CodeGenerator(EnhancedObject):
         iter_enum_lines = iter(enumerate(lines_in_file, start=1))
         return self.process_input(iter_enum_lines)
 
-    def generate_file(self, file_template, output_file=None):
+    def generate_file(self, file_template, output_file=None, force_write=False):
         """generate a file and store it where specified
 
         Args:
             file_template (str): template to follow
             output_file (str): where to store the generated code
+            force_write (bool, optional): if set, forces the file writting even if empty
 
         Returns:
             Bool: True on success
@@ -274,7 +284,13 @@ class CodeGenerator(EnhancedObject):
         if output_file is None:
             return True
 
-        return self.write_output_file(output_file)
+        nb_line = self.get_len_gen_file()
+
+        # self.log_error("File length: {}".format(nb_line))
+        # We decide not writting a file if it is empty, unless forced to do so
+        if force_write or nb_line > 0:
+            return self.write_output_file(output_file)
+        return True
 
     def has_tag(self, line):
         """

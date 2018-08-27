@@ -193,7 +193,7 @@ def dependencies_from_template():
     Returns:
         list: list of ROS package dependency required by the template
     """
-    return ['roscpp', 'dynamic_reconfigure']
+    return []
 
 def dependencies_from_interface(interface_name, context):
     """return package dependencies according to the interface name

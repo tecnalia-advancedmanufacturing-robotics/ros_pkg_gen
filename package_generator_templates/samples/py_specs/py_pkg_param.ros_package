@@ -6,4 +6,5 @@
        <parameter name="prm_dbl" type="double" value="3.14" description="double param handled through parameter server"/>
        <parameter name="prm_int" type="int" value="8" description="int param handled through parameter server"/>
    </node>
+   <depend>dynamic_reconfigure</depend>
 </package>

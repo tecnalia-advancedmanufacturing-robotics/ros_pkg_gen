@@ -33,9 +33,6 @@ class PackageGenerator(EnhancedObject):
         spec_ (TemplateSpec): configuration of the template model
         template_path_ (TYPE): Description
         xml_parser_ (TYPE): Description
-
-    Deleted Attributes:
-        name_ (TYPE): Description
     """
 
     def __init__(self, name="PackageGenerator"):
@@ -53,6 +50,7 @@ class PackageGenerator(EnhancedObject):
         self.package_path_ = None
         # parser of the package description
         self.xml_parser_ = None
+        # config parameter provide with the template
         self.spec_ = None
         # generic file generator
         self.file_generator_ = None
@@ -373,60 +371,98 @@ Revise the template, and compare to examples
         rel_path = os.path.join(os.path.dirname(rel_path), basename)
         output_item = os.path.join(os.path.dirname(output_item), basename)
 
+        # Normally an empty file should not be written
+        # The exception is currently only for the special python file __init__.py
+        is_write_forced = (os.path.basename(output_item) == '__init__.py')
+
         if self.path_pkg_backup_ is None:
             self.log("Generating file {} in {}".format(rel_path, output_item))
-            is_ok = self.file_generator_.generate_file(input_item, output_item)
-        else:
-            # Checking if an update is necessary
-            is_update_needed = False
-            previous_filename = os.path.join(self.path_pkg_backup_, rel_path)
+            is_ok = self.file_generator_.generate_file(input_item, output_item,
+                                                       force_write=is_write_forced)
 
-            # Check 1: does this file exist?
-            if not os.path.isfile(previous_filename):
-                msg = "File {} not previously existing. Just write it"
-                self.log_warn(msg.format(rel_path))
+            return self.handle_status_and_advise(input_item, output_item, is_ok)
+
+        # A previous version of the package exists
+        # Checking if an update is necessary
+        previous_filename = os.path.join(self.path_pkg_backup_, rel_path)
+
+        # Check 1: does this file exist?
+        if not os.path.isfile(previous_filename):
+            msg = "File {} not previously existing. Just write it"
+            self.log_warn(msg.format(rel_path))
+
+            is_ok = self.file_generator_.generate_file(input_item, output_item, is_write_forced)
+            return self.handle_status_and_advise(input_item, output_item, is_ok)
+
+        # File already existing. Processing previous version
+        is_update_needed = False
+        file_analyzor = GeneratedFileAnalysis()
+        is_ok = file_analyzor.extract_protected_region(previous_filename)
+        if is_ok:
+            # Check if Developer inserted any contribution
+            if file_analyzor.extracted_areas_:
+                # contribution found, merge needed
+                is_update_needed = True
             else:
-                # File already existing. Processing previous version
-                file_analyzor = GeneratedFileAnalysis()
-                is_ok = file_analyzor.extract_protected_region(previous_filename)
-                if is_ok:
-                    # Check if Developer inserted any contribution
-                    if file_analyzor.extracted_areas_:
-                        # contribution found, merge needed
-                        is_update_needed = True
-                    else:
-                        self.log("No Developer contribution found")
+                self.log("No Developer contribution found")
+        else:
+            msg = "prb while extracting protected area in {}"
+            self.log_error(msg.format(previous_filename))
+            self.log_error("Previous file to be manually merged, sorry")
+
+        # now we know if an update is needed
+        if is_ok and is_update_needed:
+            # self.log("Updating file {} in {}".format(rel_path, output_item))
+            self.log("Updating file {}".format(rel_path))
+
+            is_ok = self.file_generator_.generate_file(input_item)
+            if is_ok:
+                if self.file_generator_.get_len_gen_file() == 0:
+                    msg = "New generated file empty. No code maintained from previous version"
+                    self.log_warn(msg)
+                    # we write it if forced
+                    if is_write_forced:
+                        is_ok = self.file_generator_.write_output_file(output_item)
                 else:
-                    msg = "prb while extracting protected area in {}"
-                    self.log_error(msg.format(previous_filename))
-                    self.log_error("Previous file to be manually merge, sorry")
-
-            # no we know if an update is needed
-            if is_ok and is_update_needed:
-                # self.log("Updating file {} in {}".format(rel_path, output_item))
-                self.log("Updating file {}".format(rel_path))
-
-                is_ok = self.file_generator_.generate_file(input_item)
-                if is_ok:
                     self.log("Merging with previous version")
                     self.file_generator_.tmp_buffer_ = file_analyzor.update_file(self.file_generator_.tmp_buffer_)
                     is_ok = self.file_generator_.write_output_file(output_item)
-                else:
-                    self.log_error("Prb while generating the file")
-            else:
-                # self.log("Generating file {} in {}".format(rel_path, output_item))
-                is_ok = self.file_generator_.generate_file(input_item, output_item)
+                return self.handle_status_and_advise(input_item, output_item, is_ok)
 
-        if is_ok:
-            # checking file status
-            file_status = os.stat(input_item)
-            os.chmod(output_item, file_status.st_mode)
-            self.log("File {} handled".format(rel_path))
-            self.log("*********************************")
-        else:
-            msg = "Prb while generating file {} in {}"
-            self.log_error(msg.format(rel_path, output_item))
-        return is_ok
+        # Although the file existed before, we do not have to maintain it
+        is_ok = self.file_generator_.generate_file(input_item, output_item, is_write_forced)
+        return self.handle_status_and_advise(input_item, output_item, is_ok)
+
+    def handle_status_and_advise(self, input_file, output_file, gen_flag):
+        """Depending on the file generation process outcome,
+           Adjust file status and inform user
+
+        Args:
+            input_file (str): path  of the template file used
+            output_file (TYPE): path of the generated file
+            gen_flag (Bool): Success of the generation process
+
+        Returns:
+            Bool: True on success of the file generation
+        """
+        if not gen_flag:
+            msg = "Prb while generating file {}".format(output_file)
+            self.log_error(msg)
+            return False
+        # so the file generation went well
+        if self.file_generator_.get_len_gen_file() == 0:
+            # Only file __init__.py is kept empty
+            if os.path.basename(output_file) != '__init__.py':
+                msg = "File {} not written since empty".format(output_file)
+                self.log_warn(msg)
+                self.log_warn("Check: {}".format(os.path.basename(output_file)))
+                return True
+        # file has content
+        file_status = os.stat(input_file)
+        os.chmod(output_file, file_status.st_mode)
+        self.log("File {} handled".format(input_file))
+        self.log("*********************************")
+        return True
 
 USAGE = """ usage: generate_package package_spec package_template
 package_spec: xml description of the node(s) interface
