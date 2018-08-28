@@ -245,7 +245,7 @@ Revise the template, and compare to examples
 
     def handle_maintained_files(self):
         """ Restore file Developer requests to maintain
-        Assuming these patterns are defined in file .gen_maitain
+        Assuming these patterns are defined in file .gen_maintain
         Returns:
             Bool: True on sucess
         """

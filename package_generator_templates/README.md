@@ -52,6 +52,7 @@ The ROS interface and the core node intelligence are explicitly separated:
 * You **should** only complete the node implementation files.
 
 ### Implementation file
+
 The files `common/src/[node_name]_common.cpp` (C++) or `src/[package_name]/[node_name]_impl.py` (python) need to be filled by the Developer.
 
 It contains different classes automatically created:
@@ -177,7 +178,7 @@ That gives you additional chance to recover you package state before the update 
 
 This can occur for example if you add a launch folder (current templates do not cover launch files).
 
-To maintain specific files during the update, the procedure is to add a file `.gen_maintained` at the root of the package folder.
+To maintain specific files during the update, the procedure is to add a file `.gen_maintain` at the root of the package folder.
 This file is searched and processed during the update.
 Any directory and files mentioned there will be restored.
 As an example:

@@ -20,7 +20,7 @@ To do so the input needed are:
 See [LICENSE.md](LICENSE.md) for more details.
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=qsNkYGQBW8U
-" target="_blank"><img src="http://img.youtube.com/vi/qsNkYGQBW8U/0.jpg" 
+" target="_blank"><img src="http://img.youtube.com/vi/qsNkYGQBW8U/0.jpg"
 alt="ROS Package Generator demo" width="560" height="315" border="0" /></a>
 
 ## Getting started
@@ -67,7 +67,7 @@ You can generate automatically the structure of the xml file using the script `g
 ```
 rosrun package_generator generate_xml_skel cpp_node_update my_new_package_spec.ros_package
 ```
-A basic structure of template speciication (to be then filled) is then genrated, based on the template considered.
+A basic structure of template specification (to be then filled) is then generated, based on the template considered.
 
 [template_readme]: package_generator_templates/README.md
 
@@ -86,7 +86,6 @@ So far, it only contains two templates, one for python code and another for C++.
 Both follow the same pattern, based on the concept of a central update loop at a given frequency (inspired from BRICS models).
 
 More details in the dedicated [Readme file](package_generator_templates/README.md)
-
 
 ## reminders
 * to remap a topic with rosrun:
@@ -122,7 +121,6 @@ rosrun great_package_action_client node_action_client _ac_use_action_remap:=do_a
   * Consider use of Jinja
 
 ## Acknowledgements
-
 
 This development is supported by the European Union’s Horizon 2020 project [ROSIN][rosin_website].
 This project has received funding from the European Union’s Horizon 2020 research and innovation programme under
