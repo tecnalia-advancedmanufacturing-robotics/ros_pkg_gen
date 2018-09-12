@@ -53,3 +53,89 @@ But it also defines different tags that will be available to the Designer when d
 
 **`functions.py`**
 
+This file must contain at least **two** functions:
+
+```python
+def dependencies_from_template():
+    """provides the dependencies required by the template
+
+    Returns:
+        list: list of ROS package dependency required by the template
+    """
+    return ['rospy']
+```
+
+Function `dependencies_from_template` defines the dependencies that are mandatory for the package, according to the template used.
+They will be automatically added to the one provided by the `User` in the package specification.
+
+```python
+def dependencies_from_interface(interface_name, context):
+    """return package dependencies according to the interface name
+
+    Args:
+        interface_name (str): name of the interface to consider
+        context (dict): attributes assigned by the User to such instance
+
+    Returns:
+        list: List of dependencies that should be added according to
+              the interface used and the attributes values
+    """
+    list_dep = []
+
+    type_field = ['publisher', 'directPublisher', 'directSubscriber',
+                  'subscriber', 'serviceClient', 'serviceServer',
+                  'actionServer', 'actionClient']
+
+    if interface_name in type_field:
+        pkg_dep = get_package_type(context)
+        list_dep.append(pkg_dep)
+
+    if interface_name in ['actionClient', 'actionServer']:
+        list_dep.append('actionlib')
+        list_dep.append('actionlib_msgs')
+
+    if interface_name in ['listener', 'broadcaster']:
+        list_dep.append('tf')
+
+    if interface_name == 'dynParameter':
+        list_dep.append('dynamic_reconfigure')
+
+    return list_dep
+```
+
+Function `dependencies_from_interface` defines the dependencies that are to be satisfied depending on the interface used by the `User` (parameter `interface_name`), as well as the values assigned by the `User` to this interface instance (parameter `context`).
+
+Ideally that function should cover all the accepted interfaces as defined in file `dictionary.yaml`.
+
+Notice that here we use a the function `get_package_type`, that is defined in that [same file][templates/cpp_node_update/config/functions.py].
+
+
+Then the `Template Designer` may add additional functions that would be later on accessible during the code generation (see next section for more details).
+
+For instance,
+
+```python
+def get_package_type(context):
+    """extract the package the type belong to
+
+    Args:
+        context (dict): context (related to an interface description)
+
+    Returns:
+        str: the package extracted from the type key
+
+    Examples:
+        >>> context = {name: "misc", type={std_msgs::String}, desc="an interface"}
+        >>> get_package_type(context)
+        std_msgs
+    """
+    return context['type'].split("::")[0]
+```
+
+is a function that can be used to extract from the values assigned to the `type` attribute the ROS package to which belongs the type used.
+In the provided example, the `type` value is set to `std_msgs::String`.
+The call to that function would thus return `std_msgs`.
+
+Note that all these functions **have to** be defined with a unique input parameter (named here `context`).
+That variable is a dictionary that will contain all the attributes values provided by the `User` in its specification file.
+These add-on functions must follow that structure to enable their automatic call during the code generation process.

@@ -9,6 +9,7 @@ Copyright (C) 2018 Tecnalia Research and Innovation
 Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 """
 
+
 def get_package_type(context):
     """extract the package the type belong to
 
@@ -24,6 +25,7 @@ def get_package_type(context):
         std_msgs
     """
     return context['type'].split("::")[0]
+
 
 def get_class_type(context):
     """extract the Class related to the type, in C++ format
@@ -41,6 +43,7 @@ def get_class_type(context):
     """
     return context['type'].split("::")[1]
 
+
 def get_python_type(context):
     """extract the type of an object in python format
 
@@ -57,6 +60,7 @@ def get_python_type(context):
     """
     return context['type'].replace("::", ".")
 
+
 def get_cpp_path(context):
     """convert the type content into a path format
 
@@ -72,6 +76,7 @@ def get_cpp_path(context):
         "std_msgs/String"
     """
     return context['type'].replace("::", "/")
+
 
 def get_py_param_type(context):
     """convert a param type into python accepted format.
@@ -99,6 +104,7 @@ def get_py_param_type(context):
         return 'double_t'
     if param_type == 'bool':
         return 'bool_t'
+
 
 def get_py_param_value(context):
     """Extract the value of a parameter.
@@ -129,6 +135,7 @@ def get_py_param_value(context):
         return "{}".format(str2bool(context['value']))
     return context['value']
 
+
 def get_cpp_param_value(context):
     """Extract the value of a parameter, in cpp format.
     Similar to get_py_param_value, except for booleans that are true or false
@@ -158,6 +165,7 @@ def get_cpp_param_value(context):
             return "false"
     return context['value']
 
+
 def str2bool(strg):
     """convert a string into boolean value
     Several format are accepted for True.
@@ -170,6 +178,7 @@ def str2bool(strg):
         Bool: corresponding boolean value
     """
     return strg.lower() in ("yes", "true", "t", "1")
+
 
 def capitalized_node_name(context):
     """return the node name in capitalized format
@@ -187,6 +196,7 @@ def capitalized_node_name(context):
     """
     return context['nodeName'].title().replace("_", "")
 
+
 def dependencies_from_template():
     """provides the dependencies required by the template
 
@@ -195,12 +205,17 @@ def dependencies_from_template():
     """
     return []
 
+
 def dependencies_from_interface(interface_name, context):
     """return package dependencies according to the interface name
 
     Args:
         interface_name (str): name of the interface to consider
-        context (list): list of dependencies related to such interface
+        context (dict): attributes assigned by the User to such instance
+
+    Returns:
+        list: List of dependencies that should be added according to
+              the interface used and the attributes values
     """
     list_dep = []
 
