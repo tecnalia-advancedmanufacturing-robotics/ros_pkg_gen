@@ -44,6 +44,7 @@ import tf
 # protected region user include package begin #
 # protected region user include package end #
 
+
 class {apply-capitalized_node_name}Config(object):
     """
     set of static and dynamic parameters
@@ -74,6 +75,7 @@ class {apply-capitalized_node_name}Config(object):
         {endforalldynParameter}
         msg += "}"
         return msg
+
 
 class {apply-capitalized_node_name}Data(object):
     """
@@ -113,6 +115,7 @@ class {apply-capitalized_node_name}Data(object):
         msg += "}"
         return msg
 
+
 class {apply-capitalized_node_name}Passthrough(object):
     """
     set of passthrough elements slightly violating interface / implementation separation
@@ -144,6 +147,7 @@ class {apply-capitalized_node_name}Passthrough(object):
         {endforalldirectSubscriber}
         pass
 
+
 class {apply-capitalized_node_name}Implementation(object):
     """
     Class to contain Developer implementation.
@@ -168,8 +172,6 @@ class {apply-capitalized_node_name}Implementation(object):
         return True
         # protected region user configure end #
 
-
-
     def update(self, data, config):
         """
         @brief { function_description }
@@ -184,7 +186,6 @@ class {apply-capitalized_node_name}Implementation(object):
         # can be removed once filled
         pass
         # protected region user update end #
-
 
     {forallserviceServer}
     def callback_{name}(self, req):

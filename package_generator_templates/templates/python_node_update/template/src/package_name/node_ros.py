@@ -9,6 +9,7 @@ Copyright (C) {packageCopyright}
 {packageLicense}
 """
 
+from copy import deepcopy
 import rospy
 {ifactionServer}
 import actionlib
@@ -49,9 +50,8 @@ from {apply-get_package_type}.msg import {apply-get_class_type}Action
 
 # other includes
 from {packageName} import {nodeName}_impl
-from copy import deepcopy
 
-# todo set a function to write correctly the name
+
 class {apply-capitalized_node_name}ROS(object):
     """
     ROS interface class, handling all communication with ROS
@@ -191,8 +191,8 @@ class {apply-capitalized_node_name}ROS(object):
         data = deepcopy(self.component_data_)
         self.set_all_input_read()
         self.component_implementation_.update(data, config)
-
         {ifpublisher}
+
         try:
             {forallpublisher}
             self.component_data_.out_{name}_active = data.out_{name}_active
