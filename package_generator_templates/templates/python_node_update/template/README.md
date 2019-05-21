@@ -1,16 +1,17 @@
-{packageName}
-====================
+# {packageName}
 
-# General description of the package
-{packageDescription}
+## General description of the package
+
 <!--- protected region package descripion begin -->
+{packageDescription}
 <!--- protected region package descripion end -->
 
 <!--- todo How to handle the image generation -->
 <!--- <img src="./model/{nodeName}.png" width="300px" />-->
 
 {forallnodes}
-# Node: {nodeName}
+## Node: {nodeName}
+
 Update frequency: {nodeFrequency} Hz.
 {iflistener}
 
@@ -25,12 +26,14 @@ This node is using `\tf` to broadcast transforms.
 <!--- protected region {nodeName} end -->
 {ifparameter}
 
-## Static Parameters
+### Static Parameters
 
 All static parameters can be set through the command line:
-```
+
+```shell
 rosrun {packageName} {nodeName} [param_name]:=[new_value]
 ```
+
 {endifparameter}
 {forallparameter}
 `{name}` *({type}, default: {apply-get_py_param_value})*
@@ -40,12 +43,14 @@ rosrun {packageName} {nodeName} [param_name]:=[new_value]
 {endforallparameter}
 {ifdynParameter}
 
-## Dynamic Parameters
+### Dynamic Parameters
 
 All dynamic parameters can be set through the command line:
-```
+
+```shell
 rosrun {packageName} {nodeName} _[param_name]:=[new_value]
 ```
+
 {endifdynParameter}
 {foralldynParameter}
 `{name}` *({type}, default: {apply-get_py_param_value})*
@@ -55,10 +60,11 @@ rosrun {packageName} {nodeName} _[param_name]:=[new_value]
 {endforalldynParameter}
 {ifpublisher}
 
-## Published Topics
+### Published Topics
 
 A topic can be remapped from the command line:
-```
+
+```shell
 rosrun {packageName} {nodeName} [old_name]:=[new_name]
 ```
 
@@ -71,10 +77,11 @@ rosrun {packageName} {nodeName} [old_name]:=[new_name]
 {endforallpublisher}
 {ifsubscriber}
 
-## Subscribed Topics
+### Subscribed Topics
 
 A topic can be remapped from the command line:
-```
+
+```shell
 rosrun {packageName} {nodeName} [old_name]:=[new_name]
 ```
 
@@ -87,11 +94,11 @@ rosrun {packageName} {nodeName} [old_name]:=[new_name]
 {endforallsubscriber}
 {ifserviceServer}
 
-## Services proposed
+### Services proposed
 
 A remapping of the service name is made possible at node launch:
 
-```
+```shell
 rosrun {packageName} {nodeName} _[old_name]_remap:=/[new_name]
 ```
 
@@ -104,11 +111,11 @@ rosrun {packageName} {nodeName} _[old_name]_remap:=/[new_name]
 {endforallserviceServer}
 {ifserviceClient}
 
-## Services used
+### Services used
 
 A remapping of the service name is made possible at node launch:
 
-```
+```shell
 rosrun {packageName} {nodeName} _[old_name]_remap:=/[new_name]
 ```
 
@@ -121,17 +128,17 @@ rosrun {packageName} {nodeName} _[old_name]_remap:=/[new_name]
 {endforallserviceClient}
 {ifactionServer}
 
-## Action proposed
+### Action proposed
 
 A simple action launched can be obtained with:
 
-```
+```shell
 rosrun actionlib axclient.py /do_action
 ```
 
 Any action name can be readjusted at node launch:
 
-```
+```shell
 rosrun {packageName} {nodeName} _[old_name]:=[new_name]
 ```
 
@@ -144,12 +151,14 @@ rosrun {packageName} {nodeName} _[old_name]:=[new_name]
 {endforallactionServer}
 {ifactionClient}
 
-## Action used
-Any action client direaction can be readjusted at node launch:
+### Action used
 
-```
+Any action client direction can be readjusted at node launch:
+
+```shell
 rosrun {packageName} {nodeName} _[old_name]_remap:=[new_name]
 ```
+
 {endifactionClient}
 {forallactionClient}
 `{name}` *({type})*
@@ -159,7 +168,7 @@ rosrun {packageName} {nodeName} _[old_name]_remap:=[new_name]
 {endforallactionClient}
 {ifdirectPublisher}
 
-## Direct Publishers
+### Direct Publishers
 
 These publishers are not handled through the update loop.
 Their publication frequency is thus unknown
@@ -173,7 +182,8 @@ Their publication frequency is thus unknown
 {endforalldirectPublisher}
 {ifdirectSubscriber}
 
-## Direct Subscribers
+### Direct Subscribers
+
 These subscribers are not handled through the update loop.
 The subscription handler is triggered as soon as a message arrives.
 
