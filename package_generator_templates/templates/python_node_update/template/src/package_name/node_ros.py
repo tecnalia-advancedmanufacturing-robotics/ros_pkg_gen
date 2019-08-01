@@ -106,15 +106,18 @@ class {apply-capitalized_node_name}ROS(object):
                                                                                  self.component_implementation_.direct_topic_callback_{name})
         {endforalldirectSubscriber}
         {endifdirectSubscriber}
+        {ifserviceServer}
+        # handling service servers
+        {endifserviceServer}
         {forallserviceServer}
-        # to enable service name adjustment when loading the node
-        remap = rospy.get_param("~{name}_remap", "{name}")
-        self.{name}_ = rospy.Service(remap, {apply-get_class_type}, self.component_implementation_.callback_{name})
+        self.{name}_ = rospy.Service('{name}', {apply-get_class_type}, self.component_implementation_.callback_{name})
         {endforallserviceServer}
+        {ifserviceClient}
+        # handling service clients
+        {endifserviceClient}
         {forallserviceClient}
-        # to enable service name adjustment when loading the node
-        remap = rospy.get_param("~{name}_remap", "{name}")
-        self.component_implementation_.passthrough.client_{name} = rospy.ServiceProxy(remap, {apply-get_class_type});
+        self.component_implementation_.passthrough.client_{name} = rospy.ServiceProxy('{name}',
+                                                                                      {apply-get_class_type});
         {endforallserviceClient}
         {forallactionServer}
         # to enable action name adjustment when loading the node

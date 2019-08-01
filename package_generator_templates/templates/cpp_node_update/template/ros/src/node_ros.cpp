@@ -133,18 +133,17 @@ public:
         {foralldynParameter}
         np_.param("{name}", component_config_.{name}, ({type}){apply-get_cpp_param_value});
         {endforalldynParameter}
+        {ifserviceServer}
+        // handling Service servers
+        {endifserviceServer}
         {forallserviceServer}
-        // to enable service name adjustment when loading the node
-        std::string {name}_remap;
-        np_.param("{name}_remap", {name}_remap, (std::string)"{name}");
-        ROS_INFO_STREAM("Service server at direction " << {name}_remap);
-        {name}_ = n_.advertiseService<{type}::Request , {type}::Response>({name}_remap, boost::bind(&{apply-capitalized_node_name}Impl::callback_{name}, &component_implementation_,_1,_2,component_config_));
+        {name}_ = n_.advertiseService<{type}::Request , {type}::Response>("{name}", boost::bind(&{apply-capitalized_node_name}Impl::callback_{name}, &component_implementation_,_1,_2,component_config_));
         {endforallserviceServer}
+        {ifserviceClient}
+        // handling Service clients
+        {endifserviceClient}
         {forallserviceClient}
-        std::string sc_{name}_remap;
-        np_.param("{name}_remap", sc_{name}_remap, (std::string)"{name}");
-        ROS_INFO_STREAM("Service client looking at direction " << sc_{name}_remap);
-        component_implementation_.passthrough.client_{name} = n_.serviceClient<{type}>(sc_{name}_remap);
+        component_implementation_.passthrough.client_{name} = n_.serviceClient<{type}>("{name}");
         {endforallserviceClient}
         {forallactionClient}
         // to enable action name adjustment when loading the node
