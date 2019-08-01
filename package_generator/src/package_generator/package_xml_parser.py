@@ -19,6 +19,7 @@ from xml.dom import minidom
 from package_generator.enhanced_object import EnhancedObject
 from package_generator.template_spec import TemplateSpec
 
+
 def remove_empty_line(text):
     """Remove empty line within a multiline string
 
@@ -33,6 +34,7 @@ def remove_empty_line(text):
         if line.strip():
             res.append(line)
     return res
+
 
 # TODO look at http://stackoverflow.com/questions/299588/validating-with-an-xml-schema-in-python
 # for improving the xml format validation
@@ -188,7 +190,8 @@ class PackageXMLParser(EnhancedObject):
         for missing in missing_dep:
             msg_err = "Dependency {} not listed in xml file \n".format(missing)
             for item in missing_dep[missing]:
-                msg_err += "\t Required by {} \n".format(item)
+                msg_err += "\t Required by {}. \n".format(item)
+            msg_err += "Dependency automatically added"
             self.log_warn(msg_err)
             self.data_depend_.append(missing)
             # adding the dependency to the xml tree
@@ -436,7 +439,6 @@ class PackageXMLParser(EnhancedObject):
                 file_handler.write("{}\n".format(item))
         return True
 
-
     def generate_xml_from_spec(self, filename):
         """Generate an xml file based on the template dictionary
 
@@ -493,6 +495,7 @@ class PackageXMLParser(EnhancedObject):
         self.log("Edit the file, remove or comment unused interface")
         return True
 
+
 USAGE = """ usage: generate_xml_skel package_template xml_skeleton
 package_template : name of the template to use
 xml_skeleton: xml description of the node(s) interface
@@ -500,6 +503,7 @@ xml_skeleton: xml description of the node(s) interface
 Packages template: either one defined in package `package_generator_templates`,
                    either a path to a local one.
 """
+
 
 def main_generate_xml():
     """Generate a xml package description based on a template spec
