@@ -53,10 +53,10 @@ rosrun {packageName} {nodeName} _[param_name]:=[new_value]
 
 ### Services proposed
 
-A remapping of the service name is made possible at node launch:
+Any service name can be adjusted using the ROS remapping functionality:
 
 ```shell
-rosrun {packageName} {nodeName} _[old_name]_remap:=/[new_name]
+rosrun {packageName} {nodeName} [old_name]:=[new_name]
 ```
 
 {endifserviceServer}
@@ -70,10 +70,10 @@ rosrun {packageName} {nodeName} _[old_name]_remap:=/[new_name]
 
 ### Services used
 
-A remapping of the service name is made possible at node launch:
+Any service name can be adjusted using the ROS remapping functionality:
 
 ```shell
-rosrun {packageName} {nodeName} _[old_name]_remap:=/[new_name]
+rosrun {packageName} {nodeName} [old_name]:=[new_name]
 ```
 
 {endifserviceClient}

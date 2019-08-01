@@ -51,10 +51,11 @@ class {apply-capitalized_node_name}ROS(object):
         {foralldynParameter}
         self.component_config_.{name} = rospy.get_param("{name}", {apply-get_py_param_value})
         {endforalldynParameter}
+        {ifserviceServer}
+        # handling service servers
+        {endifserviceServer}
         {forallserviceServer}
-        # to enable service name adjustment when loading the node
-        remap = rospy.get_param("~{name}_remap", "{name}")
-        self.{name}_ = rospy.Service(remap, {apply-get_class_type}, self.component_implementation_.callback_{name})
+        self.{name}_ = rospy.Service('{name}', {apply-get_class_type}, self.component_implementation_.callback_{name})
         {endforallserviceServer}
 
     {ifdynParameter}

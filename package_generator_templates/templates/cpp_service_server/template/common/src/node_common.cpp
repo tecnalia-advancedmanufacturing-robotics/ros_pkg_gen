@@ -84,11 +84,9 @@ public:
     {foralldirectSubscriber}
     ros::Subscriber {name};
     {endforalldirectSubscriber}
-
     {forallserviceClient}
     ros::ServiceClient client_{name};
     {endforallserviceClient}
-
     /**
      * @brief constructor
      */
@@ -154,7 +152,6 @@ public:
     {
         /* protected region user implementation of service callback for {name} begin */
         /* protected region user implementation of service callback for {name} end */
-        // todo remove that return
         return true;
     }
     {endforallserviceServer}
