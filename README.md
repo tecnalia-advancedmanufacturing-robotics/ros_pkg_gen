@@ -97,16 +97,10 @@ More details in the dedicated [Readme file](package_generator_templates/README.m
 
 ## reminders
 
-* to remap a topic with rosrun:
+* to remap a topic or a service with rosrun:
 
 ```shell
 rosrun great_multi_package_pub_sub node_sub sub_int:=/pub_in
-```
-
-* for services, the current implementation is configured to enable initial remapping
-
-```shell
-rosrun great_package_services node_service_server _service_trigger_server_remap:=/service_client
 ```
 
 * for the action, one can use:
