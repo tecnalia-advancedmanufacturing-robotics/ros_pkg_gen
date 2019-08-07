@@ -7,9 +7,9 @@ This document describes how a _Template Designer_ can generate a package templat
 A package template is a set of files gathered into a directory.
 The expected content is the following (referring to the [C++ template](templates/cpp_node_update) as illustration):
 
-* `config` directory, which contains specification information of the package (see [this example](templates/cpp_node_update/config))
+* `config` directory: contains specification information of the package (see [this example](templates/cpp_node_update/config))
 
-* `template` directory, which is the bunch of skeleton files that are used for the package generation.
+* `template` directory, bunch of skeleton files that are used for the package generation.
 
 ### Config directory
 
@@ -17,9 +17,10 @@ The specification of a template is done with two files, `dictionary.yaml` and `f
 
 **`dictionary.yaml`**
 
-The dictionary file is basically the definition of the tags the _User_ will be able to use when defining a package to generate.
+The dictionary file is basically the definition of the tags the _User_ can use in the xml file defining the package to generate.
 
 As an example, from the [C++ template](templates/cpp_node_update/config/dictionary.yaml):
+
 ```yaml
 package_attributes: ["name", "author", "author_email", "description", "license", "copyright"]
 node_attributes: ["name", "frequency"]
@@ -41,9 +42,7 @@ node_interface:
 
 * `package_attributes`: the list of XML attributes the _User_ can provide to the required XML element `package`.
 * `node_attributes`: the list of XML attributes the _User_ can provide to the required XML element `node`.
-* `node_interface`: the proposed interface component that can have a node.
-  The `Designer` can define the interface name and the interface attributes.
-  They will be used by the `User` to add interface elements, with the required attributes.
+* `node_interface`: list of interface components authorized by the template.
 
 The _Designer_ is only required to define these three keys `package_attributes` and `node_attributes` as lists, and `node_interface` as a dictionary.
 The attribute names are completely defined by the Designer.
@@ -66,7 +65,7 @@ def dependencies_from_template():
 ```
 
 Function `dependencies_from_template` defines the dependencies that are mandatory for the package, according to the template used.
-They will be automatically added to the one provided by the `User` in the package specification.
+They will be automatically added to the ones provided by the `User` in the package specification.
 
 ```python
 def dependencies_from_interface(interface_name, context):
@@ -109,7 +108,6 @@ Ideally that function should cover all the accepted interfaces as defined in fil
 
 Notice that here we use a the function `get_package_type`, that is defined in that [same file][templates/cpp_node_update/config/functions.py].
 
-
 Then the `Template Designer` may add additional functions that would be later on accessible during the code generation (see next section for more details).
 
 For instance,
@@ -139,3 +137,24 @@ The call to that function would thus return `std_msgs`.
 Note that all these functions **have to** be defined with a unique input parameter (named here `context`).
 That variable is a dictionary that will contain all the attributes values provided by the `User` in its specification file.
 These add-on functions must follow that structure to enable their automatic call during the code generation process.
+
+### Template directory
+
+The Template folder contains the skeleton of all files that will be deployed into the generated files.
+
+All files are generated once, unless his name contains the string `node`.
+In that case, the file will be generated for each node defined by the user.
+The filename is then adjusted by replacing the string `node` with the node name.
+
+####  Template file
+
+A template file can be related to any language.
+Each line of the template is reproduced, unless a specific instruction tag is encountered.
+
+The instruction tags are of the form:
+
+* `{ifinterface}`: the following lines are inserted only if at least one instance of `interface` is defined by the `Developer`.
+* `{forallinterface}`: the following lines are generated for each of the instance of the `interface` in the `Developer` spec.
+
+Here, `interface` refers to _any_ of the interfaces.
+These code are generated automatically based on all fields of `node_interface` in file `dictionnary.yaml`.
