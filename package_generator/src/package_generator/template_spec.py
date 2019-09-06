@@ -13,6 +13,7 @@ import yaml
 import pprint
 import os
 
+
 class TemplateSpec(EnhancedObject):
     """Contains a the set of configuration info for a template
        This information is completing the folder containing the files to
@@ -142,6 +143,7 @@ class TemplateSpec(EnhancedObject):
             self.dep_from_interface_ = None
 
         return True
+
 
 if __name__ == "__main__":
     """

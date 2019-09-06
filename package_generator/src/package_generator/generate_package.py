@@ -23,6 +23,7 @@ from package_generator.file_update_management import GeneratedFileAnalysis
 from package_generator.enhanced_object import EnhancedObject
 from package_generator.template_spec import TemplateSpec
 
+
 class PackageGenerator(EnhancedObject):
     """Handle the genration of a whole package
 
@@ -476,6 +477,7 @@ package_template: name of the template to use
 Packages template: either one defined in package `package_generator_templates`,
                    either a path to a local one.
 """
+
 
 def main():
     """
