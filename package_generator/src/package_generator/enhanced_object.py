@@ -12,6 +12,7 @@ Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 from termcolor import colored
 import inspect
 
+
 class EnhancedObject(object):
     """Enhanced Object with advanced log tool
 

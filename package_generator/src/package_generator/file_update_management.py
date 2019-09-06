@@ -19,6 +19,7 @@ from package_generator.enhanced_object import EnhancedObject
 # should gather the list of line within the tag area.
 # begining and end of line as well
 
+
 class ProtectedArea(object):
     """Definition of a protected area, as a list of code line
 
@@ -53,7 +54,7 @@ class ProtectedArea(object):
         assert pl_start.protected_tag_ == pl_stop.protected_tag_
         assert pl_start.is_start_flag()
         assert pl_stop.is_stop_flag()
-        ## to be check with a single line of comment.
+        # to be check with a single line of comment.
         # for the added value, check related comment in the following
         assert pl_start.num_line_ < pl_stop.num_line_
 
@@ -66,6 +67,7 @@ class ProtectedArea(object):
         # stop: we quit 1 lines to take it out
         self.protected_lines_ = all_lines[self.num_line_start_:self.num_line_stop_-1]
         return True
+
 
 class ProtectedLine(EnhancedObject):
     """Description of a protected line
@@ -129,7 +131,6 @@ class ProtectedLine(EnhancedObject):
             line = self.line_
         # print "Looking for {} in {}".format(self.protection_pattern_, line)
         return self.protection_pattern_ in line
-
 
     def is_start_flag(self, line=None):
         """check wether the flag in line corresponds to the protection begining
@@ -243,6 +244,7 @@ class ProtectedLine(EnhancedObject):
         self.protected_tag_ = tag_string
         # self.log("Protected tag set to: {}".format(self.protected_tag_))
         return True
+
 
 class GeneratedFileAnalysis(EnhancedObject):
     """Handle a generated file, wrt to protected areas
