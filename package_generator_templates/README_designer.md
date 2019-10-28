@@ -109,7 +109,6 @@ Ideally that function should cover all the accepted interfaces as defined in fil
 Notice that here we use a the function `get_package_type`, that is defined in that [same file][templates/cpp_node_update/config/functions.py].
 
 Then the `Template Designer` may add additional functions that would be later on accessible during the code generation (see next section for more details).
-
 For instance,
 
 ```python
@@ -146,15 +145,89 @@ All files are generated once, unless his name contains the string `node`.
 In that case, the file will be generated for each node defined by the user.
 The filename is then adjusted by replacing the string `node` with the node name.
 
-####  Template file
+#### Template file
 
 A template file can be related to any language.
 Each line of the template is reproduced, unless a specific instruction tag is encountered.
 
-The instruction tags are of the form:
+All instruction tags are of the form `"{instructionTag}"`.
 
-* `{ifinterface}`: the following lines are inserted only if at least one instance of `interface` is defined by the `Developer`.
-* `{forallinterface}`: the following lines are generated for each of the instance of the `interface` in the `Developer` spec.
+**Package information**:
 
-Here, `interface` refers to _any_ of the interfaces.
-These code are generated automatically based on all fields of `node_interface` in file `dictionnary.yaml`.
+All package attributes can be accessed using the tags `{packageTag}`, where `Tag` is to be replaced by any of the attributes of a package, as defined in file `dictionary.yaml`.
+Given the dictionnary example provided earlier, we would have access to instruction tags `{packageName}`, `{packageAuthor}`, `{packageAuthorEmail}`, `{poackageDescription}`, `{packageLicense}`,  and `{packageCopyright}`.
+
+**Node information**:
+
+All nodes attributes can be accessed using the tags `{nodeTag}`, where `Tag` is to be replaced by any of the attributes of a node, as defined in file `dictionary.yaml`.
+Given the dictionnary example provided earlier, we would have access to instruction tags ` {nodeName}` and `{nodeFrequency}`.
+
+To reproduce a bunch of codes for all nodes, use the following instructions:
+
+```c++
+{forallnodes}
+...
+{endforallnodes}
+```
+
+**Node interface access**:
+
+To access a node interface access, we propose the following tools:
+
+* Introduce a bunch of code **IF** at least one interface has been defined:
+
+```
+{iftag}
+...
+{endiftag}
+```
+
+* Introduce a bunch of code **FOR ALL** instances of a given instance:
+
+```
+{foralltag}
+...
+{endforalltag}
+```
+
+In both case, the word `tag` can be any of the interface name defined in `dictionary.yaml`.
+With the above example, we would get such code generated for 12 interfaces, like `{iflistener}` and `{endiflistener}`, or `{foralldynParameter}` and `{endforalldynParameter}`.
+
+In the loop instruction, where the code is repeated for each instance of the selected interface, we also get access to the interface attributes.
+For example, with the above dictionary file,
+
+```
+{forallpublisher}
+`{name}` *({type})*
+{description}
+{endforallpublisher}
+```
+
+tags `{name}`, `{type}`, and `{description}` would be replaced by the values entered by the `Developer` in each reproduction loop.
+
+**Package Dependencies**:
+
+Dependencies defined by the Developer can be accessed using the following tags:
+
+```
+{foralldependencies}
+  <depend>{dependencyName}</depend>
+{endforalldependencies}
+```
+
+With this illustrative instruction, the line will be repeated and completed for any of the dependencies defined by the _Developer_.
+
+**Specific commands**:
+
+All functions defined in previous file `functions.py` can be accessed in the template file using tag: `apply-function_name`, where `function_name` can be any of the functions present in that file `funtions.py`.
+For instance, in the following code:
+
+```
+{forallpublisher}
+from {apply-get_package_type}.msg import {apply-get_class_type}
+{endforallpublisher}
+```
+
+The middle line will be repeated for each publisher defined.
+The function `get_package_type` is previously defined.
+If a publisher of type `std_msgs::String` is used, then this first function will return `std_msgs`, while the function `get_class_type` will provide the class ame, i.e. `String`.
