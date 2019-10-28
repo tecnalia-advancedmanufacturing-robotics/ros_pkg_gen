@@ -24,14 +24,18 @@ See [LICENSE.md](LICENSE.md) for more details.
 alt="ROS Package Generator demo" width="560" height="315" border="0" /></a>
 
 ## Getting started
+
 ### Prerequisites
+
 We assume [`ROS`][ros] is installed on the machine.
 Code is developed and tested so far under `ROS indigo` and `ROS kinetic`.
 
 [ros]: http://www.ros.org/
 
 ### Installing
+
 The installation procedure follows the standard operations as any ROS package does.
+
 ```shell
 # Assuming ~/catkin_ws is the workspace in which the repository has been downloaded
 cd ~/catkin_ws
@@ -43,6 +47,7 @@ rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO
 ### Use
 
 We assume we are at the ROS workspace root, and that the current git repository is accessible from the ROS workspace.
+
 ```shell
 source devel/setup.bash
 # go to the place where we would like to place the new package
@@ -56,6 +61,7 @@ rosrun package_generator generate_package my_new_package_spec.ros_package python
 ```
 
 The template can be indicated either as:
+
 * an absolute path to a template directory
 * a relative path from the currently active directory
 * a directory name assumed to be existing in the template package
@@ -64,9 +70,11 @@ The expected content of the xml file and the behavior of the generated code is d
 Please take 5 minutes to read it.
 
 You can generate automatically the structure of the xml file using the script `generate_xml_skel`:
-```
+
+```shell
 rosrun package_generator generate_xml_skel cpp_node_update my_new_package_spec.ros_package
 ```
+
 A basic structure of template specification (to be then filled) is then generated, based on the template considered.
 
 [template_readme]: package_generator_templates/README.md
@@ -88,21 +96,22 @@ Both follow the same pattern, based on the concept of a central update loop at a
 More details in the dedicated [Readme file](package_generator_templates/README.md)
 
 ## reminders
-* to remap a topic with rosrun:
-```
+
+* to remap a topic or a service with rosrun:
+
+```shell
 rosrun great_multi_package_pub_sub node_sub sub_int:=/pub_in
 ```
 
-* for services, the current implementation is configured to enable initial remapping
-```
-rosrun great_package_services node_service_server _service_trigger_server_remap:=/service_client
-```
 * for the action, one can use:
-```
+
+```shell
 rosrun actionlib axclient.py /do_action
 ```
+
 * actions can be also remapped :
-```
+
+```shell
 rosrun great_package_action_client node_action_client _ac_use_action_remap:=do_action
 ```
 
@@ -113,10 +122,16 @@ rosrun great_package_action_client node_action_client _ac_use_action_remap:=do_a
   * Describe how a Designer can create a template
   * see how to handle list and map from parameter server
   * check if remap for service client is implemented
-  * improve code line management for error finding in templates
   * update: if the requested file is generated, refuse it
   * apply more code static checking
-
+  * if no dependency is provided, the system is not accepting doign the generation.
+    Check if (i) th message is appropriate, (ii) if the generation should be performed anyhow
+  * Decide on the insertion per default to `cmake_module` in the required packages
+  * Enhance executable definition in CMakeLists when a library is to be added
+  * Handle user-provided dependencies for find_package
+  * Remove sentance _This file is to be edited by the Developer_
+  * Consider Forcing to "to require cmake 3.0.2 for Kinetic"
+  * Ensure all class methods are camelCased.
 * Longer Term:
   * Consider use of Jinja
 

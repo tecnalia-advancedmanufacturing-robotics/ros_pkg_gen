@@ -1,0 +1,9 @@
+package_attributes: ["name", "author", "author_email", "description", "license", "copyright"]
+node_attributes: ["name"]
+
+node_interface:
+    serviceServer: ["name", "type", "description"]
+    parameter: ["name", "type", "value", "description"]
+    dynParameter: ["name", "type", "value", "description"]
+    listener: ["name", "description"]
+    broadcaster: ["name", "description"]

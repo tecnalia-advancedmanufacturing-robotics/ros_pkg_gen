@@ -14,6 +14,7 @@ from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.enhanced_object import EnhancedObject
 from package_generator.template_spec import TemplateSpec
 
+
 def convert(line, delimiter=None, **kwargs):
     """equivalant to format, with provided delimiter
        and without issue with unknown keys
@@ -49,6 +50,7 @@ def convert(line, delimiter=None, **kwargs):
         # print "acc: {}".format(result_line)
         # print acc
     return result_line
+
 
 class CodeGenerator(EnhancedObject):
     """class responsible of the generation of a single file
@@ -138,6 +140,8 @@ class CodeGenerator(EnhancedObject):
 
         lambda_for = lambda d: lambda t: self.get_loop_gen(d, t)
         lambda_if = lambda u: lambda v: self.get_if_defined(u, v)
+        lambda_for_deps = lambda text: self.get_loop_dependencies(text)
+        lambda_for_nodes = lambda text: self.get_loop_nodes(text)
 
         for item in node_interface:
             # self.log_warn("Adding tag for {}".format(item))
@@ -148,8 +152,8 @@ class CodeGenerator(EnhancedObject):
 
         # TODO check how to make this even generic,
         # we should not assume these names are provided
-        self.transformation_loop_['foralldependencies'] = lambda text: self.get_loop_dependencies(text)
-        self.transformation_loop_['forallnodes'] = lambda text: self.get_loop_nodes(text)
+        self.transformation_loop_['foralldependencies'] = lambda_for_deps
+        self.transformation_loop_['forallnodes'] = lambda_for_nodes
 
     # TODO empty self.transformation_functions_ before/when entering here
     def generate_apply_functions(self):
@@ -199,7 +203,6 @@ class CodeGenerator(EnhancedObject):
             Int: numbe rof lines in the file
         """
         return len(self.tmp_buffer_)
-
 
     def write_output_file(self, filename=None):
         """write the generated code
@@ -428,13 +431,12 @@ class CodeGenerator(EnhancedObject):
                     tag_found = False
 
                     # todo check how to handle it on the same line
-                    #accumulated_line = line + '\n'
-                    accumulated_line = ""
+                    accumulated_lines = list()
 
                     try:
                         while not tag_found:
                             # todo: avoid using an accumulated line here.
-                            sub_num_line, sub_line = iter_enum_lines.next()
+                            _, sub_line = iter_enum_lines.next()
                             # self.log("Sub Checking line: {}".format(sub_line))
 
                             sub_matches = self.get_all_tags(sub_line)
@@ -443,7 +445,7 @@ class CodeGenerator(EnhancedObject):
                             if search_tag in subtags:
                                 tag_found = True
                                 break
-                            accumulated_line += sub_line + '\n'
+                            accumulated_lines.append(sub_line)
                             continue
 
                     except StopIteration, e:
@@ -455,10 +457,9 @@ class CodeGenerator(EnhancedObject):
                                            'text': error_msg})
 
                     # tag found. We know have a bunch of line to process
-                    # TODO should the loop tag be returning the generated code,
-                    # or directly write in the output? using process_loop
-                    # imbricated, it is by default writting in it.
-                    is_ok = self.transformation_loop_[tag](accumulated_line)
+                    iter_acc_lines = iter(enumerate(accumulated_lines,
+                                                    start=num_line + 1))
+                    is_ok = self.transformation_loop_[tag](iter_acc_lines)
                     continue
                 raise SyntaxError('SyntaxError',
                                   {'filename': 'unknown',
@@ -466,17 +467,20 @@ class CodeGenerator(EnhancedObject):
                                    'offset': "{}".format(indent),
                                    'text': "unknown tag {}".format(tag)})
         except AssertionError, err:
-            self.log_error("Assertion Error on line {}: {}".format(num_line, err.args))
+            self.log_error("Assertion Error on line {}: {}".format(num_line,
+                                                                   err.args))
             return False
         except SyntaxError, err:
-            self.log_error("Syntax Error on line {}: {}".format(num_line, err.args))
+            self.log_error("Syntax Error on line {}: {}".format(num_line,
+                                                                err.args))
             return False
         except StopIteration, err:
             # self.log("All file has been processed")
             return True
         except Exception, err:
-            self.log_error("Error detected around line {}: {}".format(num_line, err.args))
-        self.log_error("This should not be reached...")
+            self.log_error("Error detected around line {}: {}".format(num_line,
+                                                                      err.args))
+            return False
         return False
 
     def get_package_attr(self, attr):
@@ -552,21 +556,23 @@ class CodeGenerator(EnhancedObject):
         else:
             return output
 
-    def get_loop_dependencies(self, text):
+    # TODO error to be checked
+    def get_loop_dependencies(self, iter_text):
         """Generate a code looping on each dependency defined.
 
         Args:
-            text (str): multiline text to process
+            iter_text (Iterator): listing to process
 
         Returns:
             Bool: operation success
         """
         output = list()
-        # self.log("Handling text: \n {}".format(text))
-        for item in  self.dep_spec_:
+        listing = list(iter_text)
+        # self.log("Handling text: \n {}".format(listing))
+        for item in self.dep_spec_:
             dep_dict = {'dependencyName': item}
-            #self.log("Handling dependency {}".format(item))
-            for line in text.splitlines():
+            # self.log("Handling dependency {}".format(item))
+            for _, line in listing:
                 # self.log("Handling line {}".format(line))
                 line_processed = convert(line, **dep_dict)
 
@@ -577,13 +583,12 @@ class CodeGenerator(EnhancedObject):
         return True
 
     # TODO error should be checked
-    def get_loop_gen(self, interface_type, text):
+    def get_loop_gen(self, interface_type, text_it):
         """Generate a a code looping on a given interface type
 
         Args:
             interface_type (str): name of the interface we are interested in
-            text (str): multiline text to process which instance of the given
-            interface
+            text_it (iter): iterator on [num_line, line] to be processed
 
         Returns:
             Bool: Operation success
@@ -600,13 +605,16 @@ class CodeGenerator(EnhancedObject):
         for key in self.transformation_:
             context_upper[key] = self.transformation_[key]
 
+        # listing stands for num_line, text
+        listing = list(text_it)
+
         for item in self.nodes_spec_["interface"][interface_type]:
             # self.log("Handling {} {}".format(interface_type, item))
 
             context_extended = item.copy()
             context_extended.update(context_upper)
-            #self.log_warn("Extended item {}".format(context_extended))
-            for line in text.splitlines():
+            # self.log_warn("Extended item {}".format(context_extended))
+            for num_line, line in listing:
                 # self.log("Handling line {}".format(line))
                 # TODO: there is a risk of inserting empty lines
                 # maybe not, since imbricated cases are not considered yet
@@ -623,12 +631,12 @@ class CodeGenerator(EnhancedObject):
                         # self.log("operation is: {}".format(operation))
                         # make sure the operation exist
                         if operation not in self.transformation_functions_:
-                            self.log_warn("Operator {} unknown and thus discarded".format(operation))
+                            self.log_warn(" [{}] Operator {} unknown and thus discarded".format(num_line, operation))
                             continue
                         try:
                             res = self.transformation_functions_[operation](context_extended)
                         except Exception as e:
-                            self.log_error("Exception detected in processing apply on line {} \n {} \n with item {}".format(line, e, item))
+                            self.log_error("Exception detected in processing apply on line [{}]: {} \n {} \n with item {}".format(num_line, line, e, item))
                             raise
                         # self.log_warn("result would be {}".format(res))
                         # self.log_warn("Here we are")
@@ -643,12 +651,12 @@ class CodeGenerator(EnhancedObject):
         return True
 
     # todo unify the data format. Here it is provided as a unique string?
-    def get_if_defined(self, interface_type, text):
+    def get_if_defined(self, interface_type, it_text):
         """generate a code only if the given interface is beeing used
 
         Args:
             interface_type (str): interface name
-            text (str): multiline text to process if the interface is used.
+            it_text (ITerator): listing to process if the interface is used.
 
         Returns:
             TYPE: Description
@@ -671,23 +679,15 @@ class CodeGenerator(EnhancedObject):
             return True
 
         # if defined, we recall the generator...
-
-        input_line = list()
-        for line in text.splitlines():
-            line = line.rstrip('\n')
-            input_line.append(line)
-
-        # todo is it good starting at line number 1?
-        iter_enum_lines = iter(enumerate(input_line, start=1))
-        is_ok = self.process_input(iter_enum_lines)
+        is_ok = self.process_input(it_text)
 
         return is_ok
 
-    def get_loop_nodes(self, text):
+    def get_loop_nodes(self, it_text):
         """Process a code, looping on each component / node defined
 
         Args:
-            text (str): multiline string to process
+            it_text (Iterator): listing to process
 
         Returns:
             Bool: Operation success
@@ -696,18 +696,13 @@ class CodeGenerator(EnhancedObject):
         bup = self.nodes_spec_
         all_node_spec = self.xml_parser_.get_nodes_spec()
 
-        input_line = list()
-        # todo: is this operation needed?
-        for line in text.splitlines():
-            line = line.rstrip('\n')
-            input_line.append(line)
+        listing = list(it_text)
 
         for item in all_node_spec:
             self.nodes_spec_ = item
             self.generate_simple_tags()
 
-            iter_enum_lines = iter(enumerate(input_line, start=1))
-            is_ok = self.process_input(iter_enum_lines)
+            is_ok = self.process_input(iter(listing))
 
             if not is_ok:
                 break
@@ -715,6 +710,7 @@ class CodeGenerator(EnhancedObject):
         self.nodes_spec_ = bup
         self.generate_simple_tags()
         return is_ok
+
 
 def main():
     """main only defined for debugging purposes
@@ -765,6 +761,7 @@ def main():
         print "Output written in file {}".format(output_file)
     else:
         print "Debug!"
+
 
 if __name__ == '__main__':
     main()

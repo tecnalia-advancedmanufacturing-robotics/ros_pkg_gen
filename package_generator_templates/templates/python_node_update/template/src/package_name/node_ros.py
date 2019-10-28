@@ -9,6 +9,7 @@ Copyright (C) {packageCopyright}
 {packageLicense}
 """
 
+from copy import deepcopy
 import rospy
 {ifactionServer}
 import actionlib
@@ -49,9 +50,8 @@ from {apply-get_package_type}.msg import {apply-get_class_type}Action
 
 # other includes
 from {packageName} import {nodeName}_impl
-from copy import deepcopy
 
-# todo set a function to write correctly the name
+
 class {apply-capitalized_node_name}ROS(object):
     """
     ROS interface class, handling all communication with ROS
@@ -106,15 +106,18 @@ class {apply-capitalized_node_name}ROS(object):
                                                                                  self.component_implementation_.direct_topic_callback_{name})
         {endforalldirectSubscriber}
         {endifdirectSubscriber}
+        {ifserviceServer}
+        # handling service servers
+        {endifserviceServer}
         {forallserviceServer}
-        # to enable service name adjustment when loading the node
-        remap = rospy.get_param("~{name}_remap", "{name}")
-        self.{name}_ = rospy.Service(remap, {apply-get_class_type}, self.component_implementation_.callback_{name})
+        self.{name}_ = rospy.Service('{name}', {apply-get_class_type}, self.component_implementation_.callback_{name})
         {endforallserviceServer}
+        {ifserviceClient}
+        # handling service clients
+        {endifserviceClient}
         {forallserviceClient}
-        # to enable service name adjustment when loading the node
-        remap = rospy.get_param("~{name}_remap", "{name}")
-        self.component_implementation_.passthrough.client_{name} = rospy.ServiceProxy(remap, {apply-get_class_type});
+        self.component_implementation_.passthrough.client_{name} = rospy.ServiceProxy('{name}',
+                                                                                      {apply-get_class_type});
         {endforallserviceClient}
         {forallactionServer}
         # to enable action name adjustment when loading the node
@@ -191,8 +194,8 @@ class {apply-capitalized_node_name}ROS(object):
         data = deepcopy(self.component_data_)
         self.set_all_input_read()
         self.component_implementation_.update(data, config)
-
         {ifpublisher}
+
         try:
             {forallpublisher}
             self.component_data_.out_{name}_active = data.out_{name}_active

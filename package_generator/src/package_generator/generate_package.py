@@ -23,6 +23,7 @@ from package_generator.file_update_management import GeneratedFileAnalysis
 from package_generator.enhanced_object import EnhancedObject
 from package_generator.template_spec import TemplateSpec
 
+
 class PackageGenerator(EnhancedObject):
     """Handle the genration of a whole package
 
@@ -154,7 +155,8 @@ Revise the template, and compare to examples
             self.log_error(msg_err)
             return False
 
-        self.file_generator_.configure(self.xml_parser_, self.spec_)
+        if not self.file_generator_.configure(self.xml_parser_, self.spec_):
+            return False
 
         package_name = self.xml_parser_.get_package_spec()["name"]
 
@@ -172,7 +174,7 @@ Revise the template, and compare to examples
             shutil.move(self.package_path_, self.path_pkg_backup_)
         else:
             self.log("Package to be created in {}".format(self.package_path_))
-            os.makedirs(self.package_path_)
+        os.makedirs(self.package_path_)
 
         package_content = os.listdir(self.template_path_ + "/template")
         nb_node = self.xml_parser_.get_number_nodes()
@@ -190,7 +192,9 @@ Revise the template, and compare to examples
             self.log_warn("Handling files for node {}".format(node_name))
 
             # reconfiguring the generator to adjust to the new active node
-            self.file_generator_.configure(self.xml_parser_, self.spec_)
+            if not self.file_generator_.configure(self.xml_parser_, self.spec_):
+                is_ok = False
+                break
 
             for item in package_content:
                 file_generic = self.template_path_ + '/template/' + item
@@ -280,9 +284,11 @@ Revise the template, and compare to examples
                         self.log("Restoring file {}".format(line))
                         # check if directories needs to be created
                         dirname = os.path.dirname(line)
+                        # self.log("dirname is : {}".format(dirname))
                         if dirname:
-                            if not os.path.isdir(path_abs):
-                                os.makedirs(self.package_path_ + "/" + dirname)
+                            path_abs_dir = self.package_path_ + "/" + dirname
+                            if not os.path.isdir(path_abs_dir):
+                                os.makedirs(path_abs_dir)
 
                         shutil.copyfile(path_abs, new_path)
                     except IOError as error:
@@ -471,6 +477,7 @@ package_template: name of the template to use
 Packages template: either one defined in package `package_generator_templates`,
                    either a path to a local one.
 """
+
 
 def main():
     """

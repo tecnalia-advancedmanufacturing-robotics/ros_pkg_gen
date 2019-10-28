@@ -203,8 +203,7 @@ def dependencies_from_template():
     Returns:
         list: list of ROS package dependency required by the template
     """
-    return ['roscpp']
-
+    return []
 
 
 def dependencies_from_interface(interface_name, context):
@@ -212,11 +211,7 @@ def dependencies_from_interface(interface_name, context):
 
     Args:
         interface_name (str): name of the interface to consider
-        context (dict): attributes assigned by the User to such instance
-
-    Returns:
-        list: List of dependencies that should be added according to
-              the interface used and the attributes values
+        context (list): list of dependencies related to such interface
     """
     list_dep = []
 

@@ -1,17 +1,13 @@
 package_attributes: ["name", "author", "author_email",
                      "description", "license", "copyright"]
-node_attributes: ["name", "frequency"]
+node_attributes: ["name"]
 
 node_interface:
-    publisher: ["name", "type", "description"]
     directPublisher: ["name", "type", "description"]
-    subscriber: ["name", "type", "description"]
     directSubscriber: ["name", "type", "description"]
     serviceClient: ["name", "type", "description"]
     serviceServer: ["name", "type", "description"]
     parameter: ["name", "type", "value", "description"]
     dynParameter: ["name", "type", "value", "description"]
-    actionServer: ["name", "type", "description"]
-    actionClient: ["name", "type", "description"]
     listener: ["name", "description"]
     broadcaster: ["name", "description"]
