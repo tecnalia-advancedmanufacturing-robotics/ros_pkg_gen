@@ -80,6 +80,18 @@ public:
     {foralldynParameter}
     {type} {name};
     {endforalldynParameter}
+    //! overloading the print operator
+    friend std::ostream& operator<< (std::ostream& os,
+                                     const {apply-capitalized_node_name}Config& config)
+    {
+        {forallparameter}
+        os << "{name}: " << config.{name} << std::endl;
+        {endforallparameter}
+        {foralldynParameter}
+        os << "{name}: " << config.{name} << std::endl;
+        {endforalldynParameter}
+        return os;
+    }
 };
 
 /**
@@ -220,9 +232,8 @@ public:
      * @param req input parameters provided by the caller
      * @param res output parameters resulting from the service execution
      * @param config latest state of the config variables
-     * @param as_ handler of the action
      */
-    bool callback_{name}({type}::Request  &req, {type}::Response &res , {apply-capitalized_node_name}Config config)
+    bool callback_{name}({type}::Request  &req, {type}::Response &res , {apply-capitalized_node_name}Config * config)
     {
         /* protected region user implementation of service callback for {name} begin */
         /* protected region user implementation of service callback for {name} end */

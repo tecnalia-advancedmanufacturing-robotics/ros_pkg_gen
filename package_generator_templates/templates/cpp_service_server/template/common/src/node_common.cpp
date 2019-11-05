@@ -156,7 +156,6 @@ public:
      * @param req input parameters provided by the caller
      * @param res output parameters resulting from the service execution
      * @param config latest state of the config variables
-     * @param as_ handler of the action
      */
     bool callback_{name}({type}::Request  &req, {type}::Response &res , {apply-capitalized_node_name}Config * config)
     {
