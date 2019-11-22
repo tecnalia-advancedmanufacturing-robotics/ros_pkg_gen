@@ -295,28 +295,6 @@ class CodeGenerator(EnhancedObject):
             return self.write_output_file(output_file)
         return True
 
-    def has_tag(self, line):
-        """
-        @brief Determines if a tag is present in the povide code line.
-
-        @param      self The object
-        @param      line The line to be parsed
-
-        @return True if has tag, False otherwise.
-        """
-        found_tags = re.findall(r'{\w+}', line)
-        assert len(found_tags) < 2, "Several tags {} on single line: |{}|".format(found_tags, line)
-
-        return found_tags
-
-    def get_tag(self, line):
-        assert self.has_tag(line), "get_tag: no tag in input line |{}|".format(line)
-
-        match = re.search(r'{\w+}', line)
-        tag = match.group(0)[1:-1]
-
-        return tag, match.start()
-
     def get_all_tags(self, line):
 
         matches = [[m.group(0)[1:-1], m.start()] for m in re.finditer(r'{\w+}', line)]
@@ -391,7 +369,7 @@ class CodeGenerator(EnhancedObject):
                     loop_tag_found = loop_tag_found or end_item in tags
 
                 # TODO see get_loop_gen to add the apply mechanism
-                # on the upper context aroud here
+                # on the upper context around here
 
                 if len(matches) > 1:
                     # multiple matches.
@@ -409,7 +387,7 @@ class CodeGenerator(EnhancedObject):
                             line = convert(line, **{tag: replacement})
                         else:
                             # todo here we could publish the line
-                            self.log_warn("tag {} not processed".format(tag))
+                            self.log_warn("tag {} on line {} not processed".format(tag, num_line))
                     # check if the line is empty
                     # that would be due to a if tag that is not defined.
                     if line and (not line.isspace()):
