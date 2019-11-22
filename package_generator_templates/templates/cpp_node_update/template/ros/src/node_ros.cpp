@@ -137,7 +137,7 @@ public:
         // handling Service servers
         {endifserviceServer}
         {forallserviceServer}
-        {name}_ = n_.advertiseService<{type}::Request , {type}::Response>("{name}", boost::bind(&{apply-capitalized_node_name}Impl::callback_{name}, &component_implementation_,_1,_2,component_config_));
+        {name}_ = n_.advertiseService<{type}::Request , {type}::Response>("{name}", boost::bind(&{apply-capitalized_node_name}Impl::callback_{name}, &component_implementation_, _1, _2, &component_config_));
         {endforallserviceServer}
         {ifserviceClient}
         // handling Service clients
