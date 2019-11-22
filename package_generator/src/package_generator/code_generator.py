@@ -33,13 +33,9 @@ def convert(line, delimiter=None, **kwargs):
     result_line = line
 
     for key, value in kwargs.iteritems():
-        # print "{} == {}".format(key, value)
         splitted = result_line.split(delimiter[0] + key + delimiter[1])
-        # print "Splitted: {}".format(splitted)
 
         acc = splitted[0]
-        # print splitted[1:]
-        # print splitted[-1]
 
         if len(splitted) > 1:
             for item in splitted[1:]:
@@ -47,8 +43,6 @@ def convert(line, delimiter=None, **kwargs):
 
         result_line = acc
 
-        # print "acc: {}".format(result_line)
-        # print acc
     return result_line
 
 
@@ -304,11 +298,7 @@ class CodeGenerator(EnhancedObject):
 
     def get_all_tags_pattern(self, root_pattern, line):
         #self.log("Processing line {}".format(line))
-        pattern = r'{%s-\w+}' % (root_pattern)
-        # self.log("Pattern search: {}".format(pattern))
         instances = re.finditer(r'\{' + root_pattern + r'-\w+}', line)
-        #instances = re.finditer(r'\{apply-\w+-\w+\}', line)
-        #instances = re.finditer("%r"%pattern, line)
         matches = [[m.group(0)[1:-1], m.start()] for m in instances]
 
         #print "Found matches: {}".format(matches)
@@ -368,12 +358,9 @@ class CodeGenerator(EnhancedObject):
                     end_item = 'end' + item
                     loop_tag_found = loop_tag_found or end_item in tags
 
-                # TODO see get_loop_gen to add the apply mechanism
-                # on the upper context around here
-
                 if len(matches) > 1:
                     # multiple matches.
-                    # we make simple checks according to authorize operations
+                    # we make simple checks according to authorized operations
                     assert not loop_tag_found, "Multiple tag with loop found. Not yet implemented"
 
                 # todo(Anthony) if the tag is the same, we can avoid two calls
