@@ -196,3 +196,5 @@ The subscription handler is triggered as soon as a message arrives.
 {endforalldirectSubscriber}
 
 {endforallnodes}
+
+*Package generated with the [ROS Package Generator](https://github.com/tecnalia-advancedmanufacturing-robotics/ros_pkg_gen).*

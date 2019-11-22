@@ -39,3 +39,5 @@
 {description}
 <!--- protected region msg {name} end -->
 {endforallaction}
+
+*Package generated with the [ROS Package Generator](https://github.com/tecnalia-advancedmanufacturing-robotics/ros_pkg_gen).*

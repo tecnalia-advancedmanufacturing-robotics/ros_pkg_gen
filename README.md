@@ -1,6 +1,6 @@
 # Package generator
 
-The following packages are about the automatic creation of ROS packages (so far c++ and python).
+The following packages are about the automatic creation of ROS packages (so far C++ and python).
 
 To do so the input needed are:
 
@@ -22,6 +22,24 @@ See [LICENSE.md](LICENSE.md) for more details.
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=qsNkYGQBW8U
 " target="_blank"><img src="http://img.youtube.com/vi/qsNkYGQBW8U/0.jpg"
 alt="ROS Package Generator demo" width="560" height="315" border="0" /></a>
+
+**Publications**:
+If you use this work in an academic context, please cite the following publication(s):
+
+A. Remazeilles, J. Azpiazu: Towards an Advanced ROS Package Generator.
+International Conference on Informatics in Control, Automation and Robotics,
+ICINCO’2019
+([pdf](https://www.insticc.org/Primoris/Resources/PaperPdf.ashx?idPaper=78340)).
+
+```
+@inproceedings{Remazeilles2019,
+  author = {Remazeilles, A. and Azpiazu, J.},
+  booktitle = {International Conference on Informatics in Control, Automation and Robotics, ICINCO'2019},
+  title = {Towards an Advanced ROS Package Generator},
+  year = {2019},
+  address = {Praga, Czech Republic}
+}
+```
 
 ## Getting started
 
@@ -79,7 +97,7 @@ A basic structure of template specification (to be then filled) is then generate
 
 [template_readme]: package_generator_templates/README.md
 
-## content
+## Content
 
 ### `package_generator`
 
@@ -95,7 +113,7 @@ Both follow the same pattern, based on the concept of a central update loop at a
 
 More details in the dedicated [Readme file](package_generator_templates/README.md)
 
-## reminders
+## Reminders
 
 * to remap a topic or a service with rosrun:
 
