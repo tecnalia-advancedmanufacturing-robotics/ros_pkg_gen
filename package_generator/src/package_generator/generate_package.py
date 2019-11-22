@@ -127,12 +127,12 @@ Revise the template, and compare to examples
         self.path_pkg_backup_ = None
 
         if not os.path.exists(output_path):
-            msg_err = "Template path ({}) is incorrect ".format(output_path)
+            msg_err = "Expected package path ({}) is incorrect ".format(output_path)
             self.log_error(msg_err)
             return False
 
         if not os.path.isdir(output_path):
-            msg_err = "Template path ({}) not a directory ".format(output_path)
+            msg_err = "Expected package path ({}) not a directory ".format(output_path)
             self.log_error(msg_err)
             return False
 
@@ -345,6 +345,7 @@ Revise the template, and compare to examples
                 # self.log("Creating directory {}".format(rel_path))
                 os.makedirs(output_item)
 
+            # Generation loop
             for item in os.listdir(input_item):
                 is_ok = self.generate_content(input_item + '/' + item, is_generic)
                 if not is_ok:
