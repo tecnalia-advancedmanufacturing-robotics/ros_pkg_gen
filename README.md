@@ -31,7 +31,7 @@ International Conference on Informatics in Control, Automation and Robotics,
 ICINCO’2019
 ([pdf](https://www.insticc.org/Primoris/Resources/PaperPdf.ashx?idPaper=78340)).
 
-```bash
+```
 @inproceedings{Remazeilles2019,
   author = {Remazeilles, A. and Azpiazu, J.},
   booktitle = {International Conference on Informatics in Control, Automation and Robotics, ICINCO'2019},
