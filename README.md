@@ -97,7 +97,7 @@ A basic structure of template specification (to be then filled) is then generate
 
 [template_readme]: package_generator_templates/README.md
 
-## content
+## Content
 
 ### `package_generator`
 
@@ -113,7 +113,7 @@ Both follow the same pattern, based on the concept of a central update loop at a
 
 More details in the dedicated [Readme file](package_generator_templates/README.md)
 
-## reminders
+## Reminders
 
 * to remap a topic or a service with rosrun:
 
