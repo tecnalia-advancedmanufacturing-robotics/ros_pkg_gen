@@ -206,12 +206,17 @@ def dependencies_from_template():
     return ['roscpp']
 
 
+
 def dependencies_from_interface(interface_name, context):
     """return package dependencies according to the interface name
 
     Args:
         interface_name (str): name of the interface to consider
-        context (list): list of dependencies related to such interface
+        context (dict): attributes assigned by the User to such instance
+
+    Returns:
+        list: List of dependencies that should be added according to
+              the interface used and the attributes values
     """
     list_dep = []
 
