@@ -51,6 +51,7 @@ class CodeGenerator(EnhancedObject):
 
     Attributes:
         dep_spec_ (list): list of dependency of the package
+        do_generate_ (bool): False used for template check
         nodes_spec_ (list): spec of each node
         package_spec_ (dict): specification of the package
         spec_ (TemplateSpec): specification of the template
@@ -75,6 +76,7 @@ class CodeGenerator(EnhancedObject):
         self.nodes_spec_ = None
         self.package_spec_ = None
         self.dep_spec_ = None
+        self.do_generate_ = True
 
     def configure(self, parser, spec):
         """set the required information to configure the generator
@@ -121,7 +123,7 @@ class CodeGenerator(EnhancedObject):
             tag = "node" + attrib_node.title().replace("_", "")
             self.transformation_[tag] = self.get_node_attr(attrib_node)
 
-        #self.log_error("Generated tags: \n {}".format(self.transformation_.keys()))
+        # self.log_error("Generated tags: \n {}".format(self.transformation_.keys()))
 
     # TODO empty self.transformation_loop_ before/when entering here
     def generate_flow_tags(self):
@@ -167,7 +169,7 @@ class CodeGenerator(EnhancedObject):
 
         assert self.nodes_spec_, "No nodes specification"
         assert self.package_spec_, "No package specification"
-        assert self.dep_spec_, "No dependency specification"
+        assert self.dep_spec_ is not None, "No dependency specification"
 
     def reset_output_file(self):
         """Reset the internal buffer used to accumulate generated code
@@ -274,7 +276,7 @@ class CodeGenerator(EnhancedObject):
             Bool: True on success
         """
         self.reset_output_file()
-
+        self.do_generate_ = True
         if not self.process_file(file_template):
             return False
 
@@ -289,19 +291,43 @@ class CodeGenerator(EnhancedObject):
             return self.write_output_file(output_file)
         return True
 
-    def get_all_tags(self, line):
+    def check_template_file(self, file_template):
+        """Check a template file (without generating it)
 
+        Arguments:
+            file_template {string} -- template file name
+
+        Returns:
+            [Bool] -- True if the file is correct
+        """
+        self.reset_output_file()
+
+        self.do_generate_ = False
+        if not self.process_file(file_template):
+            return False
+        return True
+
+    def get_all_tags(self, line):
+        """Find all tags in a given line
+
+        Arguments:
+            line {string} -- Line to process
+
+        Returns:
+            [type] -- list of matches found
+        """
+        # TODO check the return format
         matches = [[m.group(0)[1:-1], m.start()] for m in re.finditer(r'{\w+}', line)]
 
         # print "Found matches: {}".format(matches)
         return matches
 
     def get_all_tags_pattern(self, root_pattern, line):
-        #self.log("Processing line {}".format(line))
+        # self.log("Processing line {}".format(line))
         instances = re.finditer(r'\{' + root_pattern + r'-\w+}', line)
         matches = [[m.group(0)[1:-1], m.start()] for m in instances]
 
-        #print "Found matches: {}".format(matches)
+        # print "Found matches: {}".format(matches)
         return matches
 
     def process_input(self, iter_enum_lines):
@@ -333,7 +359,10 @@ class CodeGenerator(EnhancedObject):
                         self.log_warn("Operator {} unknown and thus discarded".format(operation))
                         continue
                     try:
-                        res = self.transformation_functions_[operation](self.transformation_)
+                        if self.do_generate_:
+                            res = self.transformation_functions_[operation](self.transformation_)
+                        else:
+                            res = ""
                     except Exception as err:
                         self.log_error("Exception detected in processing apply on line {} \n {}".format(line, err))
                         raise
@@ -599,7 +628,10 @@ class CodeGenerator(EnhancedObject):
                             self.log_warn(" [{}] Operator {} unknown and thus discarded".format(num_line, operation))
                             continue
                         try:
-                            res = self.transformation_functions_[operation](context_extended)
+                            if self.do_generate_:
+                                res = self.transformation_functions_[operation](context_extended)
+                            else:
+                                res = ""
                         except Exception as e:
                             self.log_error("Exception detected in processing apply on line [{}]: {} \n {} \n with item {}".format(num_line, line, e, item))
                             raise

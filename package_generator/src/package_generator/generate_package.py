@@ -155,6 +155,8 @@ Revise the template, and compare to examples
             self.log_error(msg_err)
             return False
 
+        # self.xml_parser_.print_xml_parsed()
+
         if not self.file_generator_.configure(self.xml_parser_, self.spec_):
             return False
 
@@ -467,9 +469,74 @@ Revise the template, and compare to examples
         # file has content
         file_status = os.stat(input_file)
         os.chmod(output_file, file_status.st_mode)
-        self.log("File {} handled".format(input_file))
+        # self.log("File {} handled".format(input_file))
+        self.log("File handled")
         self.log("*********************************")
         return True
+
+    def template_sanity_check(self):
+        """ Perform the package sanity check
+        """
+
+        # Extracting all components from the template
+        file_list = list()
+        dir_list = list()
+
+        path_root_template = self.template_path_ + "template"
+
+        for (root, dirs, files) in os.walk(path_root_template):
+            # print "check {}: dir {}, files: {}".format(root, dirs, files)
+
+            if os.path.samefile(root, path_root_template):
+                for item in files:
+                    file_list.append(item)
+                for item in dirs:
+                    dir_list.append(item)
+            else:
+                rel_path = os.path.relpath(root, path_root_template)
+                for item in files:
+                    file_list.append(rel_path + "/" + item)
+                for item in dirs:
+                    dir_list.append(rel_path + "/" + item)
+
+        print ("Dirs: ")
+        print("\n".join(dir_list))
+
+        print("Files: ")
+        print("\n".join(file_list))
+
+        # setting the needed component.
+        self.spec_ = TemplateSpec()
+        self.xml_parser_ = PackageXMLParser()
+        self.file_generator_ = CodeGenerator()
+
+        dir_template_spec = self.template_path_ + "config/"
+        if not self.spec_.load_spec(dir_template_spec):
+            self.log_error("Could not load the template spec")
+            return False
+
+        if not self.xml_parser_.set_template_spec(self.spec_):
+            msg_err = "Package spec not compatible with xml parser expectations"
+            self.log_error(msg_err)
+            return False
+
+        if not self.xml_parser_.set_empty_spec():
+            msg_err = "Failed generating empty spec"
+            self.log_error(msg_err)
+            return False
+
+        if not self.file_generator_.configure(self.xml_parser_, self.spec_):
+            return False
+
+        is_ok = True
+
+        for item in file_list:
+            self.log("Checking file: {}".format(item))
+            item_abs = path_root_template + "/" + item
+            is_ok = self.file_generator_.check_template_file(item_abs)
+
+        return is_ok
+
 
 USAGE = """ usage: generate_package package_spec package_template
 package_spec: xml description of the node(s) interface

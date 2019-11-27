@@ -495,6 +495,50 @@ class PackageXMLParser(EnhancedObject):
         self.log("Edit the file, remove or comment unused interface")
         return True
 
+    def set_empty_spec(self):
+
+        if self.spec_ is None:
+            self.log_error("Template spec is missing")
+            return False
+
+        # setting package attrbutes
+        attributes_package = self.spec_.dico_['package_attributes']
+
+        self.data_pack_ = dict()
+
+        for attrib in attributes_package:
+            self.data_pack_[attrib] = ""
+
+        # setting one node
+        attributes_node = self.spec_.dico_['node_attributes']
+
+        node_spec = dict()
+        node_spec["attributes"] = dict()
+
+        for attrib in attributes_node:
+            node_spec["attributes"][attrib] = ""
+
+        interface_node = self.spec_.dico_['node_interface'].keys()
+        node_spec["interface"] = dict()
+
+        for item in interface_node:
+            node_spec['interface'][item] = list()
+
+            # TODO can we make a loop on key and key value?
+            attributes = self.spec_.dico_['node_interface'][item]
+
+            fake_interface = dict()
+            for one_attr in attributes:
+                fake_interface[one_attr] = ""
+            node_spec['interface'][item].append(fake_interface)
+
+        self.data_node_ = list()
+        self.data_node_.append(node_spec)
+        self.data_depend_ = list()
+        self.active_node_ = 0
+        self.is_dependency_complete_ = True
+        return True
+
 
 USAGE = """ usage: generate_xml_skel package_template xml_skeleton
 package_template : name of the template to use

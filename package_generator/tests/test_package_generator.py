@@ -3,7 +3,7 @@
 @package package_generator
 @file test_package_generator.py
 @author Anthony Remazeilles
-@brief test the code generator
+@brief test the package generator
 
 Copyright (C) 2017 Tecnalia Research and Innovation
 Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
