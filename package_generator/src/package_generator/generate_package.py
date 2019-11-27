@@ -434,7 +434,7 @@ Revise the template, and compare to examples
                         is_ok = self.file_generator_.write_output_file(output_item)
                 else:
                     self.log("Merging with previous version")
-                    self.file_generator_.tmp_buffer_ = file_analyzor.update_file(self.file_generator_.tmp_buffer_)
+                    self.file_generator_.buffer_ = file_analyzor.update_file(self.file_generator_.buffer_)
                     is_ok = self.file_generator_.write_output_file(output_item)
                 return self.handle_status_and_advise(input_item, output_item, is_ok)
 

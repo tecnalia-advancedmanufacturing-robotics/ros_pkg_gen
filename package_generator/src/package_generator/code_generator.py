@@ -55,7 +55,7 @@ class CodeGenerator(EnhancedObject):
         nodes_spec_ (list): spec of each node
         package_spec_ (dict): specification of the package
         spec_ (TemplateSpec): specification of the template
-        tmp_buffer_ (list): will contain the generated file
+        buffer_ (list): will contain the generated file
         transformation_ (dict): mapping instruction tag to generation function
         transformation_functions_ (dict): mapping inst. fun to gen. fun
         transformation_loop_ (dict): mapping instruction flow to gen. functions
@@ -71,7 +71,7 @@ class CodeGenerator(EnhancedObject):
         self.transformation_functions_ = dict()
 
         self.spec_ = None
-        self.tmp_buffer_ = list()
+        self.buffer_ = list()
         self.xml_parser_ = None
         self.nodes_spec_ = None
         self.package_spec_ = None
@@ -98,7 +98,7 @@ class CodeGenerator(EnhancedObject):
             self.generate_simple_tags()
             self.generate_flow_tags()
             self.generate_apply_functions()
-            self.tmp_buffer_[:] = []
+            self.buffer_[:] = []
         except AssertionError, err:
             self.log_error("Prb during configuration: {}".format(err))
             return False
@@ -127,7 +127,7 @@ class CodeGenerator(EnhancedObject):
 
     # TODO empty self.transformation_loop_ before/when entering here
     def generate_flow_tags(self):
-        """Generate the conditional and loop tags
+        """Generate the conditional and loop tags.
         The definiion is based on the possible interfaces of a given component
         each possible interface will have defined tags like "ifinterface"
         and "forallinterface"
@@ -174,7 +174,7 @@ class CodeGenerator(EnhancedObject):
     def reset_output_file(self):
         """Reset the internal buffer used to accumulate generated code
         """
-        self.tmp_buffer_ = list()
+        self.buffer_ = list()
 
     def add_output_line(self, line):
         """Add a line to the code generated buffer
@@ -182,7 +182,7 @@ class CodeGenerator(EnhancedObject):
         Args:
             line (str): line to be added
         """
-        self.tmp_buffer_.append(line)
+        self.buffer_.append(line)
 
     def add_output_lines(self, buffer_line):
         """Add a list of lines to the code generated buffer
@@ -190,7 +190,7 @@ class CodeGenerator(EnhancedObject):
         Args:
             buffer_line (list): list of lines to be added
         """
-        self.tmp_buffer_ += buffer_line
+        self.buffer_ += buffer_line
 
     def get_len_gen_file(self):
         """Returns the number of lines of the generated file
@@ -198,7 +198,7 @@ class CodeGenerator(EnhancedObject):
         Returns:
             Int: numbe rof lines in the file
         """
-        return len(self.tmp_buffer_)
+        return len(self.buffer_)
 
     def write_output_file(self, filename=None):
         """write the generated code
@@ -212,15 +212,15 @@ class CodeGenerator(EnhancedObject):
         if filename is None:
             self.log("Resulting file:")
             print"----"
-            for item in self.tmp_buffer_:
+            for item in self.buffer_:
                 print item
             print"----"
             return True
 
         try:
-            # self.log("Storing {} lines in {}".format(len(self.tmp_buffer_), filename))
+            # self.log("Storing {} lines in {}".format(len(self.buffer_), filename))
             out_file = open(filename, 'w')
-            for item in self.tmp_buffer_:
+            for item in self.buffer_:
                 # print "printing {}".format(item)
                 out_file.write(item + '\n')
             out_file.close()
@@ -323,6 +323,7 @@ class CodeGenerator(EnhancedObject):
         return matches
 
     def get_all_tags_pattern(self, root_pattern, line):
+        # TODO are these 2 functions needed?
         # self.log("Processing line {}".format(line))
         instances = re.finditer(r'\{' + root_pattern + r'-\w+}', line)
         matches = [[m.group(0)[1:-1], m.start()] for m in instances]
@@ -647,7 +648,6 @@ class CodeGenerator(EnhancedObject):
         # todo no false case?
         return True
 
-    # todo unify the data format. Here it is provided as a unique string?
     def get_if_defined(self, interface_type, it_text):
         """generate a code only if the given interface is beeing used
 
