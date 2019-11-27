@@ -37,10 +37,9 @@ class TemplateSanityTest(unittest.TestCase):
 
         self.assertTrue(gen.template_sanity_check())
 
-
 # To launch a given test:
 # python -m unittest test_module.TestClass
-
+# To launch all test: python -m unittest discover -s tests -v
 
 if __name__ == '__main__':
     unittest.main()

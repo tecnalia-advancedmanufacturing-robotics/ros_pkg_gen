@@ -17,6 +17,7 @@ from package_generator.code_generator import CodeGenerator
 from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.template_spec import TemplateSpec
 
+
 class PackageGeneratorTest(unittest.TestCase):
     """Tests proposed for the Package generator module
     """
@@ -112,7 +113,6 @@ class PackageGeneratorTest(unittest.TestCase):
         if not os.path.exists(output_path):
             os.makedirs(output_path)
         self.assertTrue(gen.generate_package(self.package_spec_, output_path))
-
 
     def test_package_generator_multi_nodes(self):
         """direct call to the package genator component, with appropriate info

@@ -75,7 +75,6 @@ class CodeGeneratorTest(unittest.TestCase):
         self.assertTrue(self.generator_.configure(self.xml_parser, self.spec))
         self.generator_.reset_output_file()
 
-
     def test_apply_function(self):
         """
         To apply a function on a tag
@@ -121,7 +120,6 @@ class CodeGeneratorTest(unittest.TestCase):
                                           expected_output.splitlines()):
             # print "Comparing |{}| with |{}|".format(generated, groundtruth)
             self.assertEqual(generated, groundtruth)
-
 
     def test_multi_line(self):
         """
