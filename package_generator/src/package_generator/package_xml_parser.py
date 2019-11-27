@@ -496,6 +496,11 @@ class PackageXMLParser(EnhancedObject):
         return True
 
     def set_empty_spec(self):
+        """Generate an empty package spec file (for template checking)
+
+        Returns:
+            [Bool] -- True on success
+        """
 
         if self.spec_ is None:
             self.log_error("Template spec is missing")
