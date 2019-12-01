@@ -11,6 +11,7 @@ Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 
 import unittest
 import os
+import rospkg
 
 from package_generator.generate_package import PackageGenerator
 from package_generator.code_generator import CodeGenerator
@@ -92,7 +93,6 @@ class PackageGeneratorTest(unittest.TestCase):
 
         self.multi_node_package_spec_ = filename
 
-        import rospkg
         rospack = rospkg.RosPack()
         self.node_path_ = rospack.get_path('package_generator_templates')
         self.path_template_ = self.node_path_ + "/templates/cpp_node_update/"
@@ -129,7 +129,8 @@ class PackageGeneratorTest(unittest.TestCase):
 
         if not os.path.exists(output_path):
             os.makedirs(output_path)
-        self.assertTrue(gen.generate_package(self.multi_node_package_spec_, output_path))
+        self.assertTrue(gen.generate_package(self.multi_node_package_spec_,
+                                             output_path))
 
     def test_readme_multi_nodes(self):
         """test the generation of a readme file involving multiple nodes spec.

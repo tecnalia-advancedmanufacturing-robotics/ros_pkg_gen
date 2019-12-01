@@ -400,8 +400,12 @@ Revise the template, and compare to examples
             msg = "File {} not previously existing. Just write it"
             self.log_warn(msg.format(rel_path))
 
-            is_ok = self.file_generator_.generate_file(input_item, output_item, is_write_forced)
-            return self.handle_status_and_advise(input_item, output_item, is_ok)
+            is_ok = self.file_generator_.generate_file(input_item,
+                                                       output_item,
+                                                       is_write_forced)
+            return self.handle_status_and_advise(input_item,
+                                                 output_item,
+                                                 is_ok)
 
         # File already existing. Processing previous version
         is_update_needed = False
@@ -478,11 +482,12 @@ Revise the template, and compare to examples
         """ Perform the package sanity check
         """
 
+        # TODO list number of files in template
         # Extracting all components from the template
         file_list = list()
         dir_list = list()
 
-        path_root_template = self.template_path_ + "template"
+        path_root_template = self.template_path_ + "/template"
 
         for (root, dirs, files) in os.walk(path_root_template):
             # print "check {}: dir {}, files: {}".format(root, dirs, files)
@@ -499,18 +504,18 @@ Revise the template, and compare to examples
                 for item in dirs:
                     dir_list.append(rel_path + "/" + item)
 
-        print ("Dirs: ")
-        print("\n".join(dir_list))
+        # print ("Dirs: ")
+        # print("\n".join(dir_list))
 
-        print("Files: ")
-        print("\n".join(file_list))
+        # print("Files: ")
+        # print("\n".join(file_list))
 
         # setting the needed component.
         self.spec_ = TemplateSpec()
         self.xml_parser_ = PackageXMLParser()
         self.file_generator_ = CodeGenerator()
 
-        dir_template_spec = self.template_path_ + "config/"
+        dir_template_spec = self.template_path_ + "/config/"
         if not self.spec_.load_spec(dir_template_spec):
             self.log_error("Could not load the template spec")
             return False
@@ -535,6 +540,10 @@ Revise the template, and compare to examples
             item_abs = path_root_template + "/" + item
             is_ok = self.file_generator_.check_template_file(item_abs)
 
+        if is_ok:
+            self.log("No error detected")
+        else:
+            self.log_error("Revise the template")
         return is_ok
 
 
