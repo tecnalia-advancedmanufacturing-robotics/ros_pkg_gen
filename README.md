@@ -137,9 +137,7 @@ rosrun great_package_action_client node_action_client _ac_use_action_remap:=do_a
 
 * Short term:
   * generate xml skeleton testing (in particular for error cases)
-  * Describe how a Designer can create a template
   * see how to handle list and map from parameter server
-  * check if remap for service client is implemented
   * update: if the requested file is generated, refuse it
   * apply more code static checking
   * if no dependency is provided, the system is not accepting doign the generation.
