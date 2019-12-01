@@ -2,6 +2,12 @@
 
 This document describes how a _Template Designer_ can generate a package template.
 
+Once generated, a template can be checked for some major issues, using:
+
+```shell
+rosrun package_generator check_template [template_name]
+```
+
 ## Required Content
 
 A package template is a set of files gathered into a directory.
@@ -15,7 +21,7 @@ The expected content is the following (referring to the [C++ template](templates
 
 The specification of a template is done with two files, `dictionary.yaml` and `functions.py`.
 
-**`dictionary.yaml`**
+**`dictionary.yaml`**:
 
 The dictionary file is basically the definition of the tags the _User_ can use in the xml file defining the package to generate.
 
@@ -50,7 +56,7 @@ The attribute names are completely defined by the Designer.
 As said, the dictionary specifies the available XML elements and attributes for a _User_ when defining a package to create.
 But it also defines different tags that will be available to the Designer when defining the package template.
 
-**`functions.py`**
+**`functions.py`**:
 
 This file must contain at least **two** functions:
 
@@ -230,4 +236,4 @@ from {apply-get_package_type}.msg import {apply-get_class_type}
 
 The middle line will be repeated for each publisher defined.
 The function `get_package_type` is previously defined.
-If a publisher of type `std_msgs::String` is used, then this first function will return `std_msgs`, while the function `get_class_type` will provide the class ame, i.e. `String`.
+If a publisher of type `std_msgs::String` is used, then this first function will return `std_msgs`, while the function `get_class_type` will provide the class name, i.e. `String`.

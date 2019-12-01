@@ -547,7 +547,7 @@ Revise the template, and compare to examples
         return is_ok
 
 
-USAGE = """ usage: generate_package package_spec package_template
+USAGE_GEN = """ usage: generate_package package_spec package_template
 package_spec: xml description of the node(s) interface
 package_template: name of the template to use
 
@@ -584,7 +584,7 @@ def main():
 
     if len(sys.argv) != 3:
         print colored("Wrong input parameters !", "red")
-        print colored(USAGE, "yellow")
+        print colored(USAGE_GEN, "yellow")
         if available_templates is not None:
             msg = "Available templates are: {}"
             print colored(msg.format(available_templates), 'yellow')
@@ -630,4 +630,87 @@ def main():
         return -1
     else:
         print colored("Package generated", "green")
+    print "Bye bye"
+
+
+USAGE_CHECK = """ usage: check_template package_template
+package_template: name of the template to check
+
+Packages template: either one defined in package `package_generator_templates`,
+                   either a path to a local one.
+"""
+
+
+def main_check():
+    """
+    @brief Entry point of the package.
+    Check a template structure, as provided
+
+    Returns:
+        int: negative value on error
+    """
+
+    # checking available templates
+    rospack = rospkg.RosPack()
+    try:
+        node_path = rospack.get_path('package_generator_templates')
+        default_templates_path = node_path + "/templates/"
+    except rospkg.common.ResourceNotFound as error:
+        msg = "Package package_generator_templates not found in rospack"
+        print colored(msg, "yellow")
+        print colored("{}".format(error), "yellow")
+        default_templates_path = None
+
+    available_templates = None
+    # look for the templates available
+    if default_templates_path is not None:
+        available_templates = os.listdir(default_templates_path)
+
+    if len(sys.argv) != 2:
+        print colored("Wrong input parameters !", "red")
+        print colored(USAGE_CHECK, "yellow")
+        if available_templates is not None:
+            msg = "Available templates are: {}"
+            print colored(msg.format(available_templates), 'yellow')
+        print "Bye bye"
+        return -1
+
+    path_template = sys.argv[1]
+
+    # searching for the template location
+    if os.path.isabs(path_template):
+        print "Loading model from absolute path {}".format(path_template)
+    else:
+        # relative path.
+        # either from the current path, or from the template package
+        path_current = os.getcwd()
+        path_attempt = path_current + "/" + path_template
+
+        if os.path.isdir(path_attempt):
+            path_template = path_attempt
+            print "Loading template from path {}".format(path_template)
+        else:
+            if path_template in available_templates:
+                path_template = default_templates_path + path_template
+                msg = "Loading template from template package: {}"
+                print msg.format(path_template)
+            else:
+                msg = "Template name not found in package_generator_templates"
+                print colored(msg, "red")
+                print colored("Please verify your setup", "red")
+                return -1
+
+    gen = PackageGenerator()
+
+    if not gen.set_package_template(path_template):
+        print colored("Not able to load the template at:", "red")
+        print colored(path_template, "red")
+        print "Bye"
+        return -1
+
+    if not gen.template_sanity_check():
+        print colored("Issue detected in template", "red")
+        return -1
+    else:
+        print colored("No issue detected", "green")
     print "Bye bye"
