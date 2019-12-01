@@ -323,14 +323,14 @@ class GeneratedFileAnalysis(EnhancedObject):
                     self.log_error("Protected line({}) on line {}: not finding the begining of such zone".format(pl.protected_tag_, pl.num_line_))
                     return False
             # sanity check 3: an opening should be followed by a closure of same pattern
-            if id_line == num_protected_lines -1:
+            if id_line == num_protected_lines - 1:
                 self.log_error("Missing end tag of protected area {} started on line {}".format(pl.protected_tag_, pl.num_line_))
 
             if not all_protected_lines[id_line + 1].is_stop_flag():
                 pl = all_protected_lines[id_line]
                 pln = all_protected_lines[id_line + 1]
 
-                #with all_protected_lines[id_line], all_protected_lines[id_line + 1] as pl, pln:
+                # with all_protected_lines[id_line], all_protected_lines[id_line + 1] as pl, pln:
                 self.log_error("Protected area ({}) on line {}: expected an end of area, found a new area on line: {}".format(pl.protected_tag_, pl.num_line_, pln.num_line_))
                 return False
 
@@ -338,7 +338,7 @@ class GeneratedFileAnalysis(EnhancedObject):
                 pl = all_protected_lines[id_line]
                 pln = all_protected_lines[id_line + 1]
 
-                #with all_protected_lines[id_line], all_protected_lines[id_line + 1] as pl, pln:
+                # with all_protected_lines[id_line], all_protected_lines[id_line + 1] as pl, pln:
                 self.log_error("A end is expected for protected area [{}] from line {}.".format(pl.protected_tag_, pl.num_line_))
                 self.log_error("Found protected area [{}] on line {}".format(pln.protected_tag_, pln.num_line_))
                 return False

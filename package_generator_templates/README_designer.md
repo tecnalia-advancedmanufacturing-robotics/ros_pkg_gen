@@ -161,12 +161,12 @@ All instruction tags are of the form `"{instructionTag}"`.
 **Package information**:
 
 All package attributes can be accessed using the tags `{packageTag}`, where `Tag` is to be replaced by any of the attributes of a package, as defined in file `dictionary.yaml`.
-Given the dictionnary example provided earlier, we would have access to instruction tags `{packageName}`, `{packageAuthor}`, `{packageAuthorEmail}`, `{poackageDescription}`, `{packageLicense}`,  and `{packageCopyright}`.
+Given the dictionnary example provided earlier, we would have access to instruction tags `{packageName}`, `{packageAuthor}`, `{packageAuthorEmail}`, `{poackageDescription}`, `{packageLicense}`, and `{packageCopyright}`.
 
 **Node information**:
 
 All nodes attributes can be accessed using the tags `{nodeTag}`, where `Tag` is to be replaced by any of the attributes of a node, as defined in file `dictionary.yaml`.
-Given the dictionnary example provided earlier, we would have access to instruction tags ` {nodeName}` and `{nodeFrequency}`.
+Given the dictionnary example provided earlier, we would have access to instruction tags `{nodeName}` and `{nodeFrequency}`.
 
 To reproduce a bunch of codes for all nodes, use the following instructions:
 

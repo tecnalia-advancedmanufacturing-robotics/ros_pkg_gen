@@ -47,7 +47,7 @@ Both are jointly detailed since they both refer to the same node pattern.
 
 They both generate nodes in which incoming messages (through subscription) are processed at a given frequency, and resulting in out-coming messages (through publication) sent at the same frequency.
 
-If the pattern mainly restricts the node update policy for the publish/subscribe mechanism, it also enables to use _any_ of the other ROS communication means (i.e actions, services, tf).
+If the pattern mainly restricts the node update policy for the publish /subscribe mechanism, it also enables to use _any_ of the other ROS communication means (i.e actions, services, tf).
 
 The ROS interface and the core node intelligence are explicitly separated:
 

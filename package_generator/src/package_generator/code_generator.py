@@ -134,10 +134,10 @@ class CodeGenerator(EnhancedObject):
         """
         node_interface = self.spec_.dico_['node_interface'].keys()
 
-        lambda_for = lambda d: lambda t: self.get_loop_gen(d, t)
-        lambda_if = lambda u: lambda v: self.get_if_defined(u, v)
-        lambda_for_deps = lambda text: self.get_loop_dependencies(text)
-        lambda_for_nodes = lambda text: self.get_loop_nodes(text)
+        lambda_for = lambda d: lambda t: self.convert_forall(d, t)
+        lambda_if = lambda u: lambda v: self.convert_if(u, v)
+        lambda_for_deps = lambda text: self.convert_forall_dependencies(text)
+        lambda_for_nodes = lambda text: self.convert_forall_nodes(text)
 
         for item in node_interface:
             # self.log_warn("Adding tag for {}".format(item))
@@ -175,22 +175,6 @@ class CodeGenerator(EnhancedObject):
         """Reset the internal buffer used to accumulate generated code
         """
         self.buffer_ = list()
-
-    def add_output_line(self, line):
-        """Add a line to the code generated buffer
-
-        Args:
-            line (str): line to be added
-        """
-        self.buffer_.append(line)
-
-    def add_output_lines(self, buffer_line):
-        """Add a list of lines to the code generated buffer
-
-        Args:
-            buffer_line (list): list of lines to be added
-        """
-        self.buffer_ += buffer_line
 
     def get_len_gen_file(self):
         """Returns the number of lines of the generated file
@@ -374,7 +358,7 @@ class CodeGenerator(EnhancedObject):
                 # look for the other tags
                 matches = self.get_all_tags(line)
                 if not matches:
-                    self.add_output_line(line)
+                    self.buffer_.append(line)
                     num_line += 1
                     continue
 
@@ -383,7 +367,7 @@ class CodeGenerator(EnhancedObject):
                 loop_tag_found = False
                 tags = [tag for tag, _ in matches]
 
-                for item in self.transformation_loop_.keys():
+                for item in self.transformation_loop_:
                     loop_tag_found = loop_tag_found or item in tags
                     end_item = 'end' + item
                     loop_tag_found = loop_tag_found or end_item in tags
@@ -399,7 +383,7 @@ class CodeGenerator(EnhancedObject):
                     for tag, indent in matches:
                         # self.log("found tag |{}| at line {}:col {}".format(tag, num_line, indent))
 
-                        if tag in self.transformation_.keys():
+                        if tag in self.transformation_:
                             replacement = self.transformation_[tag]
                             line = convert(line, **{tag: replacement})
                         else:
@@ -408,7 +392,7 @@ class CodeGenerator(EnhancedObject):
                     # check if the line is empty
                     # that would be due to a if tag that is not defined.
                     if line and (not line.isspace()):
-                        self.add_output_line(line)
+                        self.buffer_.append(line)
                     # else:
                     #    print colored("Line empty: |{}|".format(line), "blue")
 
@@ -552,8 +536,8 @@ class CodeGenerator(EnhancedObject):
             return output
 
     # TODO error to be checked
-    def get_loop_dependencies(self, iter_text):
-        """Generate a code looping on each dependency defined.
+    def convert_forall_dependencies(self, iter_text):
+        """convert a code looping on each dependency defined.
 
         Args:
             iter_text (Iterator): listing to process
@@ -573,13 +557,13 @@ class CodeGenerator(EnhancedObject):
 
                 output.append(line_processed)
 
-        self.add_output_lines(output)
+        self.buffer_ += output
 
         return True
 
     # TODO error should be checked
-    def get_loop_gen(self, interface_type, text_it):
-        """Generate a a code looping on a given interface type
+    def convert_forall(self, interface_type, text_it):
+        """Convert a code for all instances of an interface type
 
         Args:
             interface_type (str): name of the interface we are interested in
@@ -642,14 +626,14 @@ class CodeGenerator(EnhancedObject):
 
                 output.append(line_processed)
 
-        self.add_output_lines(output)
+        self.buffer_ += output
         # self.log_error("Sanity check: Is dictinnary extended?\n {}".format(self.nodes_spec_["interface"][interface_type]))
         # self.log("created: {}".format(type(output)))
         # todo no false case?
         return True
 
-    def get_if_defined(self, interface_type, it_text):
-        """generate a code only if the given interface is beeing used
+    def convert_if(self, interface_type, it_text):
+        """convert a code only if the given interface is beeing used
 
         Args:
             interface_type (str): interface name
@@ -680,8 +664,8 @@ class CodeGenerator(EnhancedObject):
 
         return is_ok
 
-    def get_loop_nodes(self, it_text):
-        """Process a code, looping on each component / node defined
+    def convert_forall_nodes(self, it_text):
+        """Convert a code, looping on each component / node defined
 
         Args:
             it_text (Iterator): listing to process
