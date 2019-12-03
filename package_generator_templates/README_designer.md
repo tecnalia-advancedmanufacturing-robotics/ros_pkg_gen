@@ -2,6 +2,12 @@
 
 This document describes how a _Template Designer_ can generate a package template.
 
+Once generated, a template can be checked for some major issues, using:
+
+```shell
+rosrun package_generator check_template [template_name]
+```
+
 ## Required Content
 
 A package template is a set of files gathered into a directory.
@@ -15,7 +21,7 @@ The expected content is the following (referring to the [C++ template](templates
 
 The specification of a template is done with two files, `dictionary.yaml` and `functions.py`.
 
-**`dictionary.yaml`**
+**`dictionary.yaml`**:
 
 The dictionary file is basically the definition of the tags the _User_ can use in the xml file defining the package to generate.
 
@@ -50,7 +56,7 @@ The attribute names are completely defined by the Designer.
 As said, the dictionary specifies the available XML elements and attributes for a _User_ when defining a package to create.
 But it also defines different tags that will be available to the Designer when defining the package template.
 
-**`functions.py`**
+**`functions.py`**:
 
 This file must contain at least **two** functions:
 
@@ -155,12 +161,12 @@ All instruction tags are of the form `"{instructionTag}"`.
 **Package information**:
 
 All package attributes can be accessed using the tags `{packageTag}`, where `Tag` is to be replaced by any of the attributes of a package, as defined in file `dictionary.yaml`.
-Given the dictionnary example provided earlier, we would have access to instruction tags `{packageName}`, `{packageAuthor}`, `{packageAuthorEmail}`, `{poackageDescription}`, `{packageLicense}`,  and `{packageCopyright}`.
+Given the dictionnary example provided earlier, we would have access to instruction tags `{packageName}`, `{packageAuthor}`, `{packageAuthorEmail}`, `{poackageDescription}`, `{packageLicense}`, and `{packageCopyright}`.
 
 **Node information**:
 
 All nodes attributes can be accessed using the tags `{nodeTag}`, where `Tag` is to be replaced by any of the attributes of a node, as defined in file `dictionary.yaml`.
-Given the dictionnary example provided earlier, we would have access to instruction tags ` {nodeName}` and `{nodeFrequency}`.
+Given the dictionnary example provided earlier, we would have access to instruction tags `{nodeName}` and `{nodeFrequency}`.
 
 To reproduce a bunch of codes for all nodes, use the following instructions:
 
@@ -230,4 +236,4 @@ from {apply-get_package_type}.msg import {apply-get_class_type}
 
 The middle line will be repeated for each publisher defined.
 The function `get_package_type` is previously defined.
-If a publisher of type `std_msgs::String` is used, then this first function will return `std_msgs`, while the function `get_class_type` will provide the class ame, i.e. `String`.
+If a publisher of type `std_msgs::String` is used, then this first function will return `std_msgs`, while the function `get_class_type` will provide the class name, i.e. `String`.

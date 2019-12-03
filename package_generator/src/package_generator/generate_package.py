@@ -127,12 +127,12 @@ Revise the template, and compare to examples
         self.path_pkg_backup_ = None
 
         if not os.path.exists(output_path):
-            msg_err = "Template path ({}) is incorrect ".format(output_path)
+            msg_err = "Expected package path ({}) is incorrect ".format(output_path)
             self.log_error(msg_err)
             return False
 
         if not os.path.isdir(output_path):
-            msg_err = "Template path ({}) not a directory ".format(output_path)
+            msg_err = "Expected package path ({}) not a directory ".format(output_path)
             self.log_error(msg_err)
             return False
 
@@ -154,6 +154,8 @@ Revise the template, and compare to examples
             msg_err = "Prb while parsing xml file {}".format(package_desc)
             self.log_error(msg_err)
             return False
+
+        # self.xml_parser_.print_xml_parsed()
 
         if not self.file_generator_.configure(self.xml_parser_, self.spec_):
             return False
@@ -345,6 +347,7 @@ Revise the template, and compare to examples
                 # self.log("Creating directory {}".format(rel_path))
                 os.makedirs(output_item)
 
+            # Generation loop
             for item in os.listdir(input_item):
                 is_ok = self.generate_content(input_item + '/' + item, is_generic)
                 if not is_ok:
@@ -397,8 +400,12 @@ Revise the template, and compare to examples
             msg = "File {} not previously existing. Just write it"
             self.log_warn(msg.format(rel_path))
 
-            is_ok = self.file_generator_.generate_file(input_item, output_item, is_write_forced)
-            return self.handle_status_and_advise(input_item, output_item, is_ok)
+            is_ok = self.file_generator_.generate_file(input_item,
+                                                       output_item,
+                                                       is_write_forced)
+            return self.handle_status_and_advise(input_item,
+                                                 output_item,
+                                                 is_ok)
 
         # File already existing. Processing previous version
         is_update_needed = False
@@ -431,7 +438,7 @@ Revise the template, and compare to examples
                         is_ok = self.file_generator_.write_output_file(output_item)
                 else:
                     self.log("Merging with previous version")
-                    self.file_generator_.tmp_buffer_ = file_analyzor.update_file(self.file_generator_.tmp_buffer_)
+                    self.file_generator_.buffer_ = file_analyzor.update_file(self.file_generator_.buffer_)
                     is_ok = self.file_generator_.write_output_file(output_item)
                 return self.handle_status_and_advise(input_item, output_item, is_ok)
 
@@ -466,11 +473,81 @@ Revise the template, and compare to examples
         # file has content
         file_status = os.stat(input_file)
         os.chmod(output_file, file_status.st_mode)
-        self.log("File {} handled".format(input_file))
+        # self.log("File {} handled".format(input_file))
+        self.log("File handled")
         self.log("*********************************")
         return True
 
-USAGE = """ usage: generate_package package_spec package_template
+    def template_sanity_check(self):
+        """ Perform the package sanity check
+        """
+
+        # TODO list number of files in template
+        # Extracting all components from the template
+        file_list = list()
+        dir_list = list()
+
+        path_root_template = self.template_path_ + "/template"
+
+        for (root, dirs, files) in os.walk(path_root_template):
+            # print "check {}: dir {}, files: {}".format(root, dirs, files)
+
+            if os.path.samefile(root, path_root_template):
+                for item in files:
+                    file_list.append(item)
+                for item in dirs:
+                    dir_list.append(item)
+            else:
+                rel_path = os.path.relpath(root, path_root_template)
+                for item in files:
+                    file_list.append(rel_path + "/" + item)
+                for item in dirs:
+                    dir_list.append(rel_path + "/" + item)
+
+        # print ("Dirs: ")
+        # print("\n".join(dir_list))
+
+        # print("Files: ")
+        # print("\n".join(file_list))
+
+        # setting the needed component.
+        self.spec_ = TemplateSpec()
+        self.xml_parser_ = PackageXMLParser()
+        self.file_generator_ = CodeGenerator()
+
+        dir_template_spec = self.template_path_ + "/config/"
+        if not self.spec_.load_spec(dir_template_spec):
+            self.log_error("Could not load the template spec")
+            return False
+
+        if not self.xml_parser_.set_template_spec(self.spec_):
+            msg_err = "Package spec not compatible with xml parser expectations"
+            self.log_error(msg_err)
+            return False
+
+        if not self.xml_parser_.set_empty_spec():
+            msg_err = "Failed generating empty spec"
+            self.log_error(msg_err)
+            return False
+
+        if not self.file_generator_.configure(self.xml_parser_, self.spec_):
+            return False
+
+        is_ok = True
+
+        for item in file_list:
+            self.log("Checking file: {}".format(item))
+            item_abs = path_root_template + "/" + item
+            is_ok = self.file_generator_.check_template_file(item_abs)
+
+        if is_ok:
+            self.log("No error detected")
+        else:
+            self.log_error("Revise the template")
+        return is_ok
+
+
+USAGE_GEN = """ usage: generate_package package_spec package_template
 package_spec: xml description of the node(s) interface
 package_template: name of the template to use
 
@@ -507,7 +584,7 @@ def main():
 
     if len(sys.argv) != 3:
         print colored("Wrong input parameters !", "red")
-        print colored(USAGE, "yellow")
+        print colored(USAGE_GEN, "yellow")
         if available_templates is not None:
             msg = "Available templates are: {}"
             print colored(msg.format(available_templates), 'yellow')
@@ -553,4 +630,87 @@ def main():
         return -1
     else:
         print colored("Package generated", "green")
+    print "Bye bye"
+
+
+USAGE_CHECK = """ usage: check_template package_template
+package_template: name of the template to check
+
+Packages template: either one defined in package `package_generator_templates`,
+                   either a path to a local one.
+"""
+
+
+def main_check():
+    """
+    @brief Entry point of the package.
+    Check a template structure, as provided
+
+    Returns:
+        int: negative value on error
+    """
+
+    # checking available templates
+    rospack = rospkg.RosPack()
+    try:
+        node_path = rospack.get_path('package_generator_templates')
+        default_templates_path = node_path + "/templates/"
+    except rospkg.common.ResourceNotFound as error:
+        msg = "Package package_generator_templates not found in rospack"
+        print colored(msg, "yellow")
+        print colored("{}".format(error), "yellow")
+        default_templates_path = None
+
+    available_templates = None
+    # look for the templates available
+    if default_templates_path is not None:
+        available_templates = os.listdir(default_templates_path)
+
+    if len(sys.argv) != 2:
+        print colored("Wrong input parameters !", "red")
+        print colored(USAGE_CHECK, "yellow")
+        if available_templates is not None:
+            msg = "Available templates are: {}"
+            print colored(msg.format(available_templates), 'yellow')
+        print "Bye bye"
+        return -1
+
+    path_template = sys.argv[1]
+
+    # searching for the template location
+    if os.path.isabs(path_template):
+        print "Loading model from absolute path {}".format(path_template)
+    else:
+        # relative path.
+        # either from the current path, or from the template package
+        path_current = os.getcwd()
+        path_attempt = path_current + "/" + path_template
+
+        if os.path.isdir(path_attempt):
+            path_template = path_attempt
+            print "Loading template from path {}".format(path_template)
+        else:
+            if path_template in available_templates:
+                path_template = default_templates_path + path_template
+                msg = "Loading template from template package: {}"
+                print msg.format(path_template)
+            else:
+                msg = "Template name not found in package_generator_templates"
+                print colored(msg, "red")
+                print colored("Please verify your setup", "red")
+                return -1
+
+    gen = PackageGenerator()
+
+    if not gen.set_package_template(path_template):
+        print colored("Not able to load the template at:", "red")
+        print colored(path_template, "red")
+        print "Bye"
+        return -1
+
+    if not gen.template_sanity_check():
+        print colored("Issue detected in template", "red")
+        return -1
+    else:
+        print colored("No issue detected", "green")
     print "Bye bye"

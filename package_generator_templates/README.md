@@ -3,7 +3,6 @@
 This package gathers templates proposed for the `package_generator`.
 So far a single package pattern is implemented, declined in its C++ and python version, named `cpp_node_update` and `python_node_update`.
 
-
 **Author**: Anthony Remazeilles
 
 **Maintainer**: Anthony Remazeilles, anthony.remazeilles@tecnalia.com
@@ -13,12 +12,14 @@ So far a single package pattern is implemented, declined in its C++ and python v
 **License**: This project is under the NPOSL-3.0 License.
 See [LICENSE.md](../LICENSE.md) for more details.
 
-
 ## Getting Started
+
 ### Prerequisites
+
 The component is assuming `ROS` is installed on the machine.
 
 ### Installing
+
 The installation procedure follows the standard operations as any ROS package does.
 
 ### Use
@@ -27,9 +28,11 @@ This package is mainly a wrapper to ease the access to the different templates.
 It is mainly used through the [package_generator](../README.md).
 
 As detailed there, when the code generation is launched,
-```
+
+```shell
 rosrun package_generator generate_package my_new_package_spec.ros_package python_node_update
 ```
+
 The last argument (here `python_node_update`) can refer to a template supposed to be present in the `templates` directory of this package.
 
 ### Content
@@ -44,9 +47,10 @@ Both are jointly detailed since they both refer to the same node pattern.
 
 They both generate nodes in which incoming messages (through subscription) are processed at a given frequency, and resulting in out-coming messages (through publication) sent at the same frequency.
 
-If the pattern mainly restricts the node update policy for the publish/subscribe mechanism, it also enables to use _any_ of the other ROS communication means (i.e actions, services, tf).
+If the pattern mainly restricts the node update policy for the publish /subscribe mechanism, it also enables to use _any_ of the other ROS communication means (i.e actions, services, tf).
 
 The ROS interface and the core node intelligence are explicitly separated:
+
 * in the C++ version, the ROS interface is in `ros/src/[node_name]_ros.cpp`, and the node implementation is in `common/src/[node_name]_common.cpp`
 * in the python version, the ROS interface is in `src/[package_name]/[node_name]_ros.py`, and the implementation in `src/[package_name]/[node_name]_impl.py`
 * The ROS interface class handles the creation of all needed ROS interface.
@@ -65,10 +69,8 @@ It contains different classes automatically created:
 | `[NodeName]Passthrough` | gathers ROS interface components _violating_ the interface / implementation paradigm (such as topic management out of the update concept, actions, ...) |
 | `[NodeName]Impl` | contains the Developer implementation of the node |
 
-
 **Only** class `[NodeName]Impl` should be modified.
 It is provided with two methods (described from the C++ pattern):
-
 
 | Method | Description |
 | ------ | ----------- |
@@ -77,10 +79,10 @@ It is provided with two methods (described from the C++ pattern):
 
 The method `update` is called through the ROS file at the frequency specified by the Developer in the xml spec (see next section).
 
-## package & Nodes specification
+## Package & Nodes specification
 
 The package and nodes are described by their interface.
-This interface is defined in an `xml` file, following the syntax presented in this example.
+This interface is defined in a `xml` file, following the syntax presented in this example.
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -113,7 +115,7 @@ The current pattern provides the following interfaces:
    At each update call, they will be provided to the node implementation.
 * `serviceServer` and `serviceClient` refer to the management of ROS services.
    Note that the service client is indicated to complete the node interface. Since the service can be directly called by the node implementation, its handler has been placed in `[NodeName]Passthrough`.
-*  `actionServer` and `actionClient`: Similarly, `actionServer` is defined in the `[NodeName]Passthrough` component, since the Developer may be willing to send action messages within the action callback.
+* `actionServer` and `actionClient`: Similarly, `actionServer` is defined in the `[NodeName]Passthrough` component, since the Developer may be willing to send action messages within the action callback.
 * `listener` and `broadcaster`: informs the node will either listen to `tf` or publish transforms to `tf`.
    Both variables are then available from the `[NodeName]Passthrough` component.
 * `directSubscriber` and `directPublisher` are not handled through the update mechanism.
@@ -123,27 +125,32 @@ The current pattern provides the following interfaces:
 More spec:
 
 * All ROS interface tags are described by the attributes `name`, `type`, and `description`.
- * The `name` should be in format `node_name`.
- * The `type` should be using the c++ format as seen in the example.
+  * The `name` should be in format `node_name`.
+  * The `type` should be using the c++ format as seen in the example.
 * Only `parameter`, `listener` and `broadcaster` differ:
- * For the `parameter`tag, accepted `type` are `{'std::string', 'string', 'int', 'double', 'bool'}`.
+  * For the `parameter`tag, accepted `type` are `{'std::string', 'string', 'int', 'double', 'bool'}`.
    A default value is to be provided as well.
- * For the `listener` and `broadcaster`, only attributes `name` and `description` are expected.
+* For the `listener` and `broadcaster`, only attributes `name` and `description` are expected.
 
 ## Q & A
 
 **_Where should I wrote my code?_**
 
 In the implementation file, anywhere and _only_ where special text indicates it.
+In C++ files:
+
+```cpp
+/* protected region user additional functions begin */
+/* protected region user additional functions end */
 ```
-    /* protected region user additional functions begin */
-    /* protected region user additional functions end */
-```
+
 or in python.
+
+```python
+# protected region user additional functions begin #
+# protected region user additional functions end #
 ```
-    # protected region user additional functions begin #
-    # protected region user additional functions end #
-```
+
 The code **should be in between** these contribution markers, and the two **bounding comment lines should not be touched**.
 
 This could be problematic in case of interface update: only the _"code protected"_ is maintained.
@@ -163,7 +170,7 @@ But then you do not follow the proposed pattern (or the pattern should be update
 
 Yes you can !
 
-you just recall the package generator, as you did it the first time.
+You just recall the package generator, as you did it the first time.
 If it finds a folder package with the same name, it will assume that this is a package update.
 
 If you stick contributing within the protected areas, then all your contributions will be maintained in the updated version.
@@ -173,7 +180,7 @@ Note also that if you remove an interface from the xml, the Developer contributi
 Note finally that every time a package update is detected, the original package is temporally backed up in `/tmp`.
 That gives you additional chance to recover you package state before the update took place, in case needed.
 
----
+----
 
 **_I want to update my package, but it contains files not present in the template_**
 
@@ -184,10 +191,11 @@ This file is searched and processed during the update.
 Any directory and files mentioned there will be restored.
 As an example:
 
-```
+```shell
 launch/my_launch_file.launch
 data/
 ```
+
 will restore your file `launch/my_launch_file.launch` as well as all the content of the folder `data`.
 
 Each component to restore is to be placed on a new line.

@@ -18,6 +18,7 @@ import rospkg
 
 from package_generator.template_spec import TemplateSpec
 
+
 class GenerateDictTest(unittest.TestCase):
 
     def setUp(self):
@@ -49,6 +50,7 @@ class GenerateDictTest(unittest.TestCase):
 
     def test_correct_folder(self):
         self.assertTrue(self.spec.load_spec(self.dir_template_spec))
+
 
 if __name__ == '__main__':
     print "test_dic_generator -- begin"

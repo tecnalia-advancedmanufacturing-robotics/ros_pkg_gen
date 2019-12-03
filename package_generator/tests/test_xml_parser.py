@@ -14,6 +14,7 @@ import rospkg
 from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.template_spec import TemplateSpec
 
+
 class PackageXMLParserTest(unittest.TestCase):
     """
     tests for xml parser functions

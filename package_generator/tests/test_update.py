@@ -18,6 +18,7 @@ import os
 
 from package_generator.file_update_management import GeneratedFileAnalysis
 
+
 class UpdateTest(unittest.TestCase):
     """Tests proposed for the Package generator module
     """
@@ -111,7 +112,7 @@ class UpdateTest(unittest.TestCase):
         for item in expected_output:
             self.assertTrue(item in file_analyzor.extracted_areas_)
             self.assertEquals(expected_output[item], file_analyzor.extracted_areas_[item].protected_lines_)
-            #print file_analyzor.extracted_areas_[item].protected_lines_
+            # print file_analyzor.extracted_areas_[item].protected_lines_
 
         for item in file_analyzor.extracted_areas_:
             self.assertTrue(item in expected_output)
