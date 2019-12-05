@@ -182,40 +182,7 @@ Revise the template, and compare to examples
         nb_node = self.xml_parser_.get_number_nodes()
         self.log("Number of nodes defined: {}".format(nb_node))
 
-        # launching the file generation, except common files
-        self.log("Generating files specific to nodes")
-        is_ok = True
-        for id_node in range(nb_node):
-            # self.log_error("Handling node {}".format(id_node))
-            if not self.xml_parser_.set_active_node(id_node):
-                is_ok = False
-                break
-            node_name = self.xml_parser_.data_node_[id_node]["attributes"]["name"]
-            self.log_warn("Handling files for node {}".format(node_name))
-
-            # reconfiguring the generator to adjust to the new active node
-            if not self.file_generator_.configure(self.xml_parser_, self.spec_):
-                is_ok = False
-                break
-
-            for item in package_content:
-                file_generic = self.template_path_ + '/template/' + item
-                is_ok = self.generate_content(file_generic, False)
-                if not is_ok:
-                    break
-        if not is_ok:
-            return False
-
-        self.log("Generating files common to all nodes")
-        is_ok = True
-        # todo should we do something with the active_node file?
-        for item in package_content:
-            file_generic = self.template_path_ + '/template/' + item
-            is_ok = self.generate_content(file_generic, True)
-            if not is_ok:
-                break
-
-        if not is_ok:
+        if not self.generate_content():
             return False
 
         # we store the model into the directory model
@@ -318,134 +285,6 @@ Revise the template, and compare to examples
             self.log_error(msg.format(error))
         return True
 
-    def generate_content(self, input_item, is_generic):
-        """recursive function enabling the generation and storage of a file
-            or all content of a directory
-
-        Args:
-            input_item (str): path to a file or a directory to be generated
-            is_generic (Bool): specify if we handle generic files or node specific ones
-
-        Returns:
-            Todo: how to handle the file name, when several nodes are defined.
-        """
-        is_ok = True
-        # get the package name
-        package_name = self.xml_parser_.get_package_spec()["name"]
-
-        rel_path = os.path.relpath(input_item, self.template_path_ + "/template")
-        # check if the name 'package_name is present in the name'
-        rel_path = rel_path.replace('package_name', package_name)
-        output_item = self.package_path_ + '/' + rel_path
-
-        if os.path.isdir(input_item):
-            # self.log("Handling folder {}".format(rel_path))
-            if os.path.exists(output_item):
-                # self.log_warn("Directory {} already exists".format(output_item))
-                pass
-            else:
-                # self.log("Creating directory {}".format(rel_path))
-                os.makedirs(output_item)
-
-            # Generation loop
-            for item in os.listdir(input_item):
-                is_ok = self.generate_content(input_item + '/' + item, is_generic)
-                if not is_ok:
-                    break
-            return is_ok
-
-        # file to be generated.
-        # we check if "node" is in the filename (ie not a generic file).
-        basename = os.path.basename(rel_path)
-
-        if 'node' in basename:
-            # this is a node specific file. Flag is_generic defines our strategy
-            if is_generic:
-                # nothing to be done, we just skip it
-                return True
-        else:
-            # this is a generic file, common to all nodes
-            if not is_generic:
-                # we do nothing
-                return True
-
-        self.log("Handling template file {}".format(rel_path))
-        # The only difference between generic and no generic is that
-        # in the generic case we have to instanciate the node name
-        if 'node' in basename:
-            # This is a node specific file. We adjust the filename
-            basename = basename.replace('node', self.xml_parser_.get_active_node_spec()["attributes"]["name"])
-            # the rest is common
-
-        rel_path = os.path.join(os.path.dirname(rel_path), basename)
-        output_item = os.path.join(os.path.dirname(output_item), basename)
-
-        # Normally an empty file should not be written
-        # The exception is currently only for the special python file __init__.py
-        is_write_forced = (os.path.basename(output_item) == '__init__.py')
-
-        if self.path_pkg_backup_ is None:
-            self.log("Generating file {} in {}".format(rel_path, output_item))
-            is_ok = self.file_generator_.generate_file(input_item, output_item,
-                                                       force_write=is_write_forced)
-
-            return self.handle_status_and_advise(input_item, output_item, is_ok)
-
-        # A previous version of the package exists
-        # Checking if an update is necessary
-        previous_filename = os.path.join(self.path_pkg_backup_, rel_path)
-
-        # Check 1: does this file exist?
-        if not os.path.isfile(previous_filename):
-            msg = "File {} not previously existing. Just write it"
-            self.log_warn(msg.format(rel_path))
-
-            is_ok = self.file_generator_.generate_file(input_item,
-                                                       output_item,
-                                                       is_write_forced)
-            return self.handle_status_and_advise(input_item,
-                                                 output_item,
-                                                 is_ok)
-
-        # File already existing. Processing previous version
-        is_update_needed = False
-        file_analyzor = GeneratedFileAnalysis()
-        is_ok = file_analyzor.extract_protected_region(previous_filename)
-        if is_ok:
-            # Check if Developer inserted any contribution
-            if file_analyzor.extracted_areas_:
-                # contribution found, merge needed
-                is_update_needed = True
-            else:
-                self.log("No Developer contribution found")
-        else:
-            msg = "prb while extracting protected area in {}"
-            self.log_error(msg.format(previous_filename))
-            self.log_error("Previous file to be manually merged, sorry")
-
-        # now we know if an update is needed
-        if is_ok and is_update_needed:
-            # self.log("Updating file {} in {}".format(rel_path, output_item))
-            self.log("Updating file {}".format(rel_path))
-
-            is_ok = self.file_generator_.generate_file(input_item)
-            if is_ok:
-                if self.file_generator_.get_len_gen_file() == 0:
-                    msg = "New generated file empty. No code maintained from previous version"
-                    self.log_warn(msg)
-                    # we write it if forced
-                    if is_write_forced:
-                        is_ok = self.file_generator_.write_output_file(output_item)
-                else:
-                    self.log("Merging with previous version")
-                    self.file_generator_.buffer_ = file_analyzor.update_file(self.file_generator_.buffer_)
-                    is_ok = self.file_generator_.write_output_file(output_item)
-                return self.handle_status_and_advise(input_item, output_item, is_ok)
-
-        # Although the file existed before, we do not have to maintain it
-        is_ok = self.file_generator_.generate_file(input_item, output_item, is_write_forced)
-        return self.handle_status_and_advise(input_item, output_item, is_ok)
-
     def handle_status_and_advise(self, input_file, output_file, gen_flag):
         """Depending on the file generation process outcome,
            Adjust file status and inform user
@@ -476,6 +315,172 @@ Revise the template, and compare to examples
         # self.log("File {} handled".format(input_file))
         self.log("File handled")
         self.log("*********************************")
+        return True
+
+    def generate_content(self):
+        """Generation and storage of all content
+
+        Returns:
+            Bool -- True on succesd
+        """
+        # Extracting all components from the template
+        file_list = list()
+        dir_list = list()
+
+        path_root_template = self.template_path_ + "/template"
+
+        for (root, dirs, files) in os.walk(path_root_template):
+            # print "check {}: dir {}, files: {}".format(root, dirs, files)
+
+            if os.path.samefile(root, path_root_template):
+                for item in files:
+                    file_list.append(item)
+                for item in dirs:
+                    dir_list.append(item)
+            else:
+                rel_path = os.path.relpath(root, path_root_template)
+                for item in files:
+                    file_list.append(rel_path + "/" + item)
+                for item in dirs:
+                    dir_list.append(rel_path + "/" + item)
+
+        # Looking at final directory and filenames
+        package_name = self.xml_parser_.get_package_spec()["name"]
+        nb_node = self.xml_parser_.get_number_nodes()
+        nodes_name = [self.xml_parser_.data_node_[id_node]["attributes"]["name"] for id_node in range(nb_node)]
+
+        self.log("Generating all folders")
+
+        tmp = list()
+        for item in dir_list:
+            item = item.replace('package_name', package_name)
+            if 'node' in item:
+                for one_name in nodes_name:
+                    tmp.append(item.replace('node', one_name))
+            else:
+                tmp.append(item)
+        dir_list = tmp
+
+        for item in dir_list:
+            path_folder = self.package_path_ + "/" + item
+            if not os.path.exists(path_folder):
+                os.makedirs(path_folder)
+
+        generation_list = list()
+        # File preparation: will store: template filename, new filename, node id
+        for item in file_list:
+
+            new_item = item.replace('package_name', package_name)
+            if 'node' in item:
+                for id, one_name in enumerate(nodes_name):
+                    generation_list.append([item, new_item.replace('node', one_name), id])
+            else:
+                # todo if no node active I should not set one
+                generation_list.append([item, new_item, 0])
+
+        is_ok = True
+        print("\nFiles generation plan: ")
+        for item in generation_list:
+            print item
+            [template_file, result_file, node_id] = item
+            self.log("{} --> {}".format(template_file, result_file))
+
+            if not self.xml_parser_.set_active_node(node_id):
+                return False
+
+            # reconfiguring the generator to adjust to the new active node
+            if not self.file_generator_.configure(self.xml_parser_, self.spec_):
+                return False
+
+            # Normally an empty file should not be written
+            # The exception is currently only for the special python file __init__.py
+            is_write_forced = (os.path.basename(result_file) == '__init__.py')
+
+            result_file = package_name + "/" + result_file
+            template_file = self.template_path_ + '/template/' + template_file
+
+            if self.path_pkg_backup_ is None:
+                self.log("Generating file {}".format(result_file))
+
+                is_ok = self.file_generator_.generate_file(template_file,
+                                                           result_file,
+                                                           force_write=is_write_forced)
+
+                if self.handle_status_and_advise(template_file,
+                                                 result_file,
+                                                 is_ok):
+                    continue
+                else:
+                    return False
+
+            # A previous version of the package exists
+            # Checking if an update is necessary
+            rel_path = os.path.relpath(result_file, package_name)
+            previous_filename = os.path.join(self.path_pkg_backup_, rel_path)
+
+            # Check 1: does this file exist?
+            if not os.path.isfile(previous_filename):
+                msg = "File {} not previously existing. Just write it"
+                self.log_warn(msg.format(rel_path))
+
+                is_ok = self.file_generator_.generate_file(template_file,
+                                                           result_file,
+                                                           is_write_forced)
+                if self.handle_status_and_advise(template_file,
+                                                  result_file,
+                                                  is_ok):
+                    continue
+                else:
+                    return False
+            # File already existing. Processing previous version
+            is_update_needed = False
+            file_analyzor = GeneratedFileAnalysis()
+            is_ok = file_analyzor.extract_protected_region(previous_filename)
+            if is_ok:
+                # Check if Developer inserted any contribution
+                if file_analyzor.extracted_areas_:
+                    # contribution found, merge needed
+                    is_update_needed = True
+                else:
+                    self.log("No Developer contribution found")
+            else:
+                msg = "prb while extracting protected area in {}"
+                self.log_error(msg.format(previous_filename))
+                self.log_error("Previous file to be manually merged, sorry")
+
+            # now we know if an update is needed
+            if is_ok and is_update_needed:
+                # self.log("Updating file {} in {}".format(rel_path, output_item))
+                self.log("Updating file {}".format(rel_path))
+
+                is_ok = self.file_generator_.generate_file(template_file)
+                if not is_ok:
+                    return False
+                if is_ok:
+                    if self.file_generator_.get_len_gen_file() == 0:
+                        msg = "New generated file empty. No code maintained from previous version"
+                        self.log_warn(msg)
+                        # we write it if forced
+                        if is_write_forced:
+                            is_ok = self.file_generator_.write_output_file(result_file)
+                    else:
+                        self.log("Merging with previous version")
+                        self.file_generator_.buffer_ = file_analyzor.update_file(self.file_generator_.buffer_)
+                        is_ok = self.file_generator_.write_output_file(result_file)
+
+                    if self.handle_status_and_advise(template_file,
+                                                     result_file,
+                                                     is_ok):
+                        continue
+                    else:
+                        return False
+
+            # Although the file existed before, we do not have to maintain it
+            is_ok = self.file_generator_.generate_file(template_file, result_file, is_write_forced)
+            if self.handle_status_and_advise(template_file, result_file, is_ok):
+                continue
+            else:
+                return False
         return True
 
     def template_sanity_check(self):
