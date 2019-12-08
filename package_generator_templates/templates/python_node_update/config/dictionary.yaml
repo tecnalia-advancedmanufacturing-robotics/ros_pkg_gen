@@ -1,7 +1,7 @@
 package_attributes: ["name", "author", "author_email", "description", "license", "copyright"]
-node_attributes: ["name", "frequency"]
+component_attributes: ["name", "frequency"]
 
-node_interface:
+component_interface:
     publisher: ["name", "type", "description"]
     directPublisher: ["name", "type", "description"]
     subscriber: ["name", "type", "description"]

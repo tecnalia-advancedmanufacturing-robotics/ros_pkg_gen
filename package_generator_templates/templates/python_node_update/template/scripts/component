@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 """
 @package {packageName}
-@file {nodeName}
+@file {componentName}
 @author {packageAuthor}
 @brief {packageDescription}
         Entry point to the node.
 Copyright (C) {packageCopyright}
 {packageLicense}
 """
-from {packageName}.{nodeName}_ros import main
+from {packageName}.{componentName}_ros import main
 
 if __name__ == '__main__':
     main()

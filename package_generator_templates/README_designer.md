@@ -29,9 +29,9 @@ As an example, from the [C++ template](templates/cpp_node_update/config/dictiona
 
 ```yaml
 package_attributes: ["name", "author", "author_email", "description", "license", "copyright"]
-node_attributes: ["name", "frequency"]
+component_attributes: ["name", "frequency"]
 
-node_interface:
+component_interface:
     publisher: ["name", "type", "description"]
     directPublisher: ["name", "type", "description"]
     subscriber: ["name", "type", "description"]
@@ -47,10 +47,10 @@ node_interface:
 ```
 
 * `package_attributes`: the list of XML attributes the _User_ can provide to the required XML element `package`.
-* `node_attributes`: the list of XML attributes the _User_ can provide to the required XML element `node`.
-* `node_interface`: list of interface components authorized by the template.
+* `component_attributes`: the list of XML attributes the _User_ can provide to the required XML element `node`.
+* `component_interface`: list of interface components authorized by the template.
 
-The _Designer_ is only required to define these three keys `package_attributes` and `node_attributes` as lists, and `node_interface` as a dictionary.
+The _Designer_ is only required to define these three keys `package_attributes` and `component_attributes` as lists, and `component_interface` as a dictionary.
 The attribute names are completely defined by the Designer.
 
 As said, the dictionary specifies the available XML elements and attributes for a _User_ when defining a package to create.
@@ -166,7 +166,7 @@ Given the dictionnary example provided earlier, we would have access to instruct
 **Node information**:
 
 All nodes attributes can be accessed using the tags `{nodeTag}`, where `Tag` is to be replaced by any of the attributes of a node, as defined in file `dictionary.yaml`.
-Given the dictionnary example provided earlier, we would have access to instruction tags `{nodeName}` and `{nodeFrequency}`.
+Given the dictionnary example provided earlier, we would have access to instruction tags `{nodeName}` and `{componentFrequency}`.
 
 To reproduce a bunch of codes for all nodes, use the following instructions:
 
