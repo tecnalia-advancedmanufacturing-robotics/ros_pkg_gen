@@ -47,8 +47,8 @@ component_interface:
 ```
 
 * `package_attributes`: the list of XML attributes the _User_ can provide to the required XML element `package`.
-* `component_attributes`: the list of XML attributes the _User_ can provide to the required XML element `node`.
-* `component_interface`: list of interface components authorized by the template.
+* `component_attributes`: the list of XML attributes the _User_ can provide to the required XML element `component`.
+* `component_interface`: list of the interfaces authorized by the template.
 
 The _Designer_ is only required to define these three keys `package_attributes` and `component_attributes` as lists, and `component_interface` as a dictionary.
 The attribute names are completely defined by the Designer.
@@ -147,9 +147,9 @@ These add-on functions must follow that structure to enable their automatic call
 
 The Template folder contains the skeleton of all files that will be deployed into the generated files.
 
-All files are generated once, unless his name contains the string `node`.
-In that case, the file will be generated for each node defined by the user.
-The filename is then adjusted by replacing the string `node` with the node name.
+All files are generated once, unless his name contains the string `component`.
+In that case, the file will be generated for each component defined by the user.
+The filename is then adjusted by replacing the string `component` with the component name.
 
 #### Template file
 
@@ -161,28 +161,28 @@ All instruction tags are of the form `"{instructionTag}"`.
 **Package information**:
 
 All package attributes can be accessed using the tags `{packageTag}`, where `Tag` is to be replaced by any of the attributes of a package, as defined in file `dictionary.yaml`.
-Given the dictionnary example provided earlier, we would have access to instruction tags `{packageName}`, `{packageAuthor}`, `{packageAuthorEmail}`, `{poackageDescription}`, `{packageLicense}`, and `{packageCopyright}`.
+Given the dictionary example provided earlier, we would have access to instruction tags `{packageName}`, `{packageAuthor}`, `{packageAuthorEmail}`, `{poackageDescription}`, `{packageLicense}`, and `{packageCopyright}`.
 
-**Node information**:
+**Component information**:
 
-All nodes attributes can be accessed using the tags `{nodeTag}`, where `Tag` is to be replaced by any of the attributes of a node, as defined in file `dictionary.yaml`.
-Given the dictionnary example provided earlier, we would have access to instruction tags `{nodeName}` and `{componentFrequency}`.
+All component attributes can be accessed using the tags `{componentTag}`, where `Tag` is to be replaced by any of the attributes of a node, as defined in file `dictionary.yaml`.
+Given the dictionary example provided earlier, we would have access to instruction tags `{componentName}` and `{componentFrequency}`.
 
 To reproduce a bunch of codes for all nodes, use the following instructions:
 
 ```c++
-{forallnodes}
+{forallcomponent}
 ...
-{endforallnodes}
+{endforallcomponent}
 ```
 
-**Node interface access**:
+**Component interface access**:
 
-To access a node interface access, we propose the following tools:
+To access a component interface access, we propose the following tools:
 
 * Introduce a bunch of code **IF** at least one interface has been defined:
 
-```
+```c++
 {iftag}
 ...
 {endiftag}
@@ -190,7 +190,7 @@ To access a node interface access, we propose the following tools:
 
 * Introduce a bunch of code **FOR ALL** instances of a given instance:
 
-```
+```c++
 {foralltag}
 ...
 {endforalltag}
@@ -202,7 +202,7 @@ With the above example, we would get such code generated for 12 interfaces, like
 In the loop instruction, where the code is repeated for each instance of the selected interface, we also get access to the interface attributes.
 For example, with the above dictionary file,
 
-```
+```c++
 {forallpublisher}
 `{name}` *({type})*
 {description}

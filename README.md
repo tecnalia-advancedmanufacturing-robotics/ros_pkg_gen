@@ -108,14 +108,11 @@ See the dedicated [README](package_generator/README.md) for more details on its 
 ### `package_generator_templates`
 
 Gathers the package templates currently defined.
-So far, it only contains two templates, one for python code and another for C++.
-Both follow the same pattern, based on the concept of a central update loop at a given frequency (inspired from BRICS models).
-
 More details in the dedicated [Readme file](package_generator_templates/README.md)
 
 ## Reminders
 
-* to remap a topic or a service with rosrun:
+* to remap a topic or a service with `rosrun`:
 
 ```shell
 rosrun great_multi_package_pub_sub node_sub sub_int:=/pub_in
@@ -140,12 +137,12 @@ rosrun great_package_action_client node_action_client _ac_use_action_remap:=do_a
   * see how to handle list and map from parameter server
   * update: if the requested file is generated, refuse it
   * apply more code static checking
-  * if no dependency is provided, the system is not accepting doign the generation.
-    Check if (i) th message is appropriate, (ii) if the generation should be performed anyhow
+  * if no dependency is provided, the system is not accepting doing the generation.
+    Check if (i) thw message is appropriate, (ii) if the generation should be performed anyhow
   * Decide on the insertion per default to `cmake_module` in the required packages
   * Enhance executable definition in CMakeLists when a library is to be added
   * Handle user-provided dependencies for find_package
-  * Remove sentance _This file is to be edited by the Developer_
+  * Remove sentence _This file is to be edited by the Developer_
   * Consider Forcing to "to require cmake 3.0.2 for Kinetic"
   * Ensure all class methods are camelCased.
 * Longer Term:
