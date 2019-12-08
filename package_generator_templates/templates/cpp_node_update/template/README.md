@@ -7,12 +7,12 @@
 <!--- protected region package descripion end -->
 
 <!--- todo How to handle the image generation -->
-<!--- <img src="./model/{nodeName}.png" width="300px" />-->
+<!--- <img src="./model/{componentName}.png" width="300px" />-->
 
-{forallnodes}
-## Node: {nodeName}
+{forallcomponent}
+## Node: {componentName}
 
-Update frequency: {nodeFrequency} Hz.
+Update frequency: {componentFrequency} Hz.
 {iflistener}
 
 This node is using `\tf` to get transform information.
@@ -22,8 +22,8 @@ This node is using `\tf` to get transform information.
 This node is using `\tf` to broadcast transforms.
 {endifbroadcaster}
 
-<!--- protected region {nodeName} begin -->
-<!--- protected region {nodeName} end -->
+<!--- protected region {componentName} begin -->
+<!--- protected region {componentName} end -->
 {ifparameter}
 
 ### Static Parameters
@@ -31,7 +31,7 @@ This node is using `\tf` to broadcast transforms.
 All static parameters can be set through the command line:
 
 ```shell
-rosrun {packageName} {nodeName} [param_name]:=[new_value]
+rosrun {packageName} {componentName} [param_name]:=[new_value]
 ```
 
 {endifparameter}
@@ -48,7 +48,7 @@ rosrun {packageName} {nodeName} [param_name]:=[new_value]
 All dynamic parameters can be set through the command line:
 
 ```shell
-rosrun {packageName} {nodeName} _[param_name]:=[new_value]
+rosrun {packageName} {componentName} _[param_name]:=[new_value]
 ```
 
 {endifdynParameter}
@@ -65,7 +65,7 @@ rosrun {packageName} {nodeName} _[param_name]:=[new_value]
 A topic can be remapped from the command line:
 
 ```shell
-rosrun {packageName} {nodeName} [old_name]:=[new_name]
+rosrun {packageName} {componentName} [old_name]:=[new_name]
 ```
 
 {endifpublisher}
@@ -82,7 +82,7 @@ rosrun {packageName} {nodeName} [old_name]:=[new_name]
 A topic can be remapped from the command line:
 
 ```shell
-rosrun {packageName} {nodeName} [old_name]:=[new_name]
+rosrun {packageName} {componentName} [old_name]:=[new_name]
 ```
 
 {endifsubscriber}
@@ -98,7 +98,7 @@ rosrun {packageName} {nodeName} [old_name]:=[new_name]
 A remapping of the service name is made possible at node launch:
 
 ```shell
-rosrun {packageName} {nodeName} _[old_name]_remap:=/[new_name]
+rosrun {packageName} {componentName} _[old_name]_remap:=/[new_name]
 ```
 
 {endifserviceServer}
@@ -115,7 +115,7 @@ rosrun {packageName} {nodeName} _[old_name]_remap:=/[new_name]
 A remapping of the service name is made possible at node launch:
 
 ```shell
-rosrun {packageName} {nodeName} _[old_name]_remap:=/[new_name]
+rosrun {packageName} {componentName} _[old_name]_remap:=/[new_name]
 ```
 
 {endifserviceClient}
@@ -149,7 +149,7 @@ rosrun actionlib axclient.py /do_action
 Any action client name can be readjusted at node launch:
 
 ```shell
-rosrun {packageName} {nodeName} _[old_name]_remap:=[new_name]
+rosrun {packageName} {componentName} _[old_name]_remap:=[new_name]
 ```
 
 {endifactionClient}
@@ -188,6 +188,6 @@ The subscription handler is triggered as soon as a message arrives.
 <!--- protected region direct subscriber {name} end -->
 {endforalldirectSubscriber}
 
-{endforallnodes}
+{endforallcomponent}
 
 *Package generated with the [ROS Package Generator](https://github.com/tecnalia-advancedmanufacturing-robotics/ros_pkg_gen).*

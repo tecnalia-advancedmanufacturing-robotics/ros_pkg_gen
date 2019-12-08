@@ -42,9 +42,9 @@ class PackageXMLParser(EnhancedObject):
     """load a package description and prepare appropriate access structure
 
     Attributes:
-        active_node_ (int): id of the current active node (if several defined)
+        active_comp_ (int): id of the current active component (if several defined)
         data_depend_ (list): list of package dependency
-        data_node_ (list): list of node specification
+        data_comp_ (list): list of component specification
         data_pack_ (dict): specifications of the package
         spec_ (TemplateSpec): Template specification
         is_dependency_complete_ (bool): whether dependencies were automatically added
@@ -63,8 +63,8 @@ class PackageXMLParser(EnhancedObject):
         self.spec_ = None
         self.data_pack_ = dict()
         self.data_depend_ = list()
-        self.data_node_ = list()
-        self.active_node_ = -1
+        self.data_comp_ = list()
+        self.active_comp_ = -1
         self.is_dependency_complete_ = True
 
     def set_template_spec(self, spec):
@@ -73,10 +73,11 @@ class PackageXMLParser(EnhancedObject):
         Args:
             spec (TemplateSpec): Object containing the template specs.
         """
-        expected_keys = ['package_attributes', 'node_interface', 'node_attributes']
+        expected_keys = ['package_attributes', 'component_interface', 'component_attributes']
+        self.log("Dico: {}".format(spec.dico_))
         for item in expected_keys:
             if item not in spec.dico_:
-                self.log_error("Missing key {} in provided dictionary")
+                self.log_error("Missing key {} in provided dictionary".format(item))
                 return False
         self.spec_ = spec
         return True
@@ -91,8 +92,7 @@ class PackageXMLParser(EnhancedObject):
         Returns:
             Bool: true if it succeeded
 
-        Deleted Parameters:
-            Warning: on success the active node is placed on the first one
+        Warning: on success the active component is placed on the first one
         """
         if self.spec_ is None:
             msg_err = "Cannot load a package description without template spec"
@@ -124,7 +124,7 @@ class PackageXMLParser(EnhancedObject):
         is_ok = self.extend_dependencies()
         if is_ok:
             # self.print_xml_parsed()
-            self.active_node_ = 0
+            self.active_comp_ = 0
         return is_ok
 
     def extend_dependencies(self):
@@ -157,10 +157,10 @@ class PackageXMLParser(EnhancedObject):
 
         # look now at the dependencies related to available interfaces
         if self.spec_.dep_from_interface_ is not None:
-            for node in self.data_node_:
-                # self.log("Checking node with interface: \n {}".format(node['interface']))
-                for one_interface in node['interface']:
-                    for item in node['interface'][one_interface]:
+            for comp in self.data_comp_:
+                # self.log("Checking comp with interface: \n {}".format(comp['interface']))
+                for one_interface in comp['interface']:
+                    for item in comp['interface'][one_interface]:
                         try:
                             pkg_dep = self.spec_.dep_from_interface_(one_interface, item)
                         except TypeError as err:
@@ -215,26 +215,26 @@ class PackageXMLParser(EnhancedObject):
             if attrib not in attributes_package:
                 self.log_warn("Provided attrib {} ignored".format(attrib))
 
-    def load_one_node_interface(self, xml_interface):
-        """Check and store a node interface
+    def load_one_comp_interface(self, xml_interface):
+        """Check and store a component interface
 
         Args:
-            xml_interface (TYPE): xml spec of the node
+            xml_interface (TYPE): xml spec of the comp
 
         Returns:
-            dict: the node interface
+            dict: the comp interface
         """
-        # self.log("Checking node interface {}".format(xml_interface.tag))
+        # self.log("Checking comp interface {}".format(xml_interface.tag))
 
-        interface_node = self.spec_.dico_['node_interface'].keys()
+        interface_comp = self.spec_.dico_['component_interface'].keys()
 
-        assert xml_interface.tag in interface_node, "Unknown interface {}".format(xml_interface.tag)
+        assert xml_interface.tag in interface_comp, "Unknown interface {}".format(xml_interface.tag)
 
         interface_spec = dict()
         interface_spec["type"] = xml_interface.tag
         interface_spec["attributes"] = dict()
 
-        attributes = self.spec_.dico_['node_interface'][xml_interface.tag]
+        attributes = self.spec_.dico_['component_interface'][xml_interface.tag]
 
         for attrib in attributes:
             assert attrib in xml_interface.attrib.keys(), 'Missing required attribute {} for {} interface. Check line {}'.format(attrib, xml_interface.tag, xml_interface.attrib)
@@ -247,49 +247,49 @@ class PackageXMLParser(EnhancedObject):
                 self.log_warn("Provided attrib {} of interface {} ignored (check {})".format(attrib, xml_interface.tag, xml_interface.attrib))
         return interface_spec
 
-    def load_node_spec(self, xml_node):
-        """Load the node specification
+    def load_comp_spec(self, xml_comp):
+        """Load the component specification
 
         Args:
-            xml_node (TYPE): xml description of the node
+            xml_comp (TYPE): xml description of the comp
 
         Returns:
-            dict: uploaded node attributes and possible interface
+            dict: uploaded comp attributes and possible interface
         """
         # TODO check as well component names
 
-        loc_data_node = dict()
-        loc_data_node['attributes'] = dict()
+        loc_data_comp = dict()
+        loc_data_comp['attributes'] = dict()
 
-        attributes_node = self.spec_.dico_['node_attributes']
+        attributes_comp = self.spec_.dico_['component_attributes']
 
-        for attrib in attributes_node:
-            assert attrib in xml_node.attrib.keys(), "Missing required attribute {} for node description".format(attrib)
-            loc_data_node['attributes'][attrib] = xml_node.attrib[attrib]
+        for attrib in attributes_comp:
+            assert attrib in xml_comp.attrib.keys(), "Missing required attribute {} for comp description".format(attrib)
+            loc_data_comp['attributes'][attrib] = xml_comp.attrib[attrib]
 
-        # self.log("Requested node description correct")
+        # self.log("Requested comp description correct")
 
-        for attrib in xml_node.attrib.keys():
-            if attrib not in attributes_node:
+        for attrib in xml_comp.attrib.keys():
+            if attrib not in attributes_comp:
                 self.log_warn("Provided attrib {} ignored".format(attrib))
 
-        interface_node = self.spec_.dico_['node_interface'].keys()
+        interface_comp = self.spec_.dico_['component_interface'].keys()
 
-        # self.log("Check: node interface is: {}".format(interface_node))
+        # self.log("Check: comp interface is: {}".format(interface_comp))
 
-        loc_data_node['interface'] = dict()
-        for item in interface_node:
-            loc_data_node['interface'][item] = list()
+        loc_data_comp['interface'] = dict()
+        for item in interface_comp:
+            loc_data_comp['interface'][item] = list()
 
-        for child in xml_node:
+        for child in xml_comp:
             # self.log("Checking for {}".format(child))
-            child_interface = self.load_one_node_interface(child)
+            child_interface = self.load_one_comp_interface(child)
             # self.log("Adding entry for type {}".format(child_interface["type"]))
-            # self.log("Within: {}".format(loc_data_node['interface']))
+            # self.log("Within: {}".format(loc_data_comp['interface']))
 
-            loc_data_node['interface'][child_interface["type"]].append(child_interface["attributes"])
+            loc_data_comp['interface'][child_interface["type"]].append(child_interface["attributes"])
 
-        return loc_data_node
+        return loc_data_comp
 
     def load_one_dependency(self, xml_dep):
         """Summary
@@ -307,8 +307,8 @@ class PackageXMLParser(EnhancedObject):
             xml_item (TYPE): xml item to look at
         """
         tag = xml_item.tag
-        if tag == "node":
-            self.data_node_.append(self.load_node_spec(xml_item))
+        if tag == "component":
+            self.data_comp_.append(self.load_comp_spec(xml_item))
         elif tag == "depend":
             self.load_one_dependency(xml_item)
         else:
@@ -346,15 +346,15 @@ class PackageXMLParser(EnhancedObject):
         self.log("**************")
         self.log("{}".format(self.data_depend_))
         self.log("**************")
-        self.log("{}".format(self.data_node_))
+        self.log("{}".format(self.data_comp_))
 
-    def get_nodes_spec(self):
-        """Return all nodes spec
+    def get_comp_spec(self):
+        """Return all components spec
 
         Returns:
-            list: All nodes description
+            list: All comps description
         """
-        return self.data_node_
+        return self.data_comp_
 
     def get_package_spec(self):
         """Return the package spec
@@ -372,48 +372,49 @@ class PackageXMLParser(EnhancedObject):
         """
         return self.data_depend_
 
-    def get_number_nodes(self):
-        """Returns the number of nodes being defined
+    def get_number_comps(self):
+        """Returns the number of components being defined
 
         Returns:
-            int: number of nodes
+            int: number of components
         """
-        return len(self.data_node_)
+        return len(self.data_comp_)
 
-    def set_active_node(self, node_id):
-        """set the active node be handled
+    def set_active_comp(self, comp_id):
+        """set the active component be handled
 
         Args:
-            node_id (int): active node number
+            comp_id (int): active comp number
 
         Returns:
             Bool: True if the operation succeeded
         """
 
-        if node_id < 0:
-            self.log_error("node id ({}) should be >= 0".format(node_id))
+        if comp_id < 0:
+            self.log_error("comp id ({}) should be >= 0".format(comp_id))
             return False
-        if not self.data_node_:
+        if not self.data_comp_:
             self.log_error("No specification read so far")
             return False
-        if node_id >= len(self.data_node_):
-            msg = "node id ({}) should be < {}".format(node_id,
-                                                       len(self.data_node_))
+        if comp_id >= len(self.data_comp_):
+            msg = "comp id ({}) should be < {}".format(comp_id,
+                                                       len(self.data_comp_))
             self.log_error(msg)
             return False
 
-        self.active_node_ = node_id
+        self.active_comp_ = comp_id
         return True
 
-    def get_active_node_spec(self):
-        """Provide all the spec of a given node
+    def get_active_comp_spec(self):
+        """Provide all the spec of a given comp
 
         Returns:
             TYPE: Description
         """
-        assert self.active_node_ != -1, "No active node defined"
-        assert self.active_node_ < len(self.data_node_), "Active node {} should be less then {}".format(self.active_node_, len(self.data_node_))
-        return self.data_node_[self.active_node_]
+        assert self.active_comp_ != -1, "No active component defined"
+        assert self.active_comp_ < len(self.data_comp_), "Active compomponent {} should be less than {}".format(self.active_comp_,
+                                                                                                        len(self.data_comp_))
+        return self.data_comp_[self.active_comp_]
 
     def write_xml(self, filename):
         """write the xml into a file
@@ -457,13 +458,13 @@ class PackageXMLParser(EnhancedObject):
         for item in self.spec_.dico_['package_attributes']:
             xml_pack.set(item, '')
 
-        xml_node = ET.SubElement(xml_pack, "node")
-        for item in self.spec_.dico_['node_attributes']:
-            xml_node.set(item, '')
+        xml_comp = ET.SubElement(xml_pack, "comp")
+        for item in self.spec_.dico_['component_attributes']:
+            xml_comp.set(item, '')
 
-        for item in self.spec_.dico_['node_interface']:
-            xml_one_interface = ET.SubElement(xml_node, item)
-            for item_attrib in self.spec_.dico_['node_interface'][item]:
+        for item in self.spec_.dico_['comp_interface']:
+            xml_one_interface = ET.SubElement(xml_comp, item)
+            for item_attrib in self.spec_.dico_['comp_interface'][item]:
                 xml_one_interface.set(item_attrib, '')
 
         if self.spec_.dep_from_template_ is None:
@@ -514,40 +515,40 @@ class PackageXMLParser(EnhancedObject):
         for attrib in attributes_package:
             self.data_pack_[attrib] = ""
 
-        # setting one node
-        attributes_node = self.spec_.dico_['node_attributes']
+        # setting one comp
+        attributes_comp = self.spec_.dico_['component_attributes']
 
-        node_spec = dict()
-        node_spec["attributes"] = dict()
+        comp_spec = dict()
+        comp_spec["attributes"] = dict()
 
-        for attrib in attributes_node:
-            node_spec["attributes"][attrib] = ""
+        for attrib in attributes_comp:
+            comp_spec["attributes"][attrib] = ""
 
-        interface_node = self.spec_.dico_['node_interface'].keys()
-        node_spec["interface"] = dict()
+        interface_comp = self.spec_.dico_['comp_interface'].keys()
+        comp_spec["interface"] = dict()
 
-        for item in interface_node:
-            node_spec['interface'][item] = list()
+        for item in interface_comp:
+            comp_spec['interface'][item] = list()
 
             # TODO can we make a loop on key and key value?
-            attributes = self.spec_.dico_['node_interface'][item]
+            attributes = self.spec_.dico_['comp_interface'][item]
 
             fake_interface = dict()
             for one_attr in attributes:
                 fake_interface[one_attr] = ""
-            node_spec['interface'][item].append(fake_interface)
+            comp_spec['interface'][item].append(fake_interface)
 
-        self.data_node_ = list()
-        self.data_node_.append(node_spec)
+        self.data_comp_ = list()
+        self.data_comp_.append(comp_spec)
         self.data_depend_ = list()
-        self.active_node_ = 0
+        self.active_comp_ = 0
         self.is_dependency_complete_ = True
         return True
 
 
 USAGE = """ usage: generate_xml_skel package_template xml_skeleton
 package_template : name of the template to use
-xml_skeleton: xml description of the node(s) interface
+xml_skeleton: xml description of the component(s) interface
 
 Packages template: either one defined in package `package_generator_templates`,
                    either a path to a local one.
@@ -563,8 +564,8 @@ def main_generate_xml():
     rospack = rospkg.RosPack()
 
     try:
-        node_path = rospack.get_path('package_generator_templates')
-        default_templates_path = node_path + "/templates/"
+        default_templates_path = rospack.get_path('package_generator_templates')
+        default_templates_path += "/templates/"
     except rospkg.common.ResourceNotFound as error:
         msg = "Package package_generator_templates not found in rospack"
         print colored(msg, "yellow")

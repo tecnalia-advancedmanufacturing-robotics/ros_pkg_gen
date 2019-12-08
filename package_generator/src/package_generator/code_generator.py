@@ -52,7 +52,7 @@ class CodeGenerator(EnhancedObject):
     Attributes:
         dep_spec_ (list): list of dependency of the package
         do_generate_ (bool): False used for template check
-        nodes_spec_ (list): spec of each node
+        comp_spec_ (list): spec of each component
         package_spec_ (dict): specification of the package
         spec_ (TemplateSpec): specification of the template
         buffer_ (list): will contain the generated file
@@ -73,7 +73,7 @@ class CodeGenerator(EnhancedObject):
         self.spec_ = None
         self.buffer_ = list()
         self.xml_parser_ = None
-        self.nodes_spec_ = None
+        self.comp_spec_ = None
         self.package_spec_ = None
         self.dep_spec_ = None
         self.do_generate_ = True
@@ -82,7 +82,7 @@ class CodeGenerator(EnhancedObject):
         """set the required information to configure the generator
 
         Args:
-            parser (PackageXMLParser): XML node description parsed
+            parser (PackageXMLParser): XML component description parsed
             spec (TemplateSpec): configuration of the template
 
         Returns:
@@ -109,7 +109,7 @@ class CodeGenerator(EnhancedObject):
         """From the template dictionnary, generate the simple tags expected
         To be used in the template
         all package attribute will have a tag like "packageAttribute"
-        all node attributes will have a tag like "nodeAttribute"
+        all component attributes will have a tag like "componentAttribute"
         """
         package_attributes = self.spec_.dico_['package_attributes']
 
@@ -117,11 +117,11 @@ class CodeGenerator(EnhancedObject):
             tag = "package" + attrib_pack.title().replace("_", "")
             self.transformation_[tag] = self.get_package_attr(attrib_pack)
 
-        node_attributes = self.spec_.dico_['node_attributes']
+        comp_attributes = self.spec_.dico_['component_attributes']
 
-        for attrib_node in node_attributes:
-            tag = "node" + attrib_node.title().replace("_", "")
-            self.transformation_[tag] = self.get_node_attr(attrib_node)
+        for attrib_comp in comp_attributes:
+            tag = "component" + attrib_comp.title().replace("_", "")
+            self.transformation_[tag] = self.get_comp_attr(attrib_comp)
 
         # self.log_error("Generated tags: \n {}".format(self.transformation_.keys()))
 
@@ -132,14 +132,14 @@ class CodeGenerator(EnhancedObject):
         each possible interface will have defined tags like "ifinterface"
         and "forallinterface"
         """
-        node_interface = self.spec_.dico_['node_interface'].keys()
+        comp_interface = self.spec_.dico_['component_interface'].keys()
 
         lambda_for = lambda d: lambda t: self.convert_forall(d, t)
         lambda_if = lambda u: lambda v: self.convert_if(u, v)
         lambda_for_deps = lambda text: self.convert_forall_dependencies(text)
-        lambda_for_nodes = lambda text: self.convert_forall_nodes(text)
+        lambda_for_comps = lambda text: self.convert_forall_comps(text)
 
-        for item in node_interface:
+        for item in comp_interface:
             # self.log_warn("Adding tag for {}".format(item))
             tag = "forall" + item
             self.transformation_loop_[tag] = lambda_for(item)
@@ -149,7 +149,7 @@ class CodeGenerator(EnhancedObject):
         # TODO check how to make this even generic,
         # we should not assume these names are provided
         self.transformation_loop_['foralldependencies'] = lambda_for_deps
-        self.transformation_loop_['forallnodes'] = lambda_for_nodes
+        self.transformation_loop_['forallcomponent'] = lambda_for_comps
 
     # TODO empty self.transformation_functions_ before/when entering here
     def generate_apply_functions(self):
@@ -163,11 +163,11 @@ class CodeGenerator(EnhancedObject):
         """ set the xml parser, and extract the relevant input from it
         """
         assert self.xml_parser_ is not None, "No xml data defined"
-        self.nodes_spec_ = self.xml_parser_.get_active_node_spec()
+        self.comp_spec_ = self.xml_parser_.get_active_comp_spec()
         self.package_spec_ = self.xml_parser_.get_package_spec()
         self.dep_spec_ = self.xml_parser_.get_dependency_spec()
 
-        assert self.nodes_spec_, "No nodes specification"
+        assert self.comp_spec_, "No component specification"
         assert self.package_spec_, "No package specification"
         assert self.dep_spec_ is not None, "No dependency specification"
 
@@ -473,8 +473,8 @@ class CodeGenerator(EnhancedObject):
         """
         return self.package_spec_[attr]
 
-    def get_node_attr(self, attr):
-        """Retun the value of a node attribute
+    def get_comp_attr(self, attr):
+        """Retun the value of a component attribute
 
         Args:
             attr (str): the attribute we are looking for
@@ -482,7 +482,7 @@ class CodeGenerator(EnhancedObject):
         Returns:
             str: the associated value
         """
-        return self.nodes_spec_["attributes"][attr]
+        return self.comp_spec_["attributes"][attr]
 
     # TODO remove that function that is not used anymore
     # function kept as exmaple if externalizing makes sense
@@ -491,36 +491,36 @@ class CodeGenerator(EnhancedObject):
 
         include_set = set()
 
-        for item in self.nodes_spec_["interface"]["publisher"]:
+        for item in self.comp_spec_["interface"]["publisher"]:
             str_path = item['type'].replace('::', '/')
             include_set.add("#include <{}.h>".format(str_path))
 
-        for item in self.nodes_spec_["interface"]["directPublisher"]:
+        for item in self.comp_spec_["interface"]["directPublisher"]:
             str_path = item['type'].replace('::', '/')
             include_set.add("#include <{}.h>".format(str_path))
 
-        for item in self.nodes_spec_["interface"]["directSubscriber"]:
+        for item in self.comp_spec_["interface"]["directSubscriber"]:
             str_path = item['type'].replace('::', '/')
             include_set.add("#include <{}.h>".format(str_path))
 
-        for item in self.nodes_spec_["interface"]["subscriber"]:
+        for item in self.comp_spec_["interface"]["subscriber"]:
             str_path = item['type'].replace('::', '/')
             include_set.add("#include <{}.h>".format(str_path))
 
-        for item in self.nodes_spec_["interface"]["actionClient"]:
+        for item in self.comp_spec_["interface"]["actionClient"]:
             str_path = item['type'].replace('::', '/')
             include_set.add("#include <{}Action.h>".format(str_path))
 
-        for item in self.nodes_spec_["interface"]["actionServer"]:
+        for item in self.comp_spec_["interface"]["actionServer"]:
             str_path = item['type'].replace('::', '/')
             include_set.add("#include <{}Action.h>".format(str_path))
 
-        for item in self.nodes_spec_["interface"]["serviceServer"]:
+        for item in self.comp_spec_["interface"]["serviceServer"]:
             str_path = item['type'].replace('::', '/')
             include_set.add("#include <{}.h>".format(str_path))
 
         # todo this may be added to the ros core even though it does not use it.
-        for item in self.nodes_spec_["interface"]["serviceClient"]:
+        for item in self.comp_spec_["interface"]["serviceClient"]:
             str_path = item['type'].replace('::', '/')
             include_set.add("#include <{}.h>".format(str_path))
 
@@ -575,7 +575,7 @@ class CodeGenerator(EnhancedObject):
         output = list()
 
         # self.log("Handling text: \n {} with interface {}".format(text, interface_type))
-        assert interface_type in self.nodes_spec_["interface"], "Requested interface type {} unknown".format(interface_type)
+        assert interface_type in self.comp_spec_["interface"], "Requested interface type {} unknown".format(interface_type)
 
         # computing all upperlayer spec
         # TODO this could be avoided and done once
@@ -587,7 +587,7 @@ class CodeGenerator(EnhancedObject):
         # listing stands for num_line, text
         listing = list(text_it)
 
-        for item in self.nodes_spec_["interface"][interface_type]:
+        for item in self.comp_spec_["interface"][interface_type]:
             # self.log("Handling {} {}".format(interface_type, item))
 
             context_extended = item.copy()
@@ -627,7 +627,7 @@ class CodeGenerator(EnhancedObject):
                 output.append(line_processed)
 
         self.buffer_ += output
-        # self.log_error("Sanity check: Is dictinnary extended?\n {}".format(self.nodes_spec_["interface"][interface_type]))
+        # self.log_error("Sanity check: Is dictinnary extended?\n {}".format(self.comp_spec_["interface"][interface_type]))
         # self.log("created: {}".format(type(output)))
         # todo no false case?
         return True
@@ -649,12 +649,12 @@ class CodeGenerator(EnhancedObject):
             list_type = interface_type
 
         for item in list_type:
-            assert item in self.nodes_spec_["interface"], "Requested interface type {} unknown".format(item)
+            assert item in self.comp_spec_["interface"], "Requested interface type {} unknown".format(item)
 
         is_one_defined = False
 
         for item in list_type:
-            is_one_defined = is_one_defined or self.nodes_spec_["interface"][item]
+            is_one_defined = is_one_defined or self.comp_spec_["interface"][item]
 
         if not is_one_defined:
             return True
@@ -664,8 +664,8 @@ class CodeGenerator(EnhancedObject):
 
         return is_ok
 
-    def convert_forall_nodes(self, it_text):
-        """Convert a code, looping on each component / node defined
+    def convert_forall_comps(self, it_text):
+        """Convert a code, looping on each component defined
 
         Args:
             it_text (Iterator): listing to process
@@ -673,14 +673,14 @@ class CodeGenerator(EnhancedObject):
         Returns:
             Bool: Operation success
         """
-        # we copy locally the node spec to pop up at the end.
-        bup = self.nodes_spec_
-        all_node_spec = self.xml_parser_.get_nodes_spec()
+        # we copy locally the component spec to pop up at the end.
+        bup = self.comp_spec_
+        all_comp_spec = self.xml_parser_.get_comp_spec()
 
         listing = list(it_text)
 
-        for item in all_node_spec:
-            self.nodes_spec_ = item
+        for item in all_comp_spec:
+            self.comp_spec_ = item
             self.generate_simple_tags()
 
             is_ok = self.process_input(iter(listing))
@@ -688,7 +688,7 @@ class CodeGenerator(EnhancedObject):
             if not is_ok:
                 break
 
-        self.nodes_spec_ = bup
+        self.comp_spec_ = bup
         self.generate_simple_tags()
         return is_ok
 
@@ -704,9 +704,9 @@ def main():
 
     import rospkg
     rospack = rospkg.RosPack()
-    node_path = rospack.get_path('package_generator_templates')
+    dir_template_spec = rospack.get_path('package_generator_templates')
 
-    dir_template_spec = node_path + "/templates/cpp_node_update/config"
+    dir_template_spec += "/templates/cpp_node_update/config"
 
     spec = TemplateSpec()
 
@@ -720,20 +720,20 @@ def main():
         print "Bye"
         return
 
-    node_path = rospack.get_path('package_generator')
-    filename = node_path + '/tests/data/demo.ros_package'
+    filename = rospack.get_path('package_generator')
+    filename += '/tests/data/demo.ros_package'
 
     if not xml_parser.load(filename):
         print "Error while parsing the xml file {}".format(filename)
         print "Bye"
         return
 
-    xml_parser.set_active_node(0)
+    xml_parser.set_active_comp(0)
     gen.configure(xml_parser, spec)
 
-    node_path = rospack.get_path('package_generator_templates')
+    filename = rospack.get_path('package_generator_templates')
 
-    filename = node_path + '/templates/cpp_node_update/template/README.md'
+    filename += '/templates/cpp_node_update/template/README.md'
 
     gen.reset_output_file()
     if gen.process_file(filename):
