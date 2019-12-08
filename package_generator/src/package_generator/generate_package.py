@@ -397,7 +397,7 @@ Revise the template, and compare to examples
             # The exception is currently only for the special python file __init__.py
             is_write_forced = (os.path.basename(result_file) == '__init__.py')
 
-            result_file = package_name + "/" + result_file
+            result_file = self.package_path_ + "/" + result_file
             template_file = self.template_path_ + '/template/' + template_file
 
             if self.path_pkg_backup_ is None:
