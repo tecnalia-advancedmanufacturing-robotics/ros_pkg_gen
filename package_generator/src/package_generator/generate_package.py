@@ -381,9 +381,8 @@ Revise the template, and compare to examples
                 generation_list.append([item, new_item, 0])
 
         is_ok = True
-        print("\nFiles generation plan: ")
+        # self.log("\nFiles generation plan: ")
         for item in generation_list:
-            print item
             [template_file, result_file, comp_id] = item
             self.log("{} --> {}".format(template_file, result_file))
 

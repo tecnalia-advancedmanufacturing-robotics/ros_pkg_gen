@@ -74,7 +74,7 @@ class PackageXMLParser(EnhancedObject):
             spec (TemplateSpec): Object containing the template specs.
         """
         expected_keys = ['package_attributes', 'component_interface', 'component_attributes']
-        self.log("Dico: {}".format(spec.dico_))
+
         for item in expected_keys:
             if item not in spec.dico_:
                 self.log_error("Missing key {} in provided dictionary".format(item))
