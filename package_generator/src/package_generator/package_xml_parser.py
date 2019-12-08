@@ -412,7 +412,7 @@ class PackageXMLParser(EnhancedObject):
             TYPE: Description
         """
         assert self.active_comp_ != -1, "No active component defined"
-        assert self.active_comp_ < len(self.data_comp_), "Active compomponent {} should be less than {}".format(self.active_comp_,
+        assert self.active_comp_ < len(self.data_comp_), "Active component {} should be less than {}".format(self.active_comp_,
                                                                                                         len(self.data_comp_))
         return self.data_comp_[self.active_comp_]
 
@@ -462,9 +462,9 @@ class PackageXMLParser(EnhancedObject):
         for item in self.spec_.dico_['component_attributes']:
             xml_comp.set(item, '')
 
-        for item in self.spec_.dico_['comp_interface']:
+        for item in self.spec_.dico_['component_interface']:
             xml_one_interface = ET.SubElement(xml_comp, item)
-            for item_attrib in self.spec_.dico_['comp_interface'][item]:
+            for item_attrib in self.spec_.dico_['component_interface'][item]:
                 xml_one_interface.set(item_attrib, '')
 
         if self.spec_.dep_from_template_ is None:
@@ -524,14 +524,14 @@ class PackageXMLParser(EnhancedObject):
         for attrib in attributes_comp:
             comp_spec["attributes"][attrib] = ""
 
-        interface_comp = self.spec_.dico_['comp_interface'].keys()
+        interface_comp = self.spec_.dico_['component_interface'].keys()
         comp_spec["interface"] = dict()
 
         for item in interface_comp:
             comp_spec['interface'][item] = list()
 
             # TODO can we make a loop on key and key value?
-            attributes = self.spec_.dico_['comp_interface'][item]
+            attributes = self.spec_.dico_['component_interface'][item]
 
             fake_interface = dict()
             for one_attr in attributes:
