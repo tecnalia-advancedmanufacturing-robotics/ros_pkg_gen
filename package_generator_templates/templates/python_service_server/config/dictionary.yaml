@@ -1,7 +1,7 @@
 package_attributes: ["name", "author", "author_email", "description", "license", "copyright"]
-node_attributes: ["name"]
+component_attributes: ["name"]
 
-node_interface:
+component_interface:
     serviceServer: ["name", "type", "description"]
     parameter: ["name", "type", "value", "description"]
     dynParameter: ["name", "type", "value", "description"]

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 @package {packageName}
-@file {nodeName}_ros.py
+@file {componentName}_ros.py
 @author {packageAuthor}
 @brief {packageDescription}
 
@@ -13,7 +13,7 @@ from copy import deepcopy
 import rospy
 {ifdynParameter}
 from dynamic_reconfigure.server import Server
-from {packageName}.cfg import {nodeName}Config
+from {packageName}.cfg import {componentName}Config
 {endifdynParameter}
 
 # ROS message & services includes
@@ -21,10 +21,10 @@ from {packageName}.cfg import {nodeName}Config
 from {apply-get_package_type}.srv import {apply-get_class_type}
 {endforallserviceServer}
 # other includes
-from {packageName} import {nodeName}_impl
+from {packageName} import {componentName}_impl
 
 
-class {apply-capitalized_node_name}ROS(object):
+class {apply-capitalized_comp_name}ROS(object):
     """
     ROS interface class, handling all communication with ROS
     """
@@ -32,12 +32,12 @@ class {apply-capitalized_node_name}ROS(object):
         """
         Attributes definition
         """
-        self.component_config_ = {nodeName}_impl.{apply-capitalized_node_name}Config()
-        self.component_implementation_ = {nodeName}_impl.{apply-capitalized_node_name}Implementation()
+        self.component_config_ = {componentName}_impl.{apply-capitalized_comp_name}Config()
+        self.component_implementation_ = {componentName}_impl.{apply-capitalized_comp_name}Implementation()
 
         {ifdynParameter}
         # preparing dynamic reconfigure mechanism
-        srv = Server({nodeName}Config, self.configure_callback)
+        srv = Server({componentName}Config, self.configure_callback)
         {endifdynParameter}
         {ifparameter}
         # handling parameters from the parameter server
@@ -82,9 +82,9 @@ def main():
     Instanciate the node interface containing the Developer implementation
     @return nothing
     """
-    rospy.init_node("{nodeName}", anonymous=False)
+    rospy.init_node("{componentName}", anonymous=False)
 
-    node = {apply-capitalized_node_name}ROS()
+    node = {apply-capitalized_comp_name}ROS()
     if not node.configure():
         rospy.logfatal("Could not configure the node")
         rospy.logfatal("Please check configuration parameters")

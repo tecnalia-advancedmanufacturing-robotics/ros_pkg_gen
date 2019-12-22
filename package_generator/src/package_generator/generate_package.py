@@ -179,8 +179,8 @@ Revise the template, and compare to examples
         os.makedirs(self.package_path_)
 
         package_content = os.listdir(self.template_path_ + "/template")
-        nb_node = self.xml_parser_.get_number_nodes()
-        self.log("Number of nodes defined: {}".format(nb_node))
+        nb_comp = self.xml_parser_.get_number_comps()
+        self.log("Number of components defined: {}".format(nb_comp))
 
         if not self.generate_content():
             return False
@@ -346,17 +346,17 @@ Revise the template, and compare to examples
 
         # Looking at final directory and filenames
         package_name = self.xml_parser_.get_package_spec()["name"]
-        nb_node = self.xml_parser_.get_number_nodes()
-        nodes_name = [self.xml_parser_.data_node_[id_node]["attributes"]["name"] for id_node in range(nb_node)]
+        nb_comp = self.xml_parser_.get_number_comps()
+        comps_name = [self.xml_parser_.data_comp_[id_comp]["attributes"]["name"] for id_comp in range(nb_comp)]
 
         self.log("Generating all folders")
 
         tmp = list()
         for item in dir_list:
             item = item.replace('package_name', package_name)
-            if 'node' in item:
-                for one_name in nodes_name:
-                    tmp.append(item.replace('node', one_name))
+            if 'component' in item:
+                for one_name in comps_name:
+                    tmp.append(item.replace('component', one_name))
             else:
                 tmp.append(item)
         dir_list = tmp
@@ -367,28 +367,29 @@ Revise the template, and compare to examples
                 os.makedirs(path_folder)
 
         generation_list = list()
-        # File preparation: will store: template filename, new filename, node id
+        # File preparation: storing [template filename, new filename, comp id]
         for item in file_list:
 
             new_item = item.replace('package_name', package_name)
-            if 'node' in item:
-                for id, one_name in enumerate(nodes_name):
-                    generation_list.append([item, new_item.replace('node', one_name), id])
+            if 'component' in item:
+                for id, one_name in enumerate(comps_name):
+                    generation_list.append([item, new_item.replace('component',
+                                                                   one_name),
+                                                                   id])
             else:
-                # todo if no node active I should not set one
+                # todo if no component active I should not set one
                 generation_list.append([item, new_item, 0])
 
         is_ok = True
-        print("\nFiles generation plan: ")
+        # self.log("\nFiles generation plan: ")
         for item in generation_list:
-            print item
-            [template_file, result_file, node_id] = item
+            [template_file, result_file, comp_id] = item
             self.log("{} --> {}".format(template_file, result_file))
 
-            if not self.xml_parser_.set_active_node(node_id):
+            if not self.xml_parser_.set_active_comp(comp_id):
                 return False
 
-            # reconfiguring the generator to adjust to the new active node
+            # reconfiguring the generator to adjust to the new active component
             if not self.file_generator_.configure(self.xml_parser_, self.spec_):
                 return False
 
@@ -396,7 +397,7 @@ Revise the template, and compare to examples
             # The exception is currently only for the special python file __init__.py
             is_write_forced = (os.path.basename(result_file) == '__init__.py')
 
-            result_file = package_name + "/" + result_file
+            result_file = self.package_path_ + "/" + result_file
             template_file = self.template_path_ + '/template/' + template_file
 
             if self.path_pkg_backup_ is None:
@@ -553,7 +554,7 @@ Revise the template, and compare to examples
 
 
 USAGE_GEN = """ usage: generate_package package_spec package_template
-package_spec: xml description of the node(s) interface
+package_spec: xml description of the component(s) interface
 package_template: name of the template to use
 
 Packages template: either one defined in package `package_generator_templates`,
@@ -574,8 +575,8 @@ def main():
     # checking available templates
     rospack = rospkg.RosPack()
     try:
-        node_path = rospack.get_path('package_generator_templates')
-        default_templates_path = node_path + "/templates/"
+        default_templates_path = rospack.get_path('package_generator_templates')
+        default_templates_path +=  "/templates/"
     except rospkg.common.ResourceNotFound as error:
         msg = "Package package_generator_templates not found in rospack"
         print colored(msg, "yellow")
@@ -658,8 +659,8 @@ def main_check():
     # checking available templates
     rospack = rospkg.RosPack()
     try:
-        node_path = rospack.get_path('package_generator_templates')
-        default_templates_path = node_path + "/templates/"
+        default_templates_path = rospack.get_path('package_generator_templates')
+        default_templates_path += "/templates/"
     except rospkg.common.ResourceNotFound as error:
         msg = "Package package_generator_templates not found in rospack"
         print colored(msg, "yellow")

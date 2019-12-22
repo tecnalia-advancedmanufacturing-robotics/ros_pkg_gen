@@ -14,15 +14,15 @@ find_package(catkin REQUIRED COMPONENTS
 # protected region additional user defined REQUIREMENTS end #
 
 {ifdynParameter}
-{forallnodes}
+{forallcomponent}
 if ({packageName}_dyn_rec_files)
-  list(APPEND {packageName}_dyn_rec_files cfg/{nodeName}.cfg)
-  # message("Append of cfg/{nodeName}.cfg")
+  list(APPEND {packageName}_dyn_rec_files cfg/{componentName}.cfg)
+  # message("Append of cfg/{componentName}.cfg")
 else ()
-  set({packageName}_dyn_rec_files cfg/{nodeName}.cfg)
-  # message("Setting with cfg/{nodeName}.cfg")
+  set({packageName}_dyn_rec_files cfg/{componentName}.cfg)
+  # message("Setting with cfg/{componentName}.cfg")
 endif ()
-{endforallnodes}
+{endforallcomponent}
 
 # message("Test: ${{packageName}_dyn_rec_files}")
 if ({packageName}_dyn_rec_files)
@@ -58,20 +58,20 @@ include_directories(${catkin_INCLUDE_DIRS})
 
 
 ## Declare cpp executable
-{forallnodes}
-add_executable({nodeName} ros/src/{nodeName}_ros.cpp)
+{forallcomponent}
+add_executable({componentName} ros/src/{componentName}_ros.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 {ifdynParameter}
-add_dependencies({nodeName} ${PROJECT_NAME}_gencfg)
-add_dependencies({nodeName} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_dependencies({componentName} ${PROJECT_NAME}_gencfg)
+add_dependencies({componentName} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 {endifdynParameter}
 ## Specify libraries to link a library or executable target against
-target_link_libraries({nodeName} ${catkin_LIBRARIES}
+target_link_libraries({componentName} ${catkin_LIBRARIES}
   # protected region additional user defined LINK STATEMENTS begin #
   # protected region additional user defined LINK STATEMENTS end #
 )
-{endforallnodes}
+{endforallcomponent}
 # protected region additional user defined BUILD STATEMENTS begin #
 # protected region additional user defined BUILD STATEMENTS end #
 
@@ -81,13 +81,13 @@ target_link_libraries({nodeName} ${catkin_LIBRARIES}
 #############
 
 ## Mark executables and/or libraries for installation
-{forallnodes}
-install(TARGETS {nodeName}
+{forallcomponent}
+install(TARGETS {componentName}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-{endforallnodes}
+{endforallcomponent}
 
 # protected region user Cmake macros begin #
 # protected region user Cmake macros end #

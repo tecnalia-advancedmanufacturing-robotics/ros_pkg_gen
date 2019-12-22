@@ -1,5 +1,5 @@
 /**
-* @file {nodeName}_ros.cpp
+* @file {componentName}_ros.cpp
 * @author {packageAuthor}
 *
 * Copyright (C) {packageCopyright}
@@ -25,7 +25,7 @@
 {endifactionClient}
 {ifdynParameter}
 #include <dynamic_reconfigure/server.h>
-#include <{packageName}/{nodeName}Config.h>
+#include <{packageName}/{componentName}Config.h>
 
 {endifdynParameter}
 // ROS message & services includes
@@ -49,22 +49,22 @@
 {endforallserviceClient}
 
 // other includes
-#include <{nodeName}_common.cpp>
+#include <{componentName}_common.cpp>
 
 /**
- * @class {apply-capitalized_node_name}ROS
+ * @class {apply-capitalized_comp_name}ROS
  * @brief Class handling the connection with the ROS world.
- * It also implement the node life-cycle, and access to object {nodeName}-impl when appropriate
+ * It also implement the node life-cycle, and access to object {componentName}-impl when appropriate
  */
-class {apply-capitalized_node_name}ROS
+class {apply-capitalized_comp_name}ROS
 {
 public:
     ros::NodeHandle n_;
     ros::NodeHandle np_;
 
     {ifdynParameter}
-    dynamic_reconfigure::Server<{packageName}::{nodeName}Config> server;
-    dynamic_reconfigure::Server<{packageName}::{nodeName}Config>::CallbackType f;
+    dynamic_reconfigure::Server<{packageName}::{componentName}Config> server;
+    dynamic_reconfigure::Server<{packageName}::{componentName}Config>::CallbackType f;
     {endifdynParameter}
     {forallpublisher}
     ros::Publisher {name}_;
@@ -79,17 +79,17 @@ public:
     actionlib::SimpleActionServer<{type}Action> as_{name}_;
     {endforallactionServer}
 
-    {apply-capitalized_node_name}Data component_data_;
+    {apply-capitalized_comp_name}Data component_data_;
     // todo confirm it should be always defined, even if not used.
-    {apply-capitalized_node_name}Config component_config_;
-    {apply-capitalized_node_name}Impl component_implementation_;
+    {apply-capitalized_comp_name}Config component_config_;
+    {apply-capitalized_comp_name}Impl component_implementation_;
 
     /**
      * @brief object constructor.
      */
-    {apply-capitalized_node_name}ROS() : np_("~")
+    {apply-capitalized_comp_name}ROS() : np_("~")
                      {forallactionServer}
-                     , as_{name}_(n_, "{name}", boost::bind(&{apply-capitalized_node_name}Impl::callback_{name}, &component_implementation_, _1, &as_{name}_), false)
+                     , as_{name}_(n_, "{name}", boost::bind(&{apply-capitalized_comp_name}Impl::callback_{name}, &component_implementation_, _1, &as_{name}_), false)
                      {endforallactionServer}
     {
         {ifactionServer}
@@ -100,7 +100,7 @@ public:
         {endforallactionServer}
         {ifdynParameter}
         // preparing dynamic reconfigure mechanism
-        f = boost::bind(&{apply-capitalized_node_name}ROS::configure_callback, this, _1, _2);
+        f = boost::bind(&{apply-capitalized_comp_name}ROS::configure_callback, this, _1, _2);
         server.setCallback(f);
         {endifdynParameter}
         {forallpublisher}
@@ -115,11 +115,11 @@ public:
         {ifdirectSubscriber}
         // Handling direct subscriber
         {foralldirectSubscriber}
-        component_implementation_.passthrough.{name} = n_.subscribe("{name}", 1, &{apply-capitalized_node_name}Impl::directTopicCallback_{name}, &component_implementation_);
+        component_implementation_.passthrough.{name} = n_.subscribe("{name}", 1, &{apply-capitalized_comp_name}Impl::directTopicCallback_{name}, &component_implementation_);
         {endforalldirectSubscriber}
         {endifdirectSubscriber}
         {forallsubscriber}
-        {name}_ = n_.subscribe("{name}", 1, &{apply-capitalized_node_name}ROS::topicCallback_{name}, this);
+        {name}_ = n_.subscribe("{name}", 1, &{apply-capitalized_comp_name}ROS::topicCallback_{name}, this);
         {endforallsubscriber}
         {ifparameter}
         // handling parameters from the parameter server
@@ -137,7 +137,7 @@ public:
         // handling Service servers
         {endifserviceServer}
         {forallserviceServer}
-        {name}_ = n_.advertiseService<{type}::Request , {type}::Response>("{name}", boost::bind(&{apply-capitalized_node_name}Impl::callback_{name}, &component_implementation_, _1, _2, &component_config_));
+        {name}_ = n_.advertiseService<{type}::Request , {type}::Response>("{name}", boost::bind(&{apply-capitalized_comp_name}Impl::callback_{name}, &component_implementation_, _1, _2, &component_config_));
         {endforallserviceServer}
         {ifserviceClient}
         // handling Service clients
@@ -176,7 +176,7 @@ public:
      * @param config the parameter structure to be updated
      * @param level level of parameters changed
      */
-    void configure_callback({packageName}::{nodeName}Config &config, uint32_t level)
+    void configure_callback({packageName}::{componentName}Config &config, uint32_t level)
     {
         {foralldynParameter}
         component_config_.{name} = config.{name};
@@ -227,7 +227,7 @@ public:
     /**
      * @brief object destructor
      */
-    ~{apply-capitalized_node_name}ROS()
+    ~{apply-capitalized_comp_name}ROS()
     {
     }
 };
@@ -238,14 +238,14 @@ public:
 int main(int argc, char** argv)
 {
 
-    ros::init(argc, argv, "{nodeName}");
+    ros::init(argc, argv, "{componentName}");
 
     ros::AsyncSpinner spinner(1);
 
-    {apply-capitalized_node_name}ROS node;
+    {apply-capitalized_comp_name}ROS node;
     node.configure();
 
-    ros::Timer timer = node.n_.createTimer(ros::Duration(1.0 / {nodeFrequency}), &{apply-capitalized_node_name}ROS::update, &node);
+    ros::Timer timer = node.n_.createTimer(ros::Duration(1.0 / {componentFrequency}), &{apply-capitalized_comp_name}ROS::update, &node);
 
     spinner.start();
 

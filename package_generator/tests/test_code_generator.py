@@ -33,7 +33,7 @@ class CodeGeneratorTest(unittest.TestCase):
         file_content = (
             '<?xml version="1.0" encoding="UTF-8"?>' '\n'
             '<package name="great_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO" copyright="TRI">' '\n'
-            '   <node name="node_extended" frequency="100.0">' '\n'
+            '   <component name="node_extended" frequency="100.0">' '\n'
             '       <publisher name="pub" type="std_msgs::Bool" description=""/>' '\n'
             '       <publisher name="pub_second" type="std_msgs::String" description=""/>' '\n'
             '       <subscriber name="sub_in" type="std_msgs::String" description="" />' '\n'
@@ -43,7 +43,7 @@ class CodeGeneratorTest(unittest.TestCase):
             '       <parameter name="param_two" type="bool" value="1" description=""/>'  '\n'
             '       <actionServer name="action_server" type="bride_tutorials::TriggerPublish" description=""/>' '\n'
             '       <actionClient name="action_client" type="bride_tutorials::TriggerPublish" description=""/>' '\n'
-            '   </node>' '\n'
+            '   </component>' '\n'
             '<depend>std_msgs</depend>' '\n'
             '<depend>std_srvs</depend>' '\n'
             '<depend>bride_tutorials</depend>' '\n'
@@ -116,7 +116,7 @@ class CodeGeneratorTest(unittest.TestCase):
         # self.generator_.write_output_file()
         # print "To compare with \n{}".format(expected_output)
 
-        for generated, groundtruth in zip(self.generator_.tmp_buffer_,
+        for generated, groundtruth in zip(self.generator_.buffer_,
                                           expected_output.splitlines()):
             # print "Comparing |{}| with |{}|".format(generated, groundtruth)
             self.assertEqual(generated, groundtruth)
@@ -126,7 +126,7 @@ class CodeGeneratorTest(unittest.TestCase):
         Test  the conversion of multi-line
         """
         filename = self.dir_name + "/template_test_multiple_line.cpp"
-        file_content = ('hello {nodeName}' '\n'
+        file_content = ('hello {componentName}' '\n'
                         '{forallpublisher}' '\n'
                         'if (component_data_.{name}_active)' '\n'
                         '  pub_.publish(component_data_.{name});' '\n'
@@ -143,7 +143,7 @@ class CodeGeneratorTest(unittest.TestCase):
             open_file.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.tmp_buffer_,
+        for generated, groundtruth in zip(self.generator_.buffer_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
@@ -152,7 +152,7 @@ class CodeGeneratorTest(unittest.TestCase):
         Test correct management of multi-line with bracket
         """
         filename = self.dir_name + "/template_test_multiple_line.cpp"
-        file_content = ('hello {nodeName}' '\n'
+        file_content = ('hello {componentName}' '\n'
                         '{forallpublisher}' '\n'
                         'if (component_data_.{name}_active)' '\n'
                         '{' '\n'
@@ -175,21 +175,21 @@ class CodeGeneratorTest(unittest.TestCase):
             open_file.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.tmp_buffer_,
+        for generated, groundtruth in zip(self.generator_.buffer_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
     def test_multi_tag_single_line(self):
         """
-        An intersting reference to look at if needed
+        todo An interesting reference to look at if needed
         http://stackoverflow.com/questions/17215400/python-format-string-unused-named-arguments
         """
         filename = self.dir_name + "/template_test_multiple_tag.cpp"
 
         file_content = (
             'Let us start !!!!' '\n'
-            'hello {nodeName}' '\n'
-            '    void update({nodeName}_data &data, {nodeName}_config config)' '\n'
+            'hello {componentName}' '\n'
+            '    void update({componentName}_data &data, {componentName}_config config)' '\n'
             'Bye Bye' '\n'
             )
         expected_output = (
@@ -202,7 +202,7 @@ class CodeGeneratorTest(unittest.TestCase):
             openfile.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.tmp_buffer_,
+        for generated, groundtruth in zip(self.generator_.buffer_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
@@ -236,7 +236,7 @@ class CodeGeneratorTest(unittest.TestCase):
             openfile.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.tmp_buffer_,
+        for generated, groundtruth in zip(self.generator_.buffer_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
@@ -247,11 +247,11 @@ class CodeGeneratorTest(unittest.TestCase):
         @param      self The object
         @return nothing
         """
-        filename = self.template_path_ + 'template/ros/src/node_ros.cpp'
+        filename = self.template_path_ + 'template/ros/src/component_ros.cpp'
 
         self.assertTrue(self.generator_.process_file(filename))
 
-        output_file = self.dir_name + "/node_ros.cpp"
+        output_file = self.dir_name + "/component_ros.cpp"
         self.generator_.write_output_file(output_file)
 
     def test_complete_cmake(self):

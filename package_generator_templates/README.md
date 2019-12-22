@@ -1,7 +1,6 @@
 # Package generator templates
 
 This package gathers templates proposed for the `package_generator`.
-So far a single package pattern is implemented, declined in its C++ and python version, named `cpp_node_update` and `python_node_update`.
 
 **Author**: Anthony Remazeilles
 
@@ -51,8 +50,8 @@ If the pattern mainly restricts the node update policy for the publish /subscrib
 
 The ROS interface and the core node intelligence are explicitly separated:
 
-* in the C++ version, the ROS interface is in `ros/src/[node_name]_ros.cpp`, and the node implementation is in `common/src/[node_name]_common.cpp`
-* in the python version, the ROS interface is in `src/[package_name]/[node_name]_ros.py`, and the implementation in `src/[package_name]/[node_name]_impl.py`
+* In the C++ version, the ROS interface is in `ros/src/[node_name]_ros.cpp`, and the node implementation is in `common/src/[node_name]_common.cpp`
+* In the python version, the ROS interface is in `src/[package_name]/[node_name]_ros.py`, and the implementation in `src/[package_name]/[node_name]_impl.py`
 * The ROS interface class handles the creation of all needed ROS interface.
 * You **should** only complete the node implementation files.
 
@@ -87,7 +86,7 @@ This interface is defined in a `xml` file, following the syntax presented in thi
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <package name="py_dummy_package" author="anthony" author_email="anthony@todo.todo" description="Dummy package containing various interface" license="TODO">
-   <node name="first_node" frequency="50.0">
+   <component name="first_node" frequency="50.0">
        <publisher name="is_config_changed" type="std_msgs::Bool" description="Inform whether the config changed"/>
        <publisher name="complete_name" type="std_msgs::String" description="name and surname"/>
        <subscriber name="sub_surname" type="std_msgs::String" description="to receive the person surname"/>
@@ -95,7 +94,7 @@ This interface is defined in a `xml` file, following the syntax presented in thi
        <parameter name="name" type="std::string" value="Empty" description="default person name"/>
        <parameter name="generate_mail_format" type="bool" value="1" description="whether mail format is used or not"/>
        <actionServer name="count_char" type="actionlib::Test" description="count the letters in the generated name"/>
-   </node>
+   </component>
    <depend>std_msgs</depend>
    <depend>std_srvs</depend>
    <depend>actionlib</depend>

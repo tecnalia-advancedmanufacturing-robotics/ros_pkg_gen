@@ -7,13 +7,13 @@
 <!--- protected region package descripion end -->
 
 <!--- todo How to handle the image generation -->
-<!--- <img src="./model/{nodeName}.png" width="300px" />-->
+<!--- <img src="./model/{componentName}.png" width="300px" />-->
 
-{forallnodes}
-## Node: {nodeName}
+{forallcomponent}
+## Node: {componentName}
 
-<!--- protected region {nodeName} begin -->
-<!--- protected region {nodeName} end -->
+<!--- protected region {componentName} begin -->
+<!--- protected region {componentName} end -->
 {ifparameter}
 
 ### Static Parameters
@@ -21,7 +21,7 @@
 All static parameters can be set through the command line:
 
 ```shell
-rosrun {packageName} {nodeName} [param_name]:=[new_value]
+rosrun {packageName} {componentName} [param_name]:=[new_value]
 ```
 
 {endifparameter}
@@ -38,7 +38,7 @@ rosrun {packageName} {nodeName} [param_name]:=[new_value]
 All dynamic parameters can be set through the command line:
 
 ```shell
-rosrun {packageName} {nodeName} _[param_name]:=[new_value]
+rosrun {packageName} {componentName} _[param_name]:=[new_value]
 ```
 
 {endifdynParameter}
@@ -56,7 +56,7 @@ rosrun {packageName} {nodeName} _[param_name]:=[new_value]
 Any service name can be adjusted using the ROS remapping functionality:
 
 ```shell
-rosrun {packageName} {nodeName} [old_name]:=[new_name]
+rosrun {packageName} {componentName} [old_name]:=[new_name]
 ```
 
 {endifserviceServer}
@@ -73,7 +73,7 @@ rosrun {packageName} {nodeName} [old_name]:=[new_name]
 Any service name can be adjusted using the ROS remapping functionality:
 
 ```shell
-rosrun {packageName} {nodeName} [old_name]:=[new_name]
+rosrun {packageName} {componentName} [old_name]:=[new_name]
 ```
 
 {endifserviceClient}
@@ -112,5 +112,5 @@ The subscription handler is triggered as soon as a message arrives.
 <!--- protected region direct subscriber {name} end -->
 {endforalldirectSubscriber}
 
-{endforallnodes}
+{endforallcomponent}
 *Package generated with the [ROS Package Generator](https://github.com/tecnalia-advancedmanufacturing-robotics/ros_pkg_gen).*

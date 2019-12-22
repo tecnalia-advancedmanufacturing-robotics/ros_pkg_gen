@@ -19,15 +19,15 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_python_setup()
 
 {ifdynParameter}
-{forallnodes}
+{forallcomponent}
 if ({packageName}_dyn_rec_files)
-  list(APPEND {packageName}_dyn_rec_files cfg/{nodeName}.cfg)
-  # message("Append of cfg/{nodeName}.cfg")
+  list(APPEND {packageName}_dyn_rec_files cfg/{componentName}.cfg)
+  # message("Append of cfg/{componentName}.cfg")
 else ()
-  set({packageName}_dyn_rec_files cfg/{nodeName}.cfg)
-  # message("Setting with cfg/{nodeName}.cfg")
+  set({packageName}_dyn_rec_files cfg/{componentName}.cfg)
+  # message("Setting with cfg/{componentName}.cfg")
 endif ()
-{endforallnodes}
+{endforallcomponent}
 
 # message("Test: ${{packageName}_dyn_rec_files}")
 if ({packageName}_dyn_rec_files)
@@ -64,9 +64,9 @@ include_directories(${catkin_INCLUDE_DIRS})
 ## Install ##
 #############
 catkin_install_python(PROGRAMS
-                      {forallnodes}
-                      scripts/{nodeName}
-                      {endforallnodes}
+                      {forallcomponent}
+                      scripts/{componentName}
+                      {endforallcomponent}
                       DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 # protected region user Cmake macros begin #

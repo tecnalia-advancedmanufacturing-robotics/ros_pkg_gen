@@ -180,21 +180,21 @@ def str2bool(strg):
     return strg.lower() in ("yes", "true", "t", "1")
 
 
-def capitalized_node_name(context):
-    """return the node name in capitalized format
+def capitalized_comp_name(context):
+    """return the component name in capitalized format
 
     Args:
-        context (dict): complete package and node transformation
+        context (dict): complete package and component transformation
 
     Returns:
-        str: node name in capitalized format, underscore being removed.
+        str: component name in capitalized format, underscore being removed.
 
     Examples:
-        >>> context = {nodeName="another_node" frecuency="100"/>
-        >>> capitalized_node_name(context)
-        "AnotherNode"
+        >>> context = {componentName="another_comp" frecuency="100"/>
+        >>> capitalized_comp_name(context)
+        "AnotherComp"
     """
-    return context['nodeName'].title().replace("_", "")
+    return context['componentName'].title().replace("_", "")
 
 
 def dependencies_from_template():
