@@ -41,6 +41,13 @@ ICINCO’2019
 }
 ```
 
+Note that the paper is related to version `1.0.0`.
+The code has evolved since then.
+See the modifications in file [ChangeLog.md](ChangeLog.md).
+Main changes are:
+* The main element generated in a package is now named `component` (used to be `node`).
+  This term is more generic, and enables considering more package types (version `2.0.0`).
+
 ## Getting started
 
 ### Prerequisites
@@ -84,7 +91,7 @@ The template can be indicated either as:
 * a relative path from the currently active directory
 * a directory name assumed to be existing in the template package
 
-The expected content of the xml file and the behavior of the generated code is described in [template package readme][template_readme].
+The expected content of the xml file and the behaviour of the generated code is described in [template package readme][template_readme].
 Please take 5 minutes to read it.
 
 You can generate automatically the structure of the xml file using the script `generate_xml_skel`:
@@ -138,7 +145,7 @@ rosrun great_package_action_client node_action_client _ac_use_action_remap:=do_a
   * update: if the requested file is generated, refuse it
   * apply more code static checking
   * if no dependency is provided, the system is not accepting doing the generation.
-    Check if (i) thw message is appropriate, (ii) if the generation should be performed anyhow
+    Check if (i) the message is appropriate, (ii) if the generation should be performed anyhow
   * Decide on the insertion per default to `cmake_module` in the required packages
   * Enhance executable definition in CMakeLists when a library is to be added
   * Handle user-provided dependencies for find_package
