@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <package name="py_great_direct_pub_sub" author="anthony" author_email="anthony@todo.todo" description="Package using direct topic communication" license="TODO" copyright="2018 Tecnalia Research and Innovation">
-    <node name="node_direct_pub" frequency="50">
+    <component name="node_direct_pub" frequency="50">
         <directPublisher name="num_reset" type="std_msgs::Int32" description="To inform when value is reset to 0"/>
         <publisher name="counter" type="std_msgs::Int32" description="Value incremented of 1, bounded to 50"/>
-    </node>
-    <node name="node_direct_sub" frequency="10">
+    </component>
+    <component name="node_direct_sub" frequency="10">
         <directSubscriber name="num_reset" type="std_msgs::Int32" description="to know when value is being bounded, with the number of reset done"/>
         <subscriber name="counter" type="std_msgs::Int32" description="received value"/>
-    </node>
+    </component>
     <depend>std_msgs</depend>
 </package>
