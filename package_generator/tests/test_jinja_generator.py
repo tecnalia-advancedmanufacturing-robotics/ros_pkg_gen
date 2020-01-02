@@ -48,6 +48,9 @@ class JinjaGeneratorTest(unittest.TestCase):
             '<depend>std_msgs</depend>' '\n'
             '<depend>std_srvs</depend>' '\n'
             '<depend>bride_tutorials</depend>' '\n'
+            '<depend>actionlib</depend>' '\n'
+            '<depend>actionlib_msgs</depend>' '\n'
+            '<depend>roscpp</depend>' '\n'
             '</package>' '\n')
 
         # print "File content: \n{}".format(file_content)
@@ -198,6 +201,47 @@ class JinjaGeneratorTest(unittest.TestCase):
 
             self.assertEqual(generated, groundtruth)
 
+    def test_write_file(self):
+        file_content = (
+            'name={{active_node}}' '\n'
+            'pkg={{package.name}}' '\n'
+            '{% for item in components[0].interface.publisher %}' '\n'
+            'publisher: {{ item.name }}' '\n'
+            '{% endfor %}' '\n'
+            '{% if components[0].interface.publisher %}' '\n'
+            'At least one publisher ' '\n'
+            '{% endif %}' '\n'
+            '{% if components[0].interface.directPublisher %}' '\n'
+            'At least one direct publisher ' '\n'
+            '{% else %}' '\n'
+            'No direct publisher ' '\n'
+            '{% endif %}')
+        expected_output = (
+            'name=0' '\n'
+            'pkg=great_package' '\n'
+            'publisher: pub' '\n'
+            'publisher: pub_second' '\n'
+            'At least one publisher ' '\n'
+            'No direct publisher ' '\n')
+        template_name = self.dir_name + "/jinja_template.txt"
+        with open(template_name, 'w') as openfile:
+            openfile.write(file_content)
+        rendered_name = self.dir_name + "/jinja_rendered.txt"
+
+        self.assertTrue(self.generator_.generate_disk_file(template_name, rendered_name))
+        self.assertTrue(os.path.isfile(rendered_name))
+
+        lines = list()
+        with open(rendered_name) as input_file:
+            for line in input_file:
+                lines.append(line.rstrip('\n'))
+
+        for generated, groundtruth in zip(lines,
+                                          expected_output.splitlines()):
+            # print "Comparing |{}| with |{}|".format(generated, groundtruth)
+
+            self.assertEqual(generated, groundtruth)
+        # todo check write request with bad filename
 
 if __name__ == '__main__':
     print "test_jinja_generator -- begin"
