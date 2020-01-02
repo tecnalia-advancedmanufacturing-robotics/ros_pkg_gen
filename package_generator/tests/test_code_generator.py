@@ -252,7 +252,7 @@ class CodeGeneratorTest(unittest.TestCase):
         self.assertTrue(self.generator_.process_file(filename))
 
         output_file = self.dir_name + "/component_ros.cpp"
-        self.generator_.write_output_file(output_file)
+        self.assertTrue(self.generator_.write_output_file(output_file))
 
     def test_complete_cmake(self):
         """
@@ -267,7 +267,7 @@ class CodeGeneratorTest(unittest.TestCase):
         self.assertTrue(self.generator_.process_file(filename))
 
         output_file = self.dir_name + "/CMakeLists.txt"
-        self.generator_.write_output_file(output_file)
+        self.assertTrue(self.generator_.write_output_file(output_file))
 
     def test_complete_readme(self):
         """
@@ -282,7 +282,7 @@ class CodeGeneratorTest(unittest.TestCase):
         self.assertTrue(self.generator_.process_file(filename))
 
         output_file = self.dir_name + "/README.md"
-        self.generator_.write_output_file(output_file)
+        self.assertTrue(self.generator_.write_output_file(output_file))
 
     def test_complete_package(self):
         """
@@ -297,7 +297,7 @@ class CodeGeneratorTest(unittest.TestCase):
         self.assertTrue(self.generator_.process_file(filename))
 
         output_file = self.dir_name + "/package.xml"
-        self.generator_.write_output_file(output_file)
+        self.assertTrue(self.generator_.write_output_file(output_file))
 
 
 if __name__ == '__main__':
