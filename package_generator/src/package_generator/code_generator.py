@@ -214,17 +214,17 @@ class CodeGenerator(EnhancedObject):
             return False
         return True
 
-    def process_file(self, filename):
+    def process_file(self, template_filename):
         """
         process a file with tags
 
         Args:
-            filename (str): pathfile
+            template_filename (str): pathfile
 
         Returns:
             Bools: True on sucess
         """
-        # self.log("Generating file {}".format(filename))
+        # self.log("Generating file {}".format(template_filename))
 
         if self.xml_parser_ is None:
             self.log_error("XML parser not defined")
@@ -235,12 +235,12 @@ class CodeGenerator(EnhancedObject):
 
         lines_in_file = list()
         try:
-            with open(filename) as input_file:
+            with open(template_filename) as input_file:
                 for line in input_file:
-                    line = line.rstrip('\n')
-                    lines_in_file.append(line)
+                    #line = line.rstrip('\n')
+                    lines_in_file.append(line.rstrip('\n'))
         except IOError:
-            self.log_error("Prb while opening file {}".format(filename))
+            self.log_error("Prb while opening file {}".format(template_filename))
             return False
         # self.log("File to process has {} lines".format(len(lines_in_file)))
 

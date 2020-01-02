@@ -321,7 +321,7 @@ Revise the template, and compare to examples
         """Generation and storage of all content
 
         Returns:
-            Bool -- True on succesd
+            Bool -- True on success
         """
         # Extracting all components from the template
         file_list = list()
@@ -390,6 +390,7 @@ Revise the template, and compare to examples
                 return False
 
             # reconfiguring the generator to adjust to the new active component
+            # todo configure already called in generate_package function. Check why
             if not self.file_generator_.configure(self.xml_parser_, self.spec_):
                 return False
 
@@ -428,8 +429,8 @@ Revise the template, and compare to examples
                                                            result_file,
                                                            is_write_forced)
                 if self.handle_status_and_advise(template_file,
-                                                  result_file,
-                                                  is_ok):
+                                                 result_file,
+                                                 is_ok):
                     continue
                 else:
                     return False
@@ -576,7 +577,7 @@ def main():
     rospack = rospkg.RosPack()
     try:
         default_templates_path = rospack.get_path('package_generator_templates')
-        default_templates_path +=  "/templates/"
+        default_templates_path += "/templates/"
     except rospkg.common.ResourceNotFound as error:
         msg = "Package package_generator_templates not found in rospack"
         print colored(msg, "yellow")
