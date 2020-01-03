@@ -237,7 +237,6 @@ class CodeGenerator(EnhancedObject):
         try:
             with open(template_filename) as input_file:
                 for line in input_file:
-                    #line = line.rstrip('\n')
                     lines_in_file.append(line.rstrip('\n'))
         except IOError:
             self.log_error("Prb while opening file {}".format(template_filename))

@@ -423,9 +423,10 @@ Revise the template, and compare to examples
             new_item = item.replace('package_name', package_name)
             if 'component' in item:
                 for id, one_name in enumerate(comps_name):
-                    generation_list.append([item, new_item.replace('component',
-                                                                   one_name),
-                                                                   id])
+                    generation_list.append([item,
+                                            new_item.replace('component',
+                                                             one_name),
+                                            id])
             else:
                 # todo if no component active I should not set one
                 generation_list.append([item, new_item, 0])

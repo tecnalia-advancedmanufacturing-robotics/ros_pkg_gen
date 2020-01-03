@@ -241,6 +241,7 @@ class JinjaGeneratorTest(unittest.TestCase):
             self.assertEqual(generated, groundtruth)
         # todo check write request with bad filename
 
+
 if __name__ == '__main__':
     print "test_jinja_generator -- begin"
     unittest.main()

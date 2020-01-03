@@ -46,6 +46,7 @@ class PackageXMLParserTest(unittest.TestCase):
         self.assertTrue(package_parser.load(file_xml))
         # todo check the content read and compare with an expected output.
 
+
 if __name__ == '__main__':
     print "test_xml_parser -- begin"
     unittest.main()
