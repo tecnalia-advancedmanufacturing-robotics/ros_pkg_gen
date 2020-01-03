@@ -75,11 +75,11 @@ class TemplateSpec(EnhancedObject):
             return False
 
         abs_name = folder_path + "/" + "generator.yaml"
-        if not os.path.isfile(abs_name):
+        if os.path.isfile(abs_name):
+            self.load_yaml_generator(abs_name)
+        else:
             self.log_warn("No generator defined. Using custom one")
             self.generators_ = ['custom']
-            # todo Add the function to read that information.
-            # todo make sure the provided generator names are corect
 
         abs_name = folder_path + "/" + "functions.py"
         if not os.path.isfile(abs_name):
@@ -113,6 +113,53 @@ class TemplateSpec(EnhancedObject):
 
         # self.log("Data read: | \n {}".format(self.dico_))
         # pprint.pprint(self.dico_)
+        return True
+
+    def load_yaml_generator(self, yaml_file):
+
+        content = dict()
+        try:
+            with open(yaml_file, 'r') as open_file:
+                content = yaml.load(open_file)
+        except IOError, err:
+            self.log_error("IO Error: {}".format(err))
+            self.log_error("Generator forced to custom")
+            self.generators_ = ['custom']
+            return False
+        except yaml.parser.ParserError, err:
+            self.log_error("Parsing Error detected: {}".format(err))
+            self.log_error("Generator forced to custom")
+            self.generators_ = ['custom']
+            return False
+
+        # check content read
+        # todo factorize error management, using Exception for examples
+        if 'generator' not in content:
+            self.log_error("Check generator file : {}".format(content))
+            self.log_error("Generator forced to custom")
+            self.generators_ = ['custom']
+            return False
+
+        if type(content['generator']) is not list:
+            self.log_error("Check generator file : {}".format(content))
+            self.log_error("Generator forced to custom")
+            self.generators_ = ['custom']
+            return False
+
+        known_gen = ["custom", "jinja"]
+
+        self.generators_ = list()
+        for item in content['generator']:
+            if item in known_gen:
+                self.generators_.append(item)
+            else:
+                self.log_error("Check generator file : {}".format(content))
+                self.log_error("{} is unknown".format(item))
+
+        if not self.generators_:
+            self.log_error("Generator forced to custom")
+            self.generators_ = ['custom']
+            return False
         return True
 
     def load_functions(self, py_file):

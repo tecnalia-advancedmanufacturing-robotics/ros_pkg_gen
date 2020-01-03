@@ -99,12 +99,6 @@ class JinjaGenerator(EnhancedObject):
         return True
 
 # todo:
-# * Add a field in the template to set the generation mode
-# ** to be fair, the best might be adding another file in the template
-# ** if file not present, custom is used. Otherwise the generator is read in the file
-# * Read the mode, and only apply appropriate generation
-# ** add a field to the spec providing the generators used
-# ** possible cases: custom, custom+jinja, jinja, jinja + custom
 # * Define appropriate context structure
 # * Handle error situations
 # * update test files

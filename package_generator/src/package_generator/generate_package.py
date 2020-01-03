@@ -238,7 +238,7 @@ Revise the template, and compare to examples
         if not is_ok:
             return False
 
-        return gen_two.generate_open_file(gen_one.rendered,
+        return gen_two.generate_open_file(gen_one.rendered_,
                                           result_file,
                                           force_write)
 
