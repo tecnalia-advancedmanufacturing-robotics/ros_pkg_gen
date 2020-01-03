@@ -117,7 +117,7 @@ class CodeGeneratorTest(unittest.TestCase):
 
         self.assertTrue(self.generator_.process_file(filename))
 
-        for generated, groundtruth in zip(self.generator_.buffer_,
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             # print "Comparing |{}| with |{}|".format(generated, groundtruth)
             self.assertEqual(generated, groundtruth)
@@ -144,7 +144,7 @@ class CodeGeneratorTest(unittest.TestCase):
             open_file.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.buffer_,
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
@@ -176,7 +176,7 @@ class CodeGeneratorTest(unittest.TestCase):
             open_file.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.buffer_,
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
@@ -203,7 +203,7 @@ class CodeGeneratorTest(unittest.TestCase):
             openfile.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.buffer_,
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
@@ -237,7 +237,7 @@ class CodeGeneratorTest(unittest.TestCase):
             openfile.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.buffer_,
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 

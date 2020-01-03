@@ -219,20 +219,52 @@ Revise the template, and compare to examples
 
     def generate_one_file(self, template_file, result_file, force_write):
 
-        is_ok = self.file_generator_.generate_disk_file(template_file)
+        self.spec_.generators_
+
+        generator = dict()
+        generator["custom"] = self.file_generator_
+        generator["jinja"] = self.jinja_generator_
+
+        if len(self.spec_.generators_) == 1:
+            return generator[self.spec_.generators_[0]].generate_disk_file(template_file,
+                                                                           result_file,
+                                                                           force_write)
+        # two generators are to be used
+        gen_one = generator[self.spec_.generators_[0]]
+        gen_two = generator[self.spec_.generators_[1]]
+
+        is_ok = gen_one.generate_disk_file(template_file)
 
         if not is_ok:
             return False
 
-        str_template = "\n".join(self.file_generator_.buffer_)
-        is_ok = self.jinja_generator_.generate_open_file(str_template,
-                                                         result_file,
-                                                         force_write)
-        return is_ok
+        return gen_two.generate_open_file(gen_one.rendered,
+                                          result_file,
+                                          force_write)
 
     def write_generated_file(self, result_file):
 
-        return self.jinja_generator_.write_rendered_file(result_file)
+        generator = dict()
+        generator["custom"] = self.file_generator_
+        generator["jinja"] = self.jinja_generator_
+
+        return generator[self.spec_.generators_[-1]].write_rendered_file(result_file)
+
+    def get_generated_file(self):
+
+        generator = dict()
+        generator["custom"] = self.file_generator_
+        generator["jinja"] = self.jinja_generator_
+
+        return generator[self.spec_.generators_[-1]].rendered_
+
+    def set_generated_file(self, buffer):
+
+        generator = dict()
+        generator["custom"] = self.file_generator_
+        generator["jinja"] = self.jinja_generator_
+
+        generator[self.spec_.generators_[-1]].rendered_ = buffer
 
     def handle_maintained_files(self):
         """ Restore file Developer requests to maintain
@@ -480,7 +512,8 @@ Revise the template, and compare to examples
                     return False
 
                 # todo handle this in case jinja is involved.
-                if self.file_generator_.get_len_gen_file() == 0:
+                buffer = self.get_generated_file()
+                if len(buffer) == 0:
                     msg = "New generated file empty. No code maintained from previous version"
                     self.log_warn(msg)
                     # we write it if forced
@@ -488,10 +521,9 @@ Revise the template, and compare to examples
                         is_ok = self.write_generated_file(result_file)
                 else:
                     self.log("Merging with previous version")
-                    # todo handle this in case jinja is involved
-                    self.file_generator_.buffer_ = file_analyzor.update_file(self.file_generator_.buffer_)
-                    # todo handle this in case jinja is involved
-                    is_ok = self.file_generator_.write_output_file(result_file)
+                    buffer = file_analyzor.update_file(buffer)
+                    self.set_generated_file(buffer)
+                    is_ok = self.write_generated_file(result_file)
 
                 if self.handle_status_and_advise(template_file,
                                                  result_file,

@@ -185,10 +185,10 @@ class JinjaGeneratorTest(unittest.TestCase):
         self.assertTrue(custom_generator.process_file(filename))
 
         print "Custom generation \n"
-        for line in custom_generator.buffer_:
+        for line in custom_generator.rendered_:
             print line
 
-        self.assertTrue(self.generator_.generate_open_file(custom_generator.buffer_))
+        self.assertTrue(self.generator_.generate_open_file(custom_generator.rendered_))
 
         # print "Rendered file \n"
         # print self.generator_.rendered_

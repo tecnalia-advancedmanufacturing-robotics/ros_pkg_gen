@@ -55,7 +55,7 @@ class CodeGenerator(EnhancedObject):
         comp_spec_ (list): spec of each component
         package_spec_ (dict): specification of the package
         spec_ (TemplateSpec): specification of the template
-        buffer_ (list): will contain the generated file
+        rendered_ (list): will contain the generated file
         transformation_ (dict): mapping instruction tag to generation function
         transformation_functions_ (dict): mapping inst. fun to gen. fun
         transformation_loop_ (dict): mapping instruction flow to gen. functions
@@ -71,7 +71,7 @@ class CodeGenerator(EnhancedObject):
         self.transformation_functions_ = dict()
 
         self.spec_ = None
-        self.buffer_ = list()
+        self.rendered_ = list()
         self.xml_parser_ = None
         self.comp_spec_ = None
         self.package_spec_ = None
@@ -98,7 +98,7 @@ class CodeGenerator(EnhancedObject):
             self.generate_simple_tags()
             self.generate_flow_tags()
             self.generate_apply_functions()
-            self.buffer_[:] = []
+            self.rendered_[:] = []
         except AssertionError, err:
             self.log_error("Prb during configuration: {}".format(err))
             return False
@@ -154,7 +154,7 @@ class CodeGenerator(EnhancedObject):
     # TODO empty self.transformation_functions_ before/when entering here
     def generate_apply_functions(self):
         """Get the transformation functions defined with the template config
-        TODO : is ir worth doing so?
+        TODO : is it worth doing so?
         """
         for fun in self.spec_.transformation_functions_:
             self.transformation_functions_[fun] = self.spec_.transformation_functions_[fun]
@@ -174,15 +174,15 @@ class CodeGenerator(EnhancedObject):
     def reset_output_file(self):
         """Reset the internal buffer used to accumulate generated code
         """
-        self.buffer_ = list()
+        self.rendered_ = list()
 
     def get_len_gen_file(self):
         """Returns the number of lines of the generated file
 
         Returns:
-            Int: numbe rof lines in the file
+            Int: number of lines in the file
         """
-        return len(self.buffer_)
+        return len(self.rendered_)
 
     def write_rendered_file(self, filename=None):
         """write the generated code
@@ -196,15 +196,15 @@ class CodeGenerator(EnhancedObject):
         if filename is None:
             self.log("Resulting file:")
             print"----"
-            for item in self.buffer_:
+            for item in self.rendered_:
                 print item
             print"----"
             return True
 
         try:
-            # self.log("Storing {} lines in {}".format(len(self.buffer_), filename))
+            # self.log("Storing {} lines in {}".format(len(self.rendered_), filename))
             out_file = open(filename, 'w')
-            for item in self.buffer_:
+            for item in self.rendered_:
                 # print "printing {}".format(item)
                 out_file.write(item + '\n')
             out_file.close()
@@ -387,7 +387,7 @@ class CodeGenerator(EnhancedObject):
                 # look for the other tags
                 matches = self.get_all_tags(line)
                 if not matches:
-                    self.buffer_.append(line)
+                    self.rendered_.append(line)
                     num_line += 1
                     continue
 
@@ -421,7 +421,7 @@ class CodeGenerator(EnhancedObject):
                     # check if the line is empty
                     # that would be due to a if tag that is not defined.
                     if line and (not line.isspace()):
-                        self.buffer_.append(line)
+                        self.rendered_.append(line)
                     # else:
                     #    print colored("Line empty: |{}|".format(line), "blue")
 
@@ -586,7 +586,7 @@ class CodeGenerator(EnhancedObject):
 
                 output.append(line_processed)
 
-        self.buffer_ += output
+        self.rendered_ += output
 
         return True
 
@@ -655,7 +655,7 @@ class CodeGenerator(EnhancedObject):
 
                 output.append(line_processed)
 
-        self.buffer_ += output
+        self.rendered_ += output
         # self.log_error("Sanity check: Is dictinnary extended?\n {}".format(self.comp_spec_["interface"][interface_type]))
         # self.log("created: {}".format(type(output)))
         # todo no false case?

@@ -77,7 +77,7 @@ class TemplateSpec(EnhancedObject):
         abs_name = folder_path + "/" + "generator.yaml"
         if not os.path.isfile(abs_name):
             self.log_warn("No generator defined. Using custom one")
-            self.generators = ['custom']
+            self.generators_ = ['custom']
             # todo Add the function to read that information.
             # todo make sure the provided generator names are corect
 
