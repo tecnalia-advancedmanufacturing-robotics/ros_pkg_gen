@@ -82,6 +82,9 @@ class JinjaGenerator(EnhancedObject):
         try:
             with open(filename, 'w') as out_file:
                 out_file.write(self.rendered_)
+                # todo could this addition be removed?
+                if self.rendered_:
+                    out_file.write('\n')
 
         except IOError:
             self.log_error("Prb while opening output file {}".format(filename))
@@ -89,11 +92,13 @@ class JinjaGenerator(EnhancedObject):
         return True
 
 # todo:
-# * Add the jinja generator after the custom one
 # * Add a field in the template to set the generation mode
 # * Read the mode, and only apply appropriate generation
+# ** add a field to the spec providing the generators used
+# ** possible cases: custom, custom+jinja, jinja, jinja + custom
 # * Define appropriate context structure
 # * Handle error situations
-# * update test file
+# * update test files
 # * update jinja_generator docstrings
 # * update documentation
+# * handle the template sanity check (if Jinja used)

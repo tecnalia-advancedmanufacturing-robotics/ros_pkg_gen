@@ -18,6 +18,7 @@ import sys
 import rospkg
 
 from package_generator.code_generator import CodeGenerator
+from package_generator.jinja_generator import JinjaGenerator
 from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.file_update_management import GeneratedFileAnalysis
 from package_generator.enhanced_object import EnhancedObject
@@ -139,6 +140,7 @@ Revise the template, and compare to examples
         self.spec_ = TemplateSpec()
         self.xml_parser_ = PackageXMLParser()
         self.file_generator_ = CodeGenerator()
+        self.jinja_generator_ = JinjaGenerator()
 
         dir_template_spec = self.template_path_ + "/config/"
         if not self.spec_.load_spec(dir_template_spec):
@@ -178,7 +180,6 @@ Revise the template, and compare to examples
             self.log("Package to be created in {}".format(self.package_path_))
         os.makedirs(self.package_path_)
 
-        package_content = os.listdir(self.template_path_ + "/template")
         nb_comp = self.xml_parser_.get_number_comps()
         self.log("Number of components defined: {}".format(nb_comp))
 
@@ -215,6 +216,23 @@ Revise the template, and compare to examples
         is_ok = self.handle_maintained_files()
 
         return is_ok
+
+    def generate_one_file(self, template_file, result_file, force_write):
+
+        is_ok = self.file_generator_.generate_file(template_file)
+
+        if not is_ok:
+            return False
+
+        str_template = "\n".join(self.file_generator_.buffer_)
+        is_ok = self.jinja_generator_.generate_open_file(str_template,
+                                                         result_file,
+                                                         force_write)
+        return is_ok
+
+    def write_generated_file(self, result_file):
+
+        return self.jinja_generator_.write_rendered_file(result_file)
 
     def handle_maintained_files(self):
         """ Restore file Developer requests to maintain
@@ -393,6 +411,8 @@ Revise the template, and compare to examples
             # todo configure already called in generate_package function. Check why
             if not self.file_generator_.configure(self.xml_parser_, self.spec_):
                 return False
+            if not self.jinja_generator_.configure(self.xml_parser_, self.spec_):
+                return False
 
             # Normally an empty file should not be written
             # The exception is currently only for the special python file __init__.py
@@ -404,9 +424,9 @@ Revise the template, and compare to examples
             if self.path_pkg_backup_ is None:
                 self.log("Generating file {}".format(result_file))
 
-                is_ok = self.file_generator_.generate_file(template_file,
-                                                           result_file,
-                                                           force_write=is_write_forced)
+                is_ok = self.generate_one_file(template_file,
+                                               result_file,
+                                               is_write_forced)
 
                 if self.handle_status_and_advise(template_file,
                                                  result_file,
@@ -425,9 +445,9 @@ Revise the template, and compare to examples
                 msg = "File {} not previously existing. Just write it"
                 self.log_warn(msg.format(rel_path))
 
-                is_ok = self.file_generator_.generate_file(template_file,
-                                                           result_file,
-                                                           is_write_forced)
+                is_ok = self.generate_one_file(template_file,
+                                               result_file,
+                                               is_write_forced)
                 if self.handle_status_and_advise(template_file,
                                                  result_file,
                                                  is_ok):
@@ -455,30 +475,33 @@ Revise the template, and compare to examples
                 # self.log("Updating file {} in {}".format(rel_path, output_item))
                 self.log("Updating file {}".format(rel_path))
 
-                is_ok = self.file_generator_.generate_file(template_file)
+                is_ok = self.generate_one_file(template_file, None, None)
                 if not is_ok:
                     return False
-                if is_ok:
-                    if self.file_generator_.get_len_gen_file() == 0:
-                        msg = "New generated file empty. No code maintained from previous version"
-                        self.log_warn(msg)
-                        # we write it if forced
-                        if is_write_forced:
-                            is_ok = self.file_generator_.write_output_file(result_file)
-                    else:
-                        self.log("Merging with previous version")
-                        self.file_generator_.buffer_ = file_analyzor.update_file(self.file_generator_.buffer_)
-                        is_ok = self.file_generator_.write_output_file(result_file)
 
-                    if self.handle_status_and_advise(template_file,
-                                                     result_file,
-                                                     is_ok):
-                        continue
-                    else:
-                        return False
+                # todo handle this in case jinja is involved.
+                if self.file_generator_.get_len_gen_file() == 0:
+                    msg = "New generated file empty. No code maintained from previous version"
+                    self.log_warn(msg)
+                    # we write it if forced
+                    if is_write_forced:
+                        is_ok = self.write_generated_file(result_file)
+                else:
+                    self.log("Merging with previous version")
+                    # todo handle this in case jinja is involved
+                    self.file_generator_.buffer_ = file_analyzor.update_file(self.file_generator_.buffer_)
+                    # todo handle this in case jinja is involved
+                    is_ok = self.file_generator_.write_output_file(result_file)
+
+                if self.handle_status_and_advise(template_file,
+                                                 result_file,
+                                                 is_ok):
+                    continue
+                else:
+                    return False
 
             # Although the file existed before, we do not have to maintain it
-            is_ok = self.file_generator_.generate_file(template_file, result_file, is_write_forced)
+            is_ok = self.generate_one_file(template_file, result_file, is_write_forced)
             if self.handle_status_and_advise(template_file, result_file, is_ok):
                 continue
             else:
