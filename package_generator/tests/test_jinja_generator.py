@@ -10,6 +10,8 @@ Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 
 To run a single test, type:
 python test_jinja_generator.py JinjaGeneratorTest.test_is_launching
+To launch all use:
+python -m unittest discover --verbose
 """
 
 import unittest
