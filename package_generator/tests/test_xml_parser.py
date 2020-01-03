@@ -44,7 +44,7 @@ class PackageXMLParserTest(unittest.TestCase):
         file_xml = node_path + '/tests/data/demo.ros_package'
 
         self.assertTrue(package_parser.load(file_xml))
-
+        # todo check the content read and compare with an expected output.
 
 if __name__ == '__main__':
     print "test_xml_parser -- begin"

@@ -41,6 +41,7 @@ class TemplateSpec(EnhancedObject):
         super(TemplateSpec, self).__init__(name)
 
         self.dico_ = dict()
+        self.generators_ = list()
         self.transformation_functions_ = dict()
         self.dep_from_template_ = None
         self.dep_from_interface_ = None
@@ -72,6 +73,13 @@ class TemplateSpec(EnhancedObject):
         if not self.load_yaml_desc(abs_name):
             self.log_error("Configuration aborted")
             return False
+
+        abs_name = folder_path + "/" + "generator.yaml"
+        if not os.path.isfile(abs_name):
+            self.log_warn("No generator defined. Using custom one")
+            self.generators = ['custom']
+            # todo Add the function to read that information.
+            # todo make sure the provided generator names are corect
 
         abs_name = folder_path + "/" + "functions.py"
         if not os.path.isfile(abs_name):

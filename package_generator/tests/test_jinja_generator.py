@@ -98,9 +98,9 @@ class JinjaGeneratorTest(unittest.TestCase):
         with open(filename, 'w') as openfile:
             openfile.write(file_content)
 
-        self.generator_.generate_disk_file(filename)
+        self.assertTrue(self.generator_.generate_disk_file(filename))
 
-        for generated, groundtruth in zip(self.generator_.rendered_.splitlines(),
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           file_content.splitlines()):
             # print "Comparing |{}| with |{}|".format(generated, groundtruth)
             self.assertEqual(generated, groundtruth)
@@ -138,8 +138,8 @@ class JinjaGeneratorTest(unittest.TestCase):
         with open(filename, 'w') as openfile:
             openfile.write(file_content)
 
-        self.generator_.generate_disk_file(filename)
-        for generated, groundtruth in zip(self.generator_.rendered_.splitlines(),
+        self.assertTrue(self.generator_.generate_disk_file(filename))
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
@@ -186,16 +186,12 @@ class JinjaGeneratorTest(unittest.TestCase):
         for line in custom_generator.buffer_:
             print line
 
-        str_buffer = "\n".join(custom_generator.buffer_)
+        self.assertTrue(self.generator_.generate_open_file(custom_generator.buffer_))
 
-        print "Check: \n{}".format(str_buffer)
+        # print "Rendered file \n"
+        # print self.generator_.rendered_
 
-        self.assertTrue(self.generator_.generate_open_file(str_buffer))
-
-        print "Rendered file \n"
-        print self.generator_.rendered_
-
-        for generated, groundtruth in zip(self.generator_.rendered_.splitlines(),
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             print "Comparing |{}| with |{}|".format(generated, groundtruth)
 

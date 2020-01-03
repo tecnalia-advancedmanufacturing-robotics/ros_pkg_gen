@@ -184,7 +184,7 @@ class CodeGenerator(EnhancedObject):
         """
         return len(self.buffer_)
 
-    def write_output_file(self, filename=None):
+    def write_rendered_file(self, filename=None):
         """write the generated code
 
         Args:
@@ -248,7 +248,7 @@ class CodeGenerator(EnhancedObject):
         iter_enum_lines = iter(enumerate(lines_in_file, start=1))
         return self.process_input(iter_enum_lines)
 
-    def generate_file(self, file_template, output_file=None, force_write=False):
+    def generate_disk_file(self, file_template, output_file=None, force_write=False):
         """generate a file and store it where specified
 
         Args:
@@ -269,10 +269,39 @@ class CodeGenerator(EnhancedObject):
 
         nb_line = self.get_len_gen_file()
 
+        # We decide not writting a file if it is empty, unless forced to do so
+        if force_write or nb_line > 0:
+            return self.write_rendered_file(output_file)
+        return True
+
+    def generate_open_file(self, file_template, output_file=None, force_write=False):
+        """generate a file and store it where specified
+
+        Args:
+            file_template (list): template file as a list of string (per lines)
+            output_file (str): where to store the generated code
+            force_write (bool, optional): if set, forces the file writting even if empty
+
+        Returns:
+            Bool: True on success
+        """
+        self.reset_output_file()
+        self.do_generate_ = True
+
+        # generate an iterator on the enumerated content of the lines list
+        iter_enum_lines = iter(enumerate(file_template, start=1))
+        if not self.process_input(iter_enum_lines):
+            return False
+
+        if output_file is None:
+            return True
+
+        nb_line = self.get_len_gen_file()
+
         # self.log_error("File length: {}".format(nb_line))
         # We decide not writting a file if it is empty, unless forced to do so
         if force_write or nb_line > 0:
-            return self.write_output_file(output_file)
+            return self.write_rendered_file(output_file)
         return True
 
     def check_template_file(self, file_template):
@@ -738,7 +767,7 @@ def main():
     gen.reset_output_file()
     if gen.process_file(filename):
         output_file = "README.md"
-        gen.write_output_file(output_file)
+        gen.write_rendered_file(output_file)
         print "Output written in file {}".format(output_file)
     else:
         print "Debug!"

@@ -43,8 +43,10 @@ class JinjaGenerator(EnhancedObject):
         # Rendered element is a unique string containing all content
         # code generator is generating a list of string instead
         # todo handle exceptions, here or in upper layers.
-        self.rendered_ = template.render(context)
+        str_rendered = template.render(context)
 
+        # convert it in the list of string format:
+        self.rendered_ = str_rendered.splitlines()
         if not output_file:
             return True
 
@@ -65,9 +67,13 @@ class JinjaGenerator(EnhancedObject):
 
         # print "Check components {}".format(context["components"])
 
-        template = jinja2.Template(template_file, trim_blocks=True)
+        str_template = "\n".join(template_file)
+        template = jinja2.Template(str_template, trim_blocks=True)
         # todo handle exceptions, here or in upper layers.
-        self.rendered_ = template.render(context)
+        str_rendered = template.render(context)
+
+        # convert it in the list of string format:
+        self.rendered_ = str_rendered.splitlines()
 
         if not output_file:
             return True
@@ -81,10 +87,11 @@ class JinjaGenerator(EnhancedObject):
 
         try:
             with open(filename, 'w') as out_file:
-                out_file.write(self.rendered_)
+                for item in self.rendered_:
+                    out_file.write(item + '\n')
                 # todo could this addition be removed?
-                if self.rendered_:
-                    out_file.write('\n')
+                # if self.rendered_:
+                #    out_file.write('\n')
 
         except IOError:
             self.log_error("Prb while opening output file {}".format(filename))
@@ -93,6 +100,8 @@ class JinjaGenerator(EnhancedObject):
 
 # todo:
 # * Add a field in the template to set the generation mode
+# ** to be fair, the best might be adding another file in the template
+# ** if file not present, custom is used. Otherwise the generator is read in the file
 # * Read the mode, and only apply appropriate generation
 # ** add a field to the spec providing the generators used
 # ** possible cases: custom, custom+jinja, jinja, jinja + custom

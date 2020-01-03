@@ -219,7 +219,7 @@ Revise the template, and compare to examples
 
     def generate_one_file(self, template_file, result_file, force_write):
 
-        is_ok = self.file_generator_.generate_file(template_file)
+        is_ok = self.file_generator_.generate_disk_file(template_file)
 
         if not is_ok:
             return False
@@ -536,7 +536,6 @@ Revise the template, and compare to examples
 
         # print ("Dirs: ")
         # print("\n".join(dir_list))
-
         # print("Files: ")
         # print("\n".join(file_list))
 
