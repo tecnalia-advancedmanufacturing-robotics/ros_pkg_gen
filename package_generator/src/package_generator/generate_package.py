@@ -8,6 +8,7 @@
 
 Copyright (C) 2017 Tecnalia Research and Innovation
 Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
+
 """
 
 from termcolor import colored
@@ -29,16 +30,17 @@ class PackageGenerator(EnhancedObject):
     """Handle the genration of a whole package
 
     Attributes:
-        file_generator_ (TYPE): Description
-        package_path_ (TYPE): Description
-        path_pkg_backup_ (TYPE): Description
+        file_generator_ (CodeGenerator): custom generator
+        jinja_generator_ (JinjaGenerator): generator based on jinja
+        package_path_ (str): base location of the package to create
+        path_pkg_backup_ (str): if the package already existed, location of the package backup
         spec_ (TemplateSpec): configuration of the template model
-        template_path_ (TYPE): Description
-        xml_parser_ (TYPE): Description
+        template_path_ (str): path to the template to use
+        xml_parser_ (PackageXMLParser): parser of the package description
     """
 
     def __init__(self, name="PackageGenerator"):
-        """ Intialisation of the object
+        """Intialisation of the object
 
         Args:
             name (str, optional): Name of the component, for printing aspect
@@ -218,7 +220,16 @@ Revise the template, and compare to examples
         return is_ok
 
     def generate_one_file(self, template_file, result_file, force_write):
+        """Generate a template file, depending on the generators to be used
 
+        Args:
+            template_file (str): template filename
+            result_file (str): filename to store the result (unless is None)
+            force_write (str): force the writting of empty files (if not, files is not written)
+
+        Returns:
+            Bool: True on success
+        """
         self.spec_.generators_
 
         generator = dict()
@@ -243,7 +254,14 @@ Revise the template, and compare to examples
                                           force_write)
 
     def write_generated_file(self, result_file):
+        """Write a generated file
 
+        Args:
+            result_file (str): filename to store the file.
+
+        Returns:
+            Bool: True on success
+        """
         generator = dict()
         generator["custom"] = self.file_generator_
         generator["jinja"] = self.jinja_generator_
@@ -251,7 +269,11 @@ Revise the template, and compare to examples
         return generator[self.spec_.generators_[-1]].write_rendered_file(result_file)
 
     def get_generated_file(self):
+        """Get the generated files
 
+        Returns:
+            list: list of of each line of the generated file
+        """
         generator = dict()
         generator["custom"] = self.file_generator_
         generator["jinja"] = self.jinja_generator_
@@ -259,7 +281,11 @@ Revise the template, and compare to examples
         return generator[self.spec_.generators_[-1]].rendered_
 
     def set_generated_file(self, buffer):
+        """set the generated file
 
+        Args:
+            buffer (list): list of of each line of the generated file
+        """
         generator = dict()
         generator["custom"] = self.file_generator_
         generator["jinja"] = self.jinja_generator_
@@ -267,8 +293,9 @@ Revise the template, and compare to examples
         generator[self.spec_.generators_[-1]].rendered_ = buffer
 
     def handle_maintained_files(self):
-        """ Restore file Developer requests to maintain
+        """Restore file Developer requests to maintain
         Assuming these patterns are defined in file .gen_maintain
+
         Returns:
             Bool: True on sucess
         """
@@ -341,7 +368,7 @@ Revise the template, and compare to examples
 
         Args:
             input_file (str): path  of the template file used
-            output_file (TYPE): path of the generated file
+            output_file (str): path of the generated file
             gen_flag (Bool): Success of the generation process
 
         Returns:
@@ -542,7 +569,10 @@ Revise the template, and compare to examples
         return True
 
     def template_sanity_check(self):
-        """ Perform the package sanity check
+        """Perform the package sanity check
+
+        Returns:
+            Bool: True on success
         """
 
         # TODO list number of files in template

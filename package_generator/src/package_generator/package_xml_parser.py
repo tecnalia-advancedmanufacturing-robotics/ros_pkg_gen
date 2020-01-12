@@ -7,6 +7,7 @@
 
 Copyright (C) 2017 Tecnalia Research and Innovation
 Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
+
 """
 
 from termcolor import colored
@@ -43,12 +44,12 @@ class PackageXMLParser(EnhancedObject):
 
     Attributes:
         active_comp_ (int): id of the current active component (if several defined)
-        data_depend_ (list): list of package dependency
         data_comp_ (list): list of component specification
+        data_depend_ (list): list of package dependency
         data_pack_ (dict): specifications of the package
-        spec_ (TemplateSpec): Template specification
         is_dependency_complete_ (bool): whether dependencies were automatically added
         root_ (TYPE): root of the xml tree
+        spec_ (TemplateSpec): Template specification
     """
     def __init__(self, name="PackageXMLParser"):
         """object constructor
@@ -72,6 +73,9 @@ class PackageXMLParser(EnhancedObject):
 
         Args:
             spec (TemplateSpec): Object containing the template specs.
+
+        Returns:
+            Bool: operation success
         """
         expected_keys = ['package_attributes', 'component_interface', 'component_attributes']
 
@@ -87,12 +91,12 @@ class PackageXMLParser(EnhancedObject):
         """load a xml description provided in a file
 
         Args:
-            filename (TYPE): Description
+            filename (str): path of the file containing the xl description
 
         Returns:
-            Bool: true if it succeeded
-
-        Warning: on success the active component is placed on the first one
+            Bool: Operation sucess
+        Warning:
+            on success the active component is placed on the first one
         """
         if self.spec_ is None:
             msg_err = "Cannot load a package description without template spec"
@@ -128,7 +132,7 @@ class PackageXMLParser(EnhancedObject):
         return is_ok
 
     def extend_dependencies(self):
-        """ Check if dependencies required by the package spec and
+        """Check if dependencies required by the package spec and
             the used interface is effectively defined.
 
         Returns:
@@ -292,7 +296,7 @@ class PackageXMLParser(EnhancedObject):
         return loc_data_comp
 
     def load_one_dependency(self, xml_dep):
-        """Summary
+        """Add a dependency
 
         Args:
             xml_dep (TYPE): Description
@@ -318,11 +322,8 @@ class PackageXMLParser(EnhancedObject):
         """
         checking the sanity of the xml file
 
-        Args:
-            verbose (bool, optional): whether additional info is being displayed
-
         Returns:
-            TYPE: Description
+            Bool: Operation sucess
         """
 
         if not self.root_:
@@ -406,7 +407,7 @@ class PackageXMLParser(EnhancedObject):
         return True
 
     def get_active_comp_spec(self):
-        """Provide all the spec of a given comp
+        """Provide all the spec of a given component
 
         Returns:
             TYPE: Description

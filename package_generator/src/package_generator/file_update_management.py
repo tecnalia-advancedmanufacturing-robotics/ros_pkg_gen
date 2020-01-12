@@ -27,7 +27,7 @@ class ProtectedArea(object):
         num_line_start_ (int): in original file, where the code starts
         num_line_stop_ (int): in original file, where the code finishes
         protected_lines_ (list): list of lines within that protected area
-        tag_ (TYPE): string ident of that protected line
+        tag_ (str): string ident of that protected line
     """
 
     def __init__(self):
@@ -71,15 +71,23 @@ class ProtectedArea(object):
 
 class ProtectedLine(EnhancedObject):
     """Description of a protected line
+
     Attributes:
         comment_format_ (list): 2 strings respectively for the begin / end of the comment
         delimitor_ (list): 2 string respectively to identify the beginining / end of the protected area
-        line_start_ (int): line at which the protected area start
+        line_ (TYPE): Description
+        num_line_ (int): Description
         protected_tag_ (str): unique tag for the current comment
         protection_pattern_ (str): tag used to detected protected area start / stop
+
+    Deleted Attributes:
+        line_start_ (int): line at which the protected area start
     """
     def __init__(self, name="ProtectedLine"):
         """Object constructor
+
+        Args:
+            name (str, optional): Description
         """
         super(ProtectedLine, self).__init__(name)
 
@@ -91,6 +99,11 @@ class ProtectedLine(EnhancedObject):
         self.line_ = None
 
     def __repr__(self):
+        """return a string state of the object
+
+        Returns:
+            str: Object state
+        """
         output = "<ProtectedLine "
         output += "delimitor: {} ".format(self.delimitor_)
         output += "num_line: {} ".format(self.num_line_)
@@ -101,6 +114,11 @@ class ProtectedLine(EnhancedObject):
         return output
 
     def __str__(self):
+        """return a string state of the object
+
+        Returns:
+            str: Object state
+        """
         output = "<ProtectedLine "
         output += "delimitor: {} ".format(self.delimitor_)
         output += "num_line: {} ".format(self.num_line_)
@@ -111,7 +129,7 @@ class ProtectedLine(EnhancedObject):
         return output
 
     def set_line_content(self, line):
-        """ set the line content
+        """set the line content
 
         Args:
             line (str): protected line to place in
@@ -248,10 +266,22 @@ class ProtectedLine(EnhancedObject):
 
 class GeneratedFileAnalysis(EnhancedObject):
     """Handle a generated file, wrt to protected areas
+
+    Attributes:
+        extracted_areas_ (dict): set of protected areas extracted organized per area identifier
+        protected_pattern_ (str): message indicating protected area start
+        protected_tags_ (list): string related to begining and end of protected area
     """
     def __init__(self, name="GeneratedFileAnalysis",
                  protected_pattern="protected region",
                  protected_tags=None):
+        """Class constructor
+
+        Args:
+            name (str, optional): Description
+            protected_pattern (str, optional): Description
+            protected_tags (None, optional): Description
+        """
         super(GeneratedFileAnalysis, self).__init__(name)
 
         # pattern text used fro delimiting user code
@@ -346,7 +376,7 @@ class GeneratedFileAnalysis(EnhancedObject):
             id_line += 2
         # Data correct, now we reduce the set to store the begining and the end
 
-        # todo: this could be done taking out the element from the list progreassively
+        # todo: this could be done taking out the element from the list progressively
         id_line = 0
         while id_line < num_protected_lines:
             pa = ProtectedArea()
@@ -382,6 +412,12 @@ class GeneratedFileAnalysis(EnhancedObject):
         @param      file_in_list The initial file
 
         @return updated list if the operation succeeded
+
+        Args:
+            file_in_list (list): list of str lines to be processed
+
+        Returns:
+            list: the updated file
         """
         # self.log("File initial contains {} lines".format(len(file_in_list)))
         file_updated = list()

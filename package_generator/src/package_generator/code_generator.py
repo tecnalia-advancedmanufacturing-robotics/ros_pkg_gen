@@ -50,12 +50,12 @@ class CodeGenerator(EnhancedObject):
     """class responsible of the generation of a single file
 
     Attributes:
+        comp_spec_ (list): spec of each component
         dep_spec_ (list): list of dependency of the package
         do_generate_ (bool): False used for template check
-        comp_spec_ (list): spec of each component
         package_spec_ (dict): specification of the package
-        spec_ (TemplateSpec): specification of the template
         rendered_ (list): will contain the generated file
+        spec_ (TemplateSpec): specification of the template
         transformation_ (dict): mapping instruction tag to generation function
         transformation_functions_ (dict): mapping inst. fun to gen. fun
         transformation_loop_ (dict): mapping instruction flow to gen. functions
@@ -63,6 +63,11 @@ class CodeGenerator(EnhancedObject):
 
     """
     def __init__(self, name="CodeGenerator"):
+        """Class constructor
+
+        Args:
+            name (str, optional): component name
+        """
         #  call super class constructor
         super(CodeGenerator, self).__init__(name)
 
@@ -160,7 +165,7 @@ class CodeGenerator(EnhancedObject):
             self.transformation_functions_[fun] = self.spec_.transformation_functions_[fun]
 
     def get_xml_parsing(self):
-        """ set the xml parser, and extract the relevant input from it
+        """set the xml parser, and extract the relevant input from it
         """
         assert self.xml_parser_ is not None, "No xml data defined"
         self.comp_spec_ = self.xml_parser_.get_active_comp_spec()
@@ -307,7 +312,7 @@ class CodeGenerator(EnhancedObject):
         """Check a template file (without generating it)
 
         Arguments:
-            file_template {string} -- template file name
+            file_template (str): template filename to be checked
 
         Returns:
             [Bool] -- True if the file is correct
@@ -323,7 +328,7 @@ class CodeGenerator(EnhancedObject):
         """Find all tags in a given line
 
         Arguments:
-            line {string} -- Line to process
+            line (string): Description
 
         Returns:
             [type] -- list of matches found
@@ -335,6 +340,15 @@ class CodeGenerator(EnhancedObject):
         return matches
 
     def get_all_tags_pattern(self, root_pattern, line):
+        """Find all tags in a line, given a pattern
+
+        Args:
+            root_pattern (str): pattern search in the line
+            line (str): line to process
+
+        Returns:
+            TYPE: Description
+        """
         # TODO are these 2 functions needed?
         # self.log("Processing line {}".format(line))
         instances = re.finditer(r'\{' + root_pattern + r'-\w+}', line)
@@ -344,7 +358,7 @@ class CodeGenerator(EnhancedObject):
         return matches
 
     def process_input(self, iter_enum_lines):
-        """Summary
+        """Render a template file, provided through a string iterator
 
         Args:
             iter_enum_lines (iterator): set of lines to process
@@ -515,6 +529,11 @@ class CodeGenerator(EnhancedObject):
     # TODO remove that function that is not used anymore
     # function kept as exmaple if externalizing makes sense
     def get_include_interface(self):
+        """generates cpp include lines
+
+        Returns:
+            List: list of the generated lines
+        """
         output = None
 
         include_set = set()
@@ -665,10 +684,10 @@ class CodeGenerator(EnhancedObject):
 
         Args:
             interface_type (str): interface name
-            it_text (ITerator): listing to process if the interface is used.
+            it_text (Iterator): listing to process if the interface is used.
 
         Returns:
-            TYPE: Description
+            True: True on success
         """
         # self.log("Handling text: \n {}".format(text))
         if isinstance(interface_type, str):

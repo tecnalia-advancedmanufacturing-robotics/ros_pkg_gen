@@ -10,7 +10,6 @@ Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 """
 from package_generator.enhanced_object import EnhancedObject
 import yaml
-import pprint
 import os
 
 
@@ -26,6 +25,7 @@ class TemplateSpec(EnhancedObject):
             due to the template itself
         dico_ (dict): the package dictionary, expected to be used by
             the developer in the xml file
+        generators_ (list): Description
         transformation_functions_ (dict): list of additional functions that are
             provided by the Designer to complete the basic instructions
             directly deduced from the dictionary
@@ -112,11 +112,21 @@ class TemplateSpec(EnhancedObject):
             return False
 
         # self.log("Data read: | \n {}".format(self.dico_))
-        # pprint.pprint(self.dico_)
         return True
 
     def load_yaml_generator(self, yaml_file):
+        """Load the yaml file in which a tag `generator`is expected to be found.
+           The tag should be described by a list, containing the name of the
+           generator to be used: `custom` and `jinja` are the values expected.
+           The order of appearance will define the order of use, if both are
+           present.
 
+        Args:
+            yaml_file (str): filename of yaml containing generator to be used
+
+        Returns:
+            Bool: Operation success
+        """
         content = dict()
         try:
             with open(yaml_file, 'r') as open_file:
