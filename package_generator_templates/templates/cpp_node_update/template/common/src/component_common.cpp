@@ -118,6 +118,7 @@ public:
     {endforallpublisher}
 };
 
+{% if interface.listener or interface.broadcaster or interface.directPublisher or interface.directSubscriber or interface.actionClient or interface.serviceClient %}
 /**
  * @class {apply-capitalized_comp_name}Passthrough
  * @brief set of passthrough elements slightly violating interface / implementation separation
@@ -165,6 +166,7 @@ public:
         {endforallactionClient}
     }
 };
+{% endif %}
 /**
  * @class {apply-capitalized_comp_name}Impl
  * @brief Implementation of the node intelligence
@@ -176,8 +178,10 @@ class {apply-capitalized_comp_name}Impl
     /* protected region user member variables end */
 
 public:
+{% if interface.listener or interface.broadcaster or interface.directPublisher or interface.directSubscriber or interface.actionClient or interface.serviceClient %}
     {apply-capitalized_comp_name}Passthrough passthrough;
 
+{% endif %}
     /**
      * @brief constructor
      */
