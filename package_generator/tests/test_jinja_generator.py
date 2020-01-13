@@ -112,7 +112,7 @@ class JinjaGeneratorTest(unittest.TestCase):
 
         file_content = (
             '{forallpublisher}' '\n'
-            'name={{active_node}}' '\n'
+            'name={{active_comp}}' '\n'
             'pkg={{package.name}}' '\n'
             '{% for item in components[0].interface.publisher %}' '\n'
             'publisher: {{ item.name }}' '\n'
@@ -141,6 +141,7 @@ class JinjaGeneratorTest(unittest.TestCase):
             openfile.write(file_content)
 
         self.assertTrue(self.generator_.generate_disk_file(filename))
+
         for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
@@ -150,7 +151,7 @@ class JinjaGeneratorTest(unittest.TestCase):
 
         file_content = (
             '{ifpublisher}' '\n'
-            'name={{active_node}}' '\n'
+            'name={{active_comp}}' '\n'
             'pkg={{package.name}}' '\n'
             '{% for item in components[0].interface.publisher %}' '\n'
             'publisher: {{ item.name }}' '\n'
@@ -184,9 +185,9 @@ class JinjaGeneratorTest(unittest.TestCase):
 
         self.assertTrue(custom_generator.process_file(filename))
 
-        print "Custom generation \n"
-        for line in custom_generator.rendered_:
-            print line
+        # print "Custom generation \n"
+        # for line in custom_generator.rendered_:
+        #    print line
 
         self.assertTrue(self.generator_.generate_open_file(custom_generator.rendered_))
 
@@ -195,13 +196,13 @@ class JinjaGeneratorTest(unittest.TestCase):
 
         for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
-            print "Comparing |{}| with |{}|".format(generated, groundtruth)
+            # print "Comparing |{}| with |{}|".format(generated, groundtruth)
 
             self.assertEqual(generated, groundtruth)
 
     def test_write_file(self):
         file_content = (
-            'name={{active_node}}' '\n'
+            'name={{active_comp}}' '\n'
             'pkg={{package.name}}' '\n'
             '{% for item in components[0].interface.publisher %}' '\n'
             'publisher: {{ item.name }}' '\n'
