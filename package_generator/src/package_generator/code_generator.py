@@ -50,12 +50,12 @@ class CodeGenerator(EnhancedObject):
     """class responsible of the generation of a single file
 
     Attributes:
+        comp_spec_ (list): spec of each component
         dep_spec_ (list): list of dependency of the package
         do_generate_ (bool): False used for template check
-        comp_spec_ (list): spec of each component
         package_spec_ (dict): specification of the package
+        rendered_ (list): will contain the generated file
         spec_ (TemplateSpec): specification of the template
-        buffer_ (list): will contain the generated file
         transformation_ (dict): mapping instruction tag to generation function
         transformation_functions_ (dict): mapping inst. fun to gen. fun
         transformation_loop_ (dict): mapping instruction flow to gen. functions
@@ -63,6 +63,11 @@ class CodeGenerator(EnhancedObject):
 
     """
     def __init__(self, name="CodeGenerator"):
+        """Class constructor
+
+        Args:
+            name (str, optional): component name
+        """
         #  call super class constructor
         super(CodeGenerator, self).__init__(name)
 
@@ -71,7 +76,7 @@ class CodeGenerator(EnhancedObject):
         self.transformation_functions_ = dict()
 
         self.spec_ = None
-        self.buffer_ = list()
+        self.rendered_ = list()
         self.xml_parser_ = None
         self.comp_spec_ = None
         self.package_spec_ = None
@@ -98,7 +103,7 @@ class CodeGenerator(EnhancedObject):
             self.generate_simple_tags()
             self.generate_flow_tags()
             self.generate_apply_functions()
-            self.buffer_[:] = []
+            self.rendered_[:] = []
         except AssertionError, err:
             self.log_error("Prb during configuration: {}".format(err))
             return False
@@ -154,13 +159,13 @@ class CodeGenerator(EnhancedObject):
     # TODO empty self.transformation_functions_ before/when entering here
     def generate_apply_functions(self):
         """Get the transformation functions defined with the template config
-        TODO : is ir worth doing so?
+        TODO : is it worth doing so?
         """
         for fun in self.spec_.transformation_functions_:
             self.transformation_functions_[fun] = self.spec_.transformation_functions_[fun]
 
     def get_xml_parsing(self):
-        """ set the xml parser, and extract the relevant input from it
+        """set the xml parser, and extract the relevant input from it
         """
         assert self.xml_parser_ is not None, "No xml data defined"
         self.comp_spec_ = self.xml_parser_.get_active_comp_spec()
@@ -174,17 +179,17 @@ class CodeGenerator(EnhancedObject):
     def reset_output_file(self):
         """Reset the internal buffer used to accumulate generated code
         """
-        self.buffer_ = list()
+        self.rendered_ = list()
 
     def get_len_gen_file(self):
         """Returns the number of lines of the generated file
 
         Returns:
-            Int: numbe rof lines in the file
+            Int: number of lines in the file
         """
-        return len(self.buffer_)
+        return len(self.rendered_)
 
-    def write_output_file(self, filename=None):
+    def write_rendered_file(self, filename=None):
         """write the generated code
 
         Args:
@@ -196,15 +201,15 @@ class CodeGenerator(EnhancedObject):
         if filename is None:
             self.log("Resulting file:")
             print"----"
-            for item in self.buffer_:
+            for item in self.rendered_:
                 print item
             print"----"
             return True
 
         try:
-            # self.log("Storing {} lines in {}".format(len(self.buffer_), filename))
+            # self.log("Storing {} lines in {}".format(len(self.rendered_), filename))
             out_file = open(filename, 'w')
-            for item in self.buffer_:
+            for item in self.rendered_:
                 # print "printing {}".format(item)
                 out_file.write(item + '\n')
             out_file.close()
@@ -214,17 +219,17 @@ class CodeGenerator(EnhancedObject):
             return False
         return True
 
-    def process_file(self, filename):
+    def process_file(self, template_filename):
         """
         process a file with tags
 
         Args:
-            filename (str): pathfile
+            template_filename (str): pathfile
 
         Returns:
             Bools: True on sucess
         """
-        # self.log("Generating file {}".format(filename))
+        # self.log("Generating file {}".format(template_filename))
 
         if self.xml_parser_ is None:
             self.log_error("XML parser not defined")
@@ -235,12 +240,11 @@ class CodeGenerator(EnhancedObject):
 
         lines_in_file = list()
         try:
-            with open(filename) as input_file:
+            with open(template_filename) as input_file:
                 for line in input_file:
-                    line = line.rstrip('\n')
-                    lines_in_file.append(line)
+                    lines_in_file.append(line.rstrip('\n'))
         except IOError:
-            self.log_error("Prb while opening file {}".format(filename))
+            self.log_error("Prb while opening file {}".format(template_filename))
             return False
         # self.log("File to process has {} lines".format(len(lines_in_file)))
 
@@ -248,7 +252,7 @@ class CodeGenerator(EnhancedObject):
         iter_enum_lines = iter(enumerate(lines_in_file, start=1))
         return self.process_input(iter_enum_lines)
 
-    def generate_file(self, file_template, output_file=None, force_write=False):
+    def generate_disk_file(self, file_template, output_file=None, force_write=False):
         """generate a file and store it where specified
 
         Args:
@@ -269,17 +273,46 @@ class CodeGenerator(EnhancedObject):
 
         nb_line = self.get_len_gen_file()
 
+        # We decide not writting a file if it is empty, unless forced to do so
+        if force_write or nb_line > 0:
+            return self.write_rendered_file(output_file)
+        return True
+
+    def generate_open_file(self, file_template, output_file=None, force_write=False):
+        """generate a file and store it where specified
+
+        Args:
+            file_template (list): template file as a list of string (per lines)
+            output_file (str): where to store the generated code
+            force_write (bool, optional): if set, forces the file writting even if empty
+
+        Returns:
+            Bool: True on success
+        """
+        self.reset_output_file()
+        self.do_generate_ = True
+
+        # generate an iterator on the enumerated content of the lines list
+        iter_enum_lines = iter(enumerate(file_template, start=1))
+        if not self.process_input(iter_enum_lines):
+            return False
+
+        if output_file is None:
+            return True
+
+        nb_line = self.get_len_gen_file()
+
         # self.log_error("File length: {}".format(nb_line))
         # We decide not writting a file if it is empty, unless forced to do so
         if force_write or nb_line > 0:
-            return self.write_output_file(output_file)
+            return self.write_rendered_file(output_file)
         return True
 
     def check_template_file(self, file_template):
         """Check a template file (without generating it)
 
         Arguments:
-            file_template {string} -- template file name
+            file_template (str): template filename to be checked
 
         Returns:
             [Bool] -- True if the file is correct
@@ -295,7 +328,7 @@ class CodeGenerator(EnhancedObject):
         """Find all tags in a given line
 
         Arguments:
-            line {string} -- Line to process
+            line (string): Description
 
         Returns:
             [type] -- list of matches found
@@ -307,6 +340,15 @@ class CodeGenerator(EnhancedObject):
         return matches
 
     def get_all_tags_pattern(self, root_pattern, line):
+        """Find all tags in a line, given a pattern
+
+        Args:
+            root_pattern (str): pattern search in the line
+            line (str): line to process
+
+        Returns:
+            TYPE: Description
+        """
         # TODO are these 2 functions needed?
         # self.log("Processing line {}".format(line))
         instances = re.finditer(r'\{' + root_pattern + r'-\w+}', line)
@@ -316,7 +358,7 @@ class CodeGenerator(EnhancedObject):
         return matches
 
     def process_input(self, iter_enum_lines):
-        """Summary
+        """Render a template file, provided through a string iterator
 
         Args:
             iter_enum_lines (iterator): set of lines to process
@@ -358,7 +400,7 @@ class CodeGenerator(EnhancedObject):
                 # look for the other tags
                 matches = self.get_all_tags(line)
                 if not matches:
-                    self.buffer_.append(line)
+                    self.rendered_.append(line)
                     num_line += 1
                     continue
 
@@ -392,7 +434,7 @@ class CodeGenerator(EnhancedObject):
                     # check if the line is empty
                     # that would be due to a if tag that is not defined.
                     if line and (not line.isspace()):
-                        self.buffer_.append(line)
+                        self.rendered_.append(line)
                     # else:
                     #    print colored("Line empty: |{}|".format(line), "blue")
 
@@ -487,6 +529,11 @@ class CodeGenerator(EnhancedObject):
     # TODO remove that function that is not used anymore
     # function kept as exmaple if externalizing makes sense
     def get_include_interface(self):
+        """generates cpp include lines
+
+        Returns:
+            List: list of the generated lines
+        """
         output = None
 
         include_set = set()
@@ -557,7 +604,7 @@ class CodeGenerator(EnhancedObject):
 
                 output.append(line_processed)
 
-        self.buffer_ += output
+        self.rendered_ += output
 
         return True
 
@@ -626,7 +673,7 @@ class CodeGenerator(EnhancedObject):
 
                 output.append(line_processed)
 
-        self.buffer_ += output
+        self.rendered_ += output
         # self.log_error("Sanity check: Is dictinnary extended?\n {}".format(self.comp_spec_["interface"][interface_type]))
         # self.log("created: {}".format(type(output)))
         # todo no false case?
@@ -637,10 +684,10 @@ class CodeGenerator(EnhancedObject):
 
         Args:
             interface_type (str): interface name
-            it_text (ITerator): listing to process if the interface is used.
+            it_text (Iterator): listing to process if the interface is used.
 
         Returns:
-            TYPE: Description
+            True: True on success
         """
         # self.log("Handling text: \n {}".format(text))
         if isinstance(interface_type, str):
@@ -738,7 +785,7 @@ def main():
     gen.reset_output_file()
     if gen.process_file(filename):
         output_file = "README.md"
-        gen.write_output_file(output_file)
+        gen.write_rendered_file(output_file)
         print "Output written in file {}".format(output_file)
     else:
         print "Debug!"

@@ -45,14 +45,17 @@ class PackageGeneratorTest(unittest.TestCase):
             '<depend>std_msgs</depend>'  '\n'
             '<depend>std_srvs</depend>'  '\n'
             '<depend>bride_tutorials</depend>'  '\n'
+            '<depend>roscpp</depend>' '\n'
+            '<depend>actionlib</depend>' '\n'
+            '<depend>actionlib_msgs</depend>' '\n'
             '</package> ' '\n')
 
         file_content_multi = (
             '<?xml version="1.0" encoding="UTF-8"?>' '\n'
             '<package name="great_multi_node_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO" copyright="TRI">' '\n'
             '   <component name="node_extended" frequency="100.0">' '\n'
-            '       <publisher name="pub" eventHandler="" type="std_msgs::Bool" description=""/>' '\n'
-            '       <publisher name="pub_second" eventHandler="" type="std_msgs::String" description=""/>' '\n'
+            '       <publisher name="pub" type="std_msgs::Bool" description=""/>' '\n'
+            '       <publisher name="pub_second" type="std_msgs::String" description=""/>' '\n'
             '       <subscriber name="sub_in" type="std_msgs::String" description=""/>' '\n'
             '       <serviceClient name="service_client" type="std_srvs::Trigger" description=""/>' '\n'
             '       <serviceServer name="service_server" type="std_srvs::SetBool" description=""/>' '\n'
@@ -62,8 +65,8 @@ class PackageGeneratorTest(unittest.TestCase):
             '       <actionClient name="action_client" type="bride_tutorials::TriggerPublish" description=""/>' '\n'
             '   </component>'  '\n'
             '   <component name="second_node" frequency="100.0">' '\n'
-            '       <publisher name="pub_bool" eventHandler="" type="std_msgs::Bool" description=""/>' '\n'
-            '       <publisher name="pub_string" eventHandler="" type="std_msgs::String" description="" />' '\n'
+            '       <publisher name="pub_bool" type="std_msgs::Bool" description=""/>' '\n'
+            '       <publisher name="pub_string" type="std_msgs::String" description="" />' '\n'
             '       <subscriber name="sub_string" type="std_msgs::String" description=""/>' '\n'
             '       <parameter name="param_string" type="std::string" value="Empty" description=""/>'  '\n'
             '       <parameter name="param_bool" type="bool" value="1" description=""/>'  '\n'
@@ -72,6 +75,9 @@ class PackageGeneratorTest(unittest.TestCase):
             '<depend>std_msgs</depend>'  '\n'
             '<depend>std_srvs</depend>'  '\n'
             '<depend>bride_tutorials</depend>'  '\n'
+            '<depend>roscpp</depend>' '\n'
+            '<depend>actionlib</depend>' '\n'
+            '<depend>actionlib_msgs</depend>' '\n'
             '</package> ' '\n')
 
         # print "File content: \n{}".format(file_content)
@@ -149,7 +155,7 @@ class PackageGeneratorTest(unittest.TestCase):
         readme_file = self.path_template_ + "template/README.md"
         output_file = self.dir_name + "/test_README.md"
 
-        self.assertTrue(file_generator.generate_file(readme_file, output_file))
+        self.assertTrue(file_generator.generate_disk_file(readme_file, output_file))
 
     def test_cmake_multi_nodes(self):
         """test generation of a CMakeLists file involving multiple nodes spec.
@@ -168,7 +174,7 @@ class PackageGeneratorTest(unittest.TestCase):
         readme_file = self.path_template_ + "template/CMakeLists.txt"
         output_file = self.dir_name + "/test_CMakeLists.txt"
 
-        self.assertTrue(file_generator.generate_file(readme_file, output_file))
+        self.assertTrue(file_generator.generate_disk_file(readme_file, output_file))
 
     def test_package_multi_nodes(self):
         """test generation of a package file involving multiple nodes spec.
@@ -187,7 +193,7 @@ class PackageGeneratorTest(unittest.TestCase):
         readme_file = self.path_template_ + "template/package.xml"
         output_file = self.dir_name + "/test_package.xml"
 
-        self.assertTrue(file_generator.generate_file(readme_file, output_file))
+        self.assertTrue(file_generator.generate_disk_file(readme_file, output_file))
 
 
 if __name__ == '__main__':

@@ -47,6 +47,9 @@ class CodeGeneratorTest(unittest.TestCase):
             '<depend>std_msgs</depend>' '\n'
             '<depend>std_srvs</depend>' '\n'
             '<depend>bride_tutorials</depend>' '\n'
+            '<depend>roscpp</depend>' '\n'
+            '<depend>actionlib</depend>' '\n'
+            '<depend>actionlib_msgs</depend>' '\n'
             '</package>' '\n')
 
         # print "File content: \n{}".format(file_content)
@@ -88,7 +91,7 @@ class CodeGeneratorTest(unittest.TestCase):
             'in one line: {name}: {apply-get_python_type}' '\n'
             'cpp path: {name}: {apply-get_cpp_path}' '\n'
             'more tricky: {name}: {apply-get_cpp_path} {unknowntag}' '\n'
-            'more tricky: {name}: {apply-get_cpp_path} {apply-unknown}' '\n'
+            'more tricky: {name}: {apply-get_cpp_path} {apply-unknownname}' '\n'
             '\n'
             '{endforallpublisher}')
 
@@ -99,7 +102,7 @@ class CodeGeneratorTest(unittest.TestCase):
             "in one line: pub: std_msgs.Bool" "\n"
             "cpp path: pub: std_msgs/Bool" "\n"
             "more tricky: pub: std_msgs/Bool {unknowntag}" "\n"
-            "more tricky: pub: std_msgs/Bool {apply-unknown}" "\n"
+            "more tricky: pub: std_msgs/Bool {apply-unknownname}" "\n"
             "" "\n"
             "name=pub_second" "\n"
             "pkg=std_msgs " "\n"
@@ -107,16 +110,14 @@ class CodeGeneratorTest(unittest.TestCase):
             "in one line: pub_second: std_msgs.String" "\n"
             "cpp path: pub_second: std_msgs/String" "\n"
             "more tricky: pub_second: std_msgs/String {unknowntag}" "\n"
-            "more tricky: pub_second: std_msgs/String {apply-unknown}" "\n")
+            "more tricky: pub_second: std_msgs/String {apply-unknownname}" "\n")
 
         with open(filename, 'w') as openfile:
             openfile.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        # self.generator_.write_output_file()
-        # print "To compare with \n{}".format(expected_output)
 
-        for generated, groundtruth in zip(self.generator_.buffer_,
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             # print "Comparing |{}| with |{}|".format(generated, groundtruth)
             self.assertEqual(generated, groundtruth)
@@ -143,7 +144,7 @@ class CodeGeneratorTest(unittest.TestCase):
             open_file.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.buffer_,
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
@@ -175,7 +176,7 @@ class CodeGeneratorTest(unittest.TestCase):
             open_file.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.buffer_,
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
@@ -202,7 +203,7 @@ class CodeGeneratorTest(unittest.TestCase):
             openfile.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.buffer_,
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
@@ -236,7 +237,7 @@ class CodeGeneratorTest(unittest.TestCase):
             openfile.write(file_content)
 
         self.assertTrue(self.generator_.process_file(filename))
-        for generated, groundtruth in zip(self.generator_.buffer_,
+        for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
             self.assertEqual(generated, groundtruth)
 
@@ -252,7 +253,7 @@ class CodeGeneratorTest(unittest.TestCase):
         self.assertTrue(self.generator_.process_file(filename))
 
         output_file = self.dir_name + "/component_ros.cpp"
-        self.generator_.write_output_file(output_file)
+        self.assertTrue(self.generator_.write_rendered_file(output_file))
 
     def test_complete_cmake(self):
         """
@@ -267,7 +268,7 @@ class CodeGeneratorTest(unittest.TestCase):
         self.assertTrue(self.generator_.process_file(filename))
 
         output_file = self.dir_name + "/CMakeLists.txt"
-        self.generator_.write_output_file(output_file)
+        self.assertTrue(self.generator_.write_rendered_file(output_file))
 
     def test_complete_readme(self):
         """
@@ -282,7 +283,7 @@ class CodeGeneratorTest(unittest.TestCase):
         self.assertTrue(self.generator_.process_file(filename))
 
         output_file = self.dir_name + "/README.md"
-        self.generator_.write_output_file(output_file)
+        self.assertTrue(self.generator_.write_rendered_file(output_file))
 
     def test_complete_package(self):
         """
@@ -297,7 +298,7 @@ class CodeGeneratorTest(unittest.TestCase):
         self.assertTrue(self.generator_.process_file(filename))
 
         output_file = self.dir_name + "/package.xml"
-        self.generator_.write_output_file(output_file)
+        self.assertTrue(self.generator_.write_rendered_file(output_file))
 
 
 if __name__ == '__main__':

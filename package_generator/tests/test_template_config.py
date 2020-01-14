@@ -35,7 +35,6 @@ class GenerateDictTest(unittest.TestCase):
             print "Creating the repo {}".format(self.dir_name)
             os.makedirs(self.dir_name)
 
-
     def test_undef_files(self):
         self.assertFalse(self.spec.load_yaml_desc("unknown_file.yaml"))
         self.assertFalse(self.spec.load_functions("unknown_file.py"))

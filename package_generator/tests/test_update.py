@@ -12,10 +12,6 @@ Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 import unittest
 import os
 
-# from package_generator.package_generator import PackageGenerator
-# from package_generator.code_generator import CodeGenerator
-# from package_generator.package_xml_parser import PackageXMLParser
-
 from package_generator.file_update_management import GeneratedFileAnalysis
 
 

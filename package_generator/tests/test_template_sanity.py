@@ -12,15 +12,13 @@ Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 # TODO should these packages added to the packages.xml?
 import unittest
 import os
-import rospkg
 import shutil
 import datetime
+import rospkg
 
-from distutils.dir_util import copy_tree
 from package_generator.generate_package import PackageGenerator
 from package_generator.code_generator import CodeGenerator
 from package_generator.package_xml_parser import PackageXMLParser
-from package_generator.template_spec import TemplateSpec
 
 
 class TemplateSanityTest(unittest.TestCase):
@@ -38,8 +36,6 @@ class TemplateSanityTest(unittest.TestCase):
         TemplateSanityTest.counter_ += 1
         if not os.path.exists(self.dir_name):
             os.makedirs(self.dir_name)
-
-        #os.makedirs(self.dir_name + "/config")
 
     def test_empty_template(self):
 

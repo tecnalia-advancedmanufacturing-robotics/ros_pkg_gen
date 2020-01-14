@@ -10,7 +10,6 @@ Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
 """
 from package_generator.enhanced_object import EnhancedObject
 import yaml
-import pprint
 import os
 
 
@@ -26,6 +25,7 @@ class TemplateSpec(EnhancedObject):
             due to the template itself
         dico_ (dict): the package dictionary, expected to be used by
             the developer in the xml file
+        generators_ (list): Description
         transformation_functions_ (dict): list of additional functions that are
             provided by the Designer to complete the basic instructions
             directly deduced from the dictionary
@@ -41,6 +41,7 @@ class TemplateSpec(EnhancedObject):
         super(TemplateSpec, self).__init__(name)
 
         self.dico_ = dict()
+        self.generators_ = list()
         self.transformation_functions_ = dict()
         self.dep_from_template_ = None
         self.dep_from_interface_ = None
@@ -73,6 +74,13 @@ class TemplateSpec(EnhancedObject):
             self.log_error("Configuration aborted")
             return False
 
+        abs_name = folder_path + "/" + "generator.yaml"
+        if os.path.isfile(abs_name):
+            self.load_yaml_generator(abs_name)
+        else:
+            self.log_warn("No generator defined. Using custom one")
+            self.generators_ = ['custom']
+
         abs_name = folder_path + "/" + "functions.py"
         if not os.path.isfile(abs_name):
             self.log_warn("Missing expected file " + abs_name)
@@ -104,7 +112,64 @@ class TemplateSpec(EnhancedObject):
             return False
 
         # self.log("Data read: | \n {}".format(self.dico_))
-        # pprint.pprint(self.dico_)
+        return True
+
+    def load_yaml_generator(self, yaml_file):
+        """Load the yaml file in which a tag `generator`is expected to be found.
+           The tag should be described by a list, containing the name of the
+           generator to be used: `custom` and `jinja` are the values expected.
+           The order of appearance will define the order of use, if both are
+           present.
+
+        Args:
+            yaml_file (str): filename of yaml containing generator to be used
+
+        Returns:
+            Bool: Operation success
+        """
+        content = dict()
+        try:
+            with open(yaml_file, 'r') as open_file:
+                content = yaml.load(open_file)
+        except IOError, err:
+            self.log_error("IO Error: {}".format(err))
+            self.log_error("Generator forced to custom")
+            self.generators_ = ['custom']
+            return False
+        except yaml.parser.ParserError, err:
+            self.log_error("Parsing Error detected: {}".format(err))
+            self.log_error("Generator forced to custom")
+            self.generators_ = ['custom']
+            return False
+
+        # check content read
+        # todo factorize error management, using Exception for examples
+        if 'generator' not in content:
+            self.log_error("Check generator file : {}".format(content))
+            self.log_error("Generator forced to custom")
+            self.generators_ = ['custom']
+            return False
+
+        if type(content['generator']) is not list:
+            self.log_error("Check generator file : {}".format(content))
+            self.log_error("Generator forced to custom")
+            self.generators_ = ['custom']
+            return False
+
+        known_gen = ["custom", "jinja"]
+
+        self.generators_ = list()
+        for item in content['generator']:
+            if item in known_gen:
+                self.generators_.append(item)
+            else:
+                self.log_error("Check generator file : {}".format(content))
+                self.log_error("{} is unknown".format(item))
+
+        if not self.generators_:
+            self.log_error("Generator forced to custom")
+            self.generators_ = ['custom']
+            return False
         return True
 
     def load_functions(self, py_file):

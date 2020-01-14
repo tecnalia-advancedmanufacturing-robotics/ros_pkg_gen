@@ -8,6 +8,7 @@
 
 Copyright (C) 2017 Tecnalia Research and Innovation
 Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
+
 """
 
 from termcolor import colored
@@ -18,6 +19,7 @@ import sys
 import rospkg
 
 from package_generator.code_generator import CodeGenerator
+from package_generator.jinja_generator import JinjaGenerator
 from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.file_update_management import GeneratedFileAnalysis
 from package_generator.enhanced_object import EnhancedObject
@@ -28,16 +30,17 @@ class PackageGenerator(EnhancedObject):
     """Handle the genration of a whole package
 
     Attributes:
-        file_generator_ (TYPE): Description
-        package_path_ (TYPE): Description
-        path_pkg_backup_ (TYPE): Description
+        file_generator_ (CodeGenerator): custom generator
+        jinja_generator_ (JinjaGenerator): generator based on jinja
+        package_path_ (str): base location of the package to create
+        path_pkg_backup_ (str): if the package already existed, location of the package backup
         spec_ (TemplateSpec): configuration of the template model
-        template_path_ (TYPE): Description
-        xml_parser_ (TYPE): Description
+        template_path_ (str): path to the template to use
+        xml_parser_ (PackageXMLParser): parser of the package description
     """
 
     def __init__(self, name="PackageGenerator"):
-        """ Intialisation of the object
+        """Intialisation of the object
 
         Args:
             name (str, optional): Name of the component, for printing aspect
@@ -139,6 +142,7 @@ Revise the template, and compare to examples
         self.spec_ = TemplateSpec()
         self.xml_parser_ = PackageXMLParser()
         self.file_generator_ = CodeGenerator()
+        self.jinja_generator_ = JinjaGenerator()
 
         dir_template_spec = self.template_path_ + "/config/"
         if not self.spec_.load_spec(dir_template_spec):
@@ -178,7 +182,6 @@ Revise the template, and compare to examples
             self.log("Package to be created in {}".format(self.package_path_))
         os.makedirs(self.package_path_)
 
-        package_content = os.listdir(self.template_path_ + "/template")
         nb_comp = self.xml_parser_.get_number_comps()
         self.log("Number of components defined: {}".format(nb_comp))
 
@@ -216,9 +219,83 @@ Revise the template, and compare to examples
 
         return is_ok
 
+    def generate_one_file(self, template_file, result_file, force_write):
+        """Generate a template file, depending on the generators to be used
+
+        Args:
+            template_file (str): template filename
+            result_file (str): filename to store the result (unless is None)
+            force_write (str): force the writting of empty files (if not, files is not written)
+
+        Returns:
+            Bool: True on success
+        """
+        self.spec_.generators_
+
+        generator = dict()
+        generator["custom"] = self.file_generator_
+        generator["jinja"] = self.jinja_generator_
+
+        if len(self.spec_.generators_) == 1:
+            return generator[self.spec_.generators_[0]].generate_disk_file(template_file,
+                                                                           result_file,
+                                                                           force_write)
+        # two generators are to be used
+        gen_one = generator[self.spec_.generators_[0]]
+        gen_two = generator[self.spec_.generators_[1]]
+
+        is_ok = gen_one.generate_disk_file(template_file)
+
+        if not is_ok:
+            return False
+
+        return gen_two.generate_open_file(gen_one.rendered_,
+                                          result_file,
+                                          force_write)
+
+    def write_generated_file(self, result_file):
+        """Write a generated file
+
+        Args:
+            result_file (str): filename to store the file.
+
+        Returns:
+            Bool: True on success
+        """
+        generator = dict()
+        generator["custom"] = self.file_generator_
+        generator["jinja"] = self.jinja_generator_
+
+        return generator[self.spec_.generators_[-1]].write_rendered_file(result_file)
+
+    def get_generated_file(self):
+        """Get the generated files
+
+        Returns:
+            list: list of of each line of the generated file
+        """
+        generator = dict()
+        generator["custom"] = self.file_generator_
+        generator["jinja"] = self.jinja_generator_
+
+        return generator[self.spec_.generators_[-1]].rendered_
+
+    def set_generated_file(self, buffer):
+        """set the generated file
+
+        Args:
+            buffer (list): list of of each line of the generated file
+        """
+        generator = dict()
+        generator["custom"] = self.file_generator_
+        generator["jinja"] = self.jinja_generator_
+
+        generator[self.spec_.generators_[-1]].rendered_ = buffer
+
     def handle_maintained_files(self):
-        """ Restore file Developer requests to maintain
+        """Restore file Developer requests to maintain
         Assuming these patterns are defined in file .gen_maintain
+
         Returns:
             Bool: True on sucess
         """
@@ -291,7 +368,7 @@ Revise the template, and compare to examples
 
         Args:
             input_file (str): path  of the template file used
-            output_file (TYPE): path of the generated file
+            output_file (str): path of the generated file
             gen_flag (Bool): Success of the generation process
 
         Returns:
@@ -321,7 +398,7 @@ Revise the template, and compare to examples
         """Generation and storage of all content
 
         Returns:
-            Bool -- True on succesd
+            Bool -- True on success
         """
         # Extracting all components from the template
         file_list = list()
@@ -373,9 +450,10 @@ Revise the template, and compare to examples
             new_item = item.replace('package_name', package_name)
             if 'component' in item:
                 for id, one_name in enumerate(comps_name):
-                    generation_list.append([item, new_item.replace('component',
-                                                                   one_name),
-                                                                   id])
+                    generation_list.append([item,
+                                            new_item.replace('component',
+                                                             one_name),
+                                            id])
             else:
                 # todo if no component active I should not set one
                 generation_list.append([item, new_item, 0])
@@ -390,7 +468,10 @@ Revise the template, and compare to examples
                 return False
 
             # reconfiguring the generator to adjust to the new active component
+            # todo configure already called in generate_package function. Check why
             if not self.file_generator_.configure(self.xml_parser_, self.spec_):
+                return False
+            if not self.jinja_generator_.configure(self.xml_parser_, self.spec_):
                 return False
 
             # Normally an empty file should not be written
@@ -403,9 +484,9 @@ Revise the template, and compare to examples
             if self.path_pkg_backup_ is None:
                 self.log("Generating file {}".format(result_file))
 
-                is_ok = self.file_generator_.generate_file(template_file,
-                                                           result_file,
-                                                           force_write=is_write_forced)
+                is_ok = self.generate_one_file(template_file,
+                                               result_file,
+                                               is_write_forced)
 
                 if self.handle_status_and_advise(template_file,
                                                  result_file,
@@ -424,12 +505,12 @@ Revise the template, and compare to examples
                 msg = "File {} not previously existing. Just write it"
                 self.log_warn(msg.format(rel_path))
 
-                is_ok = self.file_generator_.generate_file(template_file,
-                                                           result_file,
-                                                           is_write_forced)
+                is_ok = self.generate_one_file(template_file,
+                                               result_file,
+                                               is_write_forced)
                 if self.handle_status_and_advise(template_file,
-                                                  result_file,
-                                                  is_ok):
+                                                 result_file,
+                                                 is_ok):
                     continue
                 else:
                     return False
@@ -454,30 +535,33 @@ Revise the template, and compare to examples
                 # self.log("Updating file {} in {}".format(rel_path, output_item))
                 self.log("Updating file {}".format(rel_path))
 
-                is_ok = self.file_generator_.generate_file(template_file)
+                is_ok = self.generate_one_file(template_file, None, None)
                 if not is_ok:
                     return False
-                if is_ok:
-                    if self.file_generator_.get_len_gen_file() == 0:
-                        msg = "New generated file empty. No code maintained from previous version"
-                        self.log_warn(msg)
-                        # we write it if forced
-                        if is_write_forced:
-                            is_ok = self.file_generator_.write_output_file(result_file)
-                    else:
-                        self.log("Merging with previous version")
-                        self.file_generator_.buffer_ = file_analyzor.update_file(self.file_generator_.buffer_)
-                        is_ok = self.file_generator_.write_output_file(result_file)
 
-                    if self.handle_status_and_advise(template_file,
-                                                     result_file,
-                                                     is_ok):
-                        continue
-                    else:
-                        return False
+                # todo handle this in case jinja is involved.
+                buffer = self.get_generated_file()
+                if len(buffer) == 0:
+                    msg = "New generated file empty. No code maintained from previous version"
+                    self.log_warn(msg)
+                    # we write it if forced
+                    if is_write_forced:
+                        is_ok = self.write_generated_file(result_file)
+                else:
+                    self.log("Merging with previous version")
+                    buffer = file_analyzor.update_file(buffer)
+                    self.set_generated_file(buffer)
+                    is_ok = self.write_generated_file(result_file)
+
+                if self.handle_status_and_advise(template_file,
+                                                 result_file,
+                                                 is_ok):
+                    continue
+                else:
+                    return False
 
             # Although the file existed before, we do not have to maintain it
-            is_ok = self.file_generator_.generate_file(template_file, result_file, is_write_forced)
+            is_ok = self.generate_one_file(template_file, result_file, is_write_forced)
             if self.handle_status_and_advise(template_file, result_file, is_ok):
                 continue
             else:
@@ -485,7 +569,10 @@ Revise the template, and compare to examples
         return True
 
     def template_sanity_check(self):
-        """ Perform the package sanity check
+        """Perform the package sanity check
+
+        Returns:
+            Bool: True on success
         """
 
         # TODO list number of files in template
@@ -512,7 +599,6 @@ Revise the template, and compare to examples
 
         # print ("Dirs: ")
         # print("\n".join(dir_list))
-
         # print("Files: ")
         # print("\n".join(file_list))
 
@@ -576,7 +662,7 @@ def main():
     rospack = rospkg.RosPack()
     try:
         default_templates_path = rospack.get_path('package_generator_templates')
-        default_templates_path +=  "/templates/"
+        default_templates_path += "/templates/"
     except rospkg.common.ResourceNotFound as error:
         msg = "Package package_generator_templates not found in rospack"
         print colored(msg, "yellow")
