@@ -51,6 +51,24 @@ class PackageXMLParser(EnhancedObject):
         root_ (TYPE): root of the xml tree
         spec_ (TemplateSpec): Template specification
     """
+
+    def get_template(self, filename):
+
+        try:
+            tree = ET.ElementTree(file=filename)
+        except IOError:
+            self.log_error("Prb while opening file {}".format(filename))
+            return None
+        except ET.ParseError as error:
+            self.log_error("Prb while parsing file: {}:".format(error))
+            return None
+        root = tree.getroot()
+
+        if 'template' not in root.attrib.keys():
+            self.log_error("Missing template tag")
+            return None
+        return root.attrib['template']
+
     def __init__(self, name="PackageXMLParser"):
         """object constructor
 
@@ -87,6 +105,7 @@ class PackageXMLParser(EnhancedObject):
         return True
 
     # TODO: see how to put warning messages in the comment.
+    # TODO: check the root tag is package
     def load(self, filename):
         """load a xml description provided in a file
 
