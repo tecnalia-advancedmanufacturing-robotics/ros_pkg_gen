@@ -45,8 +45,10 @@ Note that the paper is related to version `1.0.0`.
 The code has evolved since then.
 See the modifications in file [ChangeLog.md](ChangeLog.md).
 Main changes are:
+
 * The main element generated in a package is now named `component` (used to be `node`).
   This term is more generic, and enables considering more package types (version `2.0.0`).
+* In addition to the custom generator, jinja generator can also be used.
 
 ## Getting started
 

@@ -19,7 +19,7 @@ The expected content is the following (referring to the [C++ template](templates
 
 ### Config directory
 
-The specification of a template is done with two files, `dictionary.yaml` and `functions.py`.
+The specification of a template is done with files `dictionary.yaml`, `functions.py` and `generator.yaml`.
 
 **`dictionary.yaml`**:
 
@@ -143,6 +143,21 @@ Note that all these functions **have to** be defined with a unique input paramet
 That variable is a dictionary that will contain all the attributes values provided by the `User` in its specification file.
 These add-on functions must follow that structure to enable their automatic call during the code generation process.
 
+**`generator.yaml`**:
+
+This file is optional.
+If not present, the default custom generator is used.
+If present, we expect to find in it the following:
+
+```yaml
+generator: ['custom', 'jinja']
+```
+
+In that case, the custom generator will be used, followed by the `jinja2` generator.
+These are the 2 available generator.
+We can set in that list any of the two generator, or both.
+If both are set, the second one will be used on the result of the generation of the first one.
+
 ### Template directory
 
 The Template folder contains the skeleton of all files that will be deployed into the generated files.
@@ -215,7 +230,7 @@ tags `{name}`, `{type}`, and `{description}` would be replaced by the values ent
 
 Dependencies defined by the Developer can be accessed using the following tags:
 
-```
+```xml
 {foralldependencies}
   <depend>{dependencyName}</depend>
 {endforalldependencies}
@@ -228,7 +243,7 @@ With this illustrative instruction, the line will be repeated and completed for 
 All functions defined in previous file `functions.py` can be accessed in the template file using tag: `apply-function_name`, where `function_name` can be any of the functions present in that file `funtions.py`.
 For instance, in the following code:
 
-```
+```python
 {forallpublisher}
 from {apply-get_package_type}.msg import {apply-get_class_type}
 {endforallpublisher}
@@ -237,3 +252,17 @@ from {apply-get_package_type}.msg import {apply-get_class_type}
 The middle line will be repeated for each publisher defined.
 The function `get_package_type` is previously defined.
 If a publisher of type `std_msgs::String` is used, then this first function will return `std_msgs`, while the function `get_class_type` will provide the class name, i.e. `String`.
+
+**Jinja2 Generator**:
+
+A template file can also use all `Jinja2` instruction.
+The following context is made available:
+
+* `package`: all package attributes
+* `components`: all component spec (list of dictionaries)
+* `active_comp`: current component number
+* `dependencies`: all dependencies (as a list)
+* `attributes`: attributes of the current component (dictionary)
+* `interface`: interface of the current component (list of dictionaries)
+
+To avoid useless warning, it is better to write simple variable access inserting a space in between the brackets and the variable name, i.e. write `{{ package.name }}` instead of `{{package.name}}`.
