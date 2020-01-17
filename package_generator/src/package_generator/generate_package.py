@@ -61,14 +61,14 @@ class PackageGenerator(EnhancedObject):
         # if the package already existed, location of the package backup
         self.path_pkg_backup_ = None
 
-    def set_package_template(self, template_path):
-        """set the package template
+    def check_template_structure(self, template_path):
+        """Check a provided path refers to a valid template structure
 
         Args:
             template_path (str): path to the package template
 
         Returns:
-            Bool: True if basic sanity checks are done with success
+            Bool: True if basic sanity checks are successful
         """
         if not os.path.exists(template_path):
             msg = "Template path ({}) is incorrect ".format(template_path)
@@ -84,7 +84,8 @@ class PackageGenerator(EnhancedObject):
 
         details = """A template should contain:
     * config/dictionary.yaml : the dictionary to be used
-    * [optional] config/functions.py : additional functions used in the generation
+    * config/functions.py [optional] : additional functions used in the generation
+    * config/generator.py [optional] : generator list (custom, jinja) default is custom
     * template/* set of elements to be generated
 Revise the template, and compare to examples
         """
@@ -114,8 +115,16 @@ Revise the template, and compare to examples
             self.log_error("\n{}".format(details))
             return False
 
-        self.template_path_ = template_path
         return True
+
+    def get_template_info(self):
+
+        rospack = rospkg.RosPack()
+        path_template = rospack.get_path('package_generator_templates')
+        path_template += "/templates/"
+        template_names = os.listdir(path_template)
+
+        return [path_template, template_names]
 
     def generate_package(self, package_desc, output_path):
         """launches the package generation
@@ -127,22 +136,61 @@ Revise the template, and compare to examples
         Returns:
             Bool: True if the operation succeeded
         """
-        self.path_pkg_backup_ = None
-
         if not os.path.exists(output_path):
-            msg_err = "Expected package path ({}) is incorrect ".format(output_path)
+            msg_err = "Incorrect desired package path ({})".format(output_path)
             self.log_error(msg_err)
             return False
 
         if not os.path.isdir(output_path):
-            msg_err = "Expected package path ({}) not a directory ".format(output_path)
+            msg_err = "Desired package path ({}) not a directory ".format(output_path)
             self.log_error(msg_err)
             return False
 
+        # Initialising needed components
+        # todo bring it to the constructor?
         self.spec_ = TemplateSpec()
         self.xml_parser_ = PackageXMLParser()
         self.file_generator_ = CodeGenerator()
         self.jinja_generator_ = JinjaGenerator()
+
+        # Start finding the template
+
+        template = self.xml_parser_.get_template(package_desc)
+        if template is None:
+            return False
+
+        # Locate template location
+        try:
+            [all_template_path, template_names] = self.get_template_info()
+        except rospkg.common.ResourceNotFound as error:
+            msg = "Package package_generator_templates not found in rospack"
+            self.log_error(msg)
+            self.log_error(error)
+            return False
+        except OSError as error:
+            msg = "No template dounf in package_generator_templates"
+            self.log_error(msg)
+            self.log_error(error)
+            return False
+
+        if template not in template_names:
+            msg = "Template requested: {} unknown".format(template)
+            self.log_error(msg)
+            msg = "Available templates: {}".format(template_names)
+            self.log_error(msg)
+            return False
+
+        template_path = all_template_path + "/" + template
+
+        # confirm this is a template...
+        if not self.check_template_structure(template_path):
+            msg = "Please revise template structure"
+            self.log_error(msg)
+            return False
+
+        # template localized, ready to work!
+        self.template_path_ = template_path
+        self.path_pkg_backup_ = None
 
         dir_template_spec = self.template_path_ + "/config/"
         if not self.spec_.load_spec(dir_template_spec):
@@ -638,13 +686,11 @@ Revise the template, and compare to examples
             self.log_error("Revise the template")
         return is_ok
 
-
+# todo complete the usage description with available templates
+# and with existing commands
 USAGE_GEN = """ usage: generate_package package_spec package_template
 package_spec: xml description of the component(s) interface
-package_template: name of the template to use
 
-Packages template: either one defined in package `package_generator_templates`,
-                   either a path to a local one.
 """
 
 
@@ -658,64 +704,32 @@ def main():
         int: negative value on error
     """
 
-    # checking available templates
-    rospack = rospkg.RosPack()
-    try:
-        default_templates_path = rospack.get_path('package_generator_templates')
-        default_templates_path += "/templates/"
-    except rospkg.common.ResourceNotFound as error:
-        msg = "Package package_generator_templates not found in rospack"
-        print colored(msg, "yellow")
-        print colored("{}".format(error), "yellow")
-        default_templates_path = None
+    gen = PackageGenerator()
 
-    available_templates = None
-    # look for the templates available
-    if default_templates_path is not None:
-        available_templates = os.listdir(default_templates_path)
-
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 2:
         print colored("Wrong input parameters !", "red")
         print colored(USAGE_GEN, "yellow")
-        if available_templates is not None:
-            msg = "Available templates are: {}"
-            print colored(msg.format(available_templates), 'yellow')
+
+        try:
+            [all_template_path, template_names] = gen.get_template_info()
+        except rospkg.common.ResourceNotFound as error:
+            msg = "Package package_generator_templates not found in rospack"
+            print colored(msg, 'red')
+            print colored(error, 'red')
+            return -1
+        except OSError as error:
+            msg = "No template dounf in package_generator_templates"
+            print colored(msg, 'red')
+            print colored(error, 'red')
+            return -1
+
+        msg = "Available templates are: {}"
+        print colored(msg.format(template_names), 'yellow')
         print "Bye bye"
         return -1
 
     package_spec = sys.argv[1]
-    path_template = sys.argv[2]
-
-    # searching for the template location
-    if os.path.isabs(path_template):
-        print "Loading model from absolute path {}".format(path_template)
-    else:
-        # relative path.
-        # either from the current path, or from the template package
-        path_current = os.getcwd()
-        path_attempt = path_current + "/" + path_template
-
-        if os.path.isdir(path_attempt):
-            path_template = path_attempt
-            print "Loading template from path {}".format(path_template)
-        else:
-            if path_template in available_templates:
-                path_template = default_templates_path + path_template
-                msg = "Loading template from template package: {}"
-                print msg.format(path_template)
-            else:
-                msg = "Template name not found in package_generator_templates"
-                print colored(msg, "red")
-                print colored("Please verify your setup", "red")
-                return -1
-
-    gen = PackageGenerator()
-
-    if not gen.set_package_template(path_template):
-        print colored("Not able to load the template at:", "red")
-        print colored(path_template, "red")
-        print "Bye"
-        return -1
+    path_current = os.getcwd()
 
     if not gen.generate_package(package_spec, path_current):
         print colored("Prb while generating the package", "red")
