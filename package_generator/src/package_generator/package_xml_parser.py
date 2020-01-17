@@ -65,7 +65,7 @@ class PackageXMLParser(EnhancedObject):
         root = tree.getroot()
 
         if 'template' not in root.attrib.keys():
-            self.log_error("Missing template tag")
+            self.log_error("Missing template tag in file {}".format(filename))
             return None
         return root.attrib['template']
 
