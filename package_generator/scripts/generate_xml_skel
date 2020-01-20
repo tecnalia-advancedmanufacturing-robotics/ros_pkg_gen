@@ -2,5 +2,6 @@
 
 from package_generator.package_xml_parser import main_generate_xml
 
+
 if __name__ == '__main__':
     main_generate_xml()

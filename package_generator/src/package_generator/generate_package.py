@@ -686,6 +686,7 @@ Revise the template, and compare to examples
             self.log_error("Revise the template")
         return is_ok
 
+
 # todo complete the usage description with available templates
 # and with existing commands
 USAGE_GEN = """ usage: generate_package package_spec package_template
@@ -711,7 +712,7 @@ def main():
         print colored(USAGE_GEN, "yellow")
 
         try:
-            [all_template_path, template_names] = gen.get_template_info()
+            [_, template_names] = gen.get_template_info()
         except rospkg.common.ResourceNotFound as error:
             msg = "Package package_generator_templates not found in rospack"
             print colored(msg, 'red')
@@ -808,6 +809,7 @@ def main_check():
 
     gen = PackageGenerator()
 
+    # Todo: method is not existing anymore
     if not gen.set_package_template(path_template):
         print colored("Not able to load the template at:", "red")
         print colored(path_template, "red")
