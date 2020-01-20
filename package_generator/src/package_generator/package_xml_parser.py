@@ -460,10 +460,11 @@ class PackageXMLParser(EnhancedObject):
                 file_handler.write("{}\n".format(item))
         return True
 
-    def generate_xml_from_spec(self, filename):
+    def generate_xml_from_spec(self, template_name, filename):
         """Generate an xml file based on the template dictionary
 
         Args:
+            template_name (str): name of the template of interest
             filename (str): filename where xml skeleton is to be written
 
         Returns:
@@ -477,6 +478,8 @@ class PackageXMLParser(EnhancedObject):
         xml_pack = ET.Element('package')
         for item in self.spec_.dico_['package_attributes']:
             xml_pack.set(item, '')
+        # todo should we add the attribute template to the config?
+        xml_pack.set("package", template_name)
 
         xml_comp = ET.SubElement(xml_pack, "comp")
         for item in self.spec_.dico_['component_attributes']:
@@ -665,7 +668,7 @@ def main_generate_xml():
         print colored("Prb while setting the parser dictionary", "red")
         return -1
 
-    package_parser.generate_xml_from_spec(package_spec)
+    package_parser.generate_xml_from_spec(os.path.basename(path_template), package_spec)
 
     print colored("Bye bye", "green")
     return 0
