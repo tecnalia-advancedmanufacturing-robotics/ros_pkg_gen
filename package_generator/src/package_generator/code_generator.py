@@ -322,6 +322,7 @@ class CodeGenerator(EnhancedObject):
         self.do_generate_ = False
         if not self.process_file(file_template):
             return False
+        # self.log("Processed file: \n {}".format(self.rendered_))
         return True
 
     def get_all_tags(self, line):

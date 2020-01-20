@@ -58,6 +58,8 @@ class PackageGenerator(EnhancedObject):
         self.spec_ = None
         # generic file generator
         self.file_generator_ = None
+        # jinja-based generator
+        self.jinja_generator_ = None
         # if the package already existed, location of the package backup
         self.path_pkg_backup_ = None
 
@@ -209,6 +211,7 @@ Revise the template, and compare to examples
 
         # self.xml_parser_.print_xml_parsed()
 
+        # todo why only the custom generator is configured?
         if not self.file_generator_.configure(self.xml_parser_, self.spec_):
             return False
 
@@ -278,7 +281,6 @@ Revise the template, and compare to examples
         Returns:
             Bool: True on success
         """
-        self.spec_.generators_
 
         generator = dict()
         generator["custom"] = self.file_generator_
@@ -300,6 +302,45 @@ Revise the template, and compare to examples
         return gen_two.generate_open_file(gen_one.rendered_,
                                           result_file,
                                           force_write)
+
+    def check_template_file(self, template_file):
+        """Generate a template file, depending on the generators to be used
+
+        Args:
+            template_file (str): template filename
+            result_file (str): filename to store the result (unless is None)
+            force_write (str): force the writting of empty files (if not, files is not written)
+
+        Returns:
+            Bool: True on success
+        """
+
+        generator = dict()
+        generator["custom"] = self.file_generator_
+        generator["jinja"] = self.jinja_generator_
+
+        if len(self.spec_.generators_) == 1:
+            # self.log("Check with Generator {}".format(self.spec_.generators_[0]))
+            return generator[self.spec_.generators_[0]].check_template_file(template_file)
+
+        # two generators are to be used
+        gen_one = generator[self.spec_.generators_[0]]
+        gen_two = generator[self.spec_.generators_[1]]
+
+        # self.log("Check with Generator {}".format(self.spec_.generators_[0]))
+
+        is_ok = gen_one.check_template_file(template_file)
+
+        if not is_ok:
+            return False
+
+        # self.log("Check with Generator {}".format(self.spec_.generators_[1]))
+
+        if self.spec_.generators_[1] == "jinja":
+            return gen_two.check_template_file(gen_one.rendered_, is_filename=False)
+        else:
+            return gen_two.check_template_file(template_file)
+
 
     def write_generated_file(self, result_file):
         """Write a generated file
@@ -616,19 +657,48 @@ Revise the template, and compare to examples
                 return False
         return True
 
-    def template_sanity_check(self):
+    def template_sanity_check(self, template):
         """Perform the package sanity check
 
         Returns:
             Bool: True on success
         """
 
+        # Locate template location
+        try:
+            [all_template_path, template_names] = self.get_template_info()
+        except rospkg.common.ResourceNotFound as error:
+            msg = "Package package_generator_templates not found in rospack"
+            self.log_error(msg)
+            self.log_error(error)
+            return False
+        except OSError as error:
+            msg = "No template dounf in package_generator_templates"
+            self.log_error(msg)
+            self.log_error(error)
+            return False
+
+        if template not in template_names:
+            msg = "Template requested: {} unknown".format(template)
+            self.log_error(msg)
+            msg = "Available templates: {}".format(template_names)
+            self.log_error(msg)
+            return False
+
+        template_path = all_template_path + "/" + template
+
+        # confirm this is a template...
+        if not self.check_template_structure(template_path):
+            msg = "Please revise template structure"
+            self.log_error(msg)
+            return False
+
         # TODO list number of files in template
         # Extracting all components from the template
         file_list = list()
         dir_list = list()
 
-        path_root_template = self.template_path_ + "/template"
+        path_root_template = template_path + "/template"
 
         for (root, dirs, files) in os.walk(path_root_template):
             # print "check {}: dir {}, files: {}".format(root, dirs, files)
@@ -654,8 +724,9 @@ Revise the template, and compare to examples
         self.spec_ = TemplateSpec()
         self.xml_parser_ = PackageXMLParser()
         self.file_generator_ = CodeGenerator()
+        self.jinja_generator_ = JinjaGenerator()
 
-        dir_template_spec = self.template_path_ + "/config/"
+        dir_template_spec = template_path + "/config/"
         if not self.spec_.load_spec(dir_template_spec):
             self.log_error("Could not load the template spec")
             return False
@@ -673,13 +744,17 @@ Revise the template, and compare to examples
         if not self.file_generator_.configure(self.xml_parser_, self.spec_):
             return False
 
+        if not self.jinja_generator_.configure(self.xml_parser_, self.spec_):
+            return False
+
         is_ok = True
 
         for item in file_list:
             self.log("Checking file: {}".format(item))
             item_abs = path_root_template + "/" + item
-            is_ok = self.file_generator_.check_template_file(item_abs)
-
+            is_ok = self.check_template_file(item_abs)
+            if not is_ok:
+                break
         if is_ok:
             self.log("No error detected")
         else:
@@ -719,7 +794,7 @@ def main():
             print colored(error, 'red')
             return -1
         except OSError as error:
-            msg = "No template dounf in package_generator_templates"
+            msg = "No template found in package_generator_templates"
             print colored(msg, 'red')
             print colored(error, 'red')
             return -1
@@ -756,67 +831,32 @@ def main_check():
     Returns:
         int: negative value on error
     """
-
-    # checking available templates
-    rospack = rospkg.RosPack()
-    try:
-        default_templates_path = rospack.get_path('package_generator_templates')
-        default_templates_path += "/templates/"
-    except rospkg.common.ResourceNotFound as error:
-        msg = "Package package_generator_templates not found in rospack"
-        print colored(msg, "yellow")
-        print colored("{}".format(error), "yellow")
-        default_templates_path = None
-
-    available_templates = None
-    # look for the templates available
-    if default_templates_path is not None:
-        available_templates = os.listdir(default_templates_path)
+    gen = PackageGenerator()
 
     if len(sys.argv) != 2:
         print colored("Wrong input parameters !", "red")
         print colored(USAGE_CHECK, "yellow")
-        if available_templates is not None:
-            msg = "Available templates are: {}"
-            print colored(msg.format(available_templates), 'yellow')
+
+        try:
+            [_, template_names] = gen.get_template_info()
+        except rospkg.common.ResourceNotFound as error:
+            msg = "Package package_generator_templates not found in rospack"
+            print colored(msg, 'red')
+            print colored(error, 'red')
+            return -1
+        except OSError as error:
+            msg = "No template found in package_generator_templates"
+            print colored(msg, 'red')
+            print colored(error, 'red')
+            return -1
+
+        msg = "Available templates are: {}"
+        print colored(msg.format(template_names), 'yellow')
         print "Bye bye"
         return -1
 
-    path_template = sys.argv[1]
-
-    # searching for the template location
-    if os.path.isabs(path_template):
-        print "Loading model from absolute path {}".format(path_template)
-    else:
-        # relative path.
-        # either from the current path, or from the template package
-        path_current = os.getcwd()
-        path_attempt = path_current + "/" + path_template
-
-        if os.path.isdir(path_attempt):
-            path_template = path_attempt
-            print "Loading template from path {}".format(path_template)
-        else:
-            if path_template in available_templates:
-                path_template = default_templates_path + path_template
-                msg = "Loading template from template package: {}"
-                print msg.format(path_template)
-            else:
-                msg = "Template name not found in package_generator_templates"
-                print colored(msg, "red")
-                print colored("Please verify your setup", "red")
-                return -1
-
-    gen = PackageGenerator()
-
-    # Todo: method is not existing anymore
-    if not gen.set_package_template(path_template):
-        print colored("Not able to load the template at:", "red")
-        print colored(path_template, "red")
-        print "Bye"
-        return -1
-
-    if not gen.template_sanity_check():
+    template_name = sys.argv[1]
+    if not gen.template_sanity_check(template_name):
         print colored("Issue detected in template", "red")
         return -1
     else:
