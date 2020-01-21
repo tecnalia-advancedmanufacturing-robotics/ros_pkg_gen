@@ -37,11 +37,12 @@ class TemplateSanityTest(unittest.TestCase):
         if not os.path.exists(self.dir_name):
             os.makedirs(self.dir_name)
 
+    # todo: to be enabled, we should be able to set a sanity_check providing a path to the template
     def test_empty_template(self):
 
         gen = PackageGenerator()
 
-        self.assertFalse(gen.set_package_template(self.dir_name))
+        self.assertFalse(gen.template_sanity_check(self.dir_name))
 
     def test_no_template_file(self):
         path_from = self.path_templates_ + "/cpp_node_update/config/dictionary.yaml"
@@ -53,7 +54,7 @@ class TemplateSanityTest(unittest.TestCase):
         os.makedirs(self.dir_name + "/template")
 
         gen = PackageGenerator()
-        self.assertTrue(gen.set_package_template(self.dir_name))
+        self.assertTrue(gen.template_sanity_check(self.dir_name))
 
     def test_for(self):
 
@@ -74,8 +75,7 @@ class TemplateSanityTest(unittest.TestCase):
             openfile.write(file_content)
 
         gen = PackageGenerator()
-        self.assertTrue(gen.set_package_template(self.dir_name))
-        self.assertFalse(gen.template_sanity_check())
+        self.assertFalse(gen.template_sanity_check(self.dir_name))
 
     def test_if(self):
 
@@ -97,17 +97,13 @@ class TemplateSanityTest(unittest.TestCase):
 
         gen = PackageGenerator()
 
-        self.assertTrue(gen.set_package_template(self.dir_name))
-        self.assertFalse(gen.template_sanity_check())
+        self.assertFalse(gen.template_sanity_check(self.dir_name))
 
     def test_single_template(self):
 
         gen = PackageGenerator()
 
-        path_template = self.path_templates_ + "cpp_node_update/"
-        self.assertTrue(gen.set_package_template(path_template))
-
-        self.assertTrue(gen.template_sanity_check())
+        self.assertTrue(gen.template_sanity_check("cpp_node_update"))
 
 
 # To launch a given test:

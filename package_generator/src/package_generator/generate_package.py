@@ -673,19 +673,38 @@ Revise the template, and compare to examples
             self.log_error(error)
             return False
         except OSError as error:
-            msg = "No template dounf in package_generator_templates"
+            msg = "No template found in package_generator_templates"
             self.log_error(msg)
             self.log_error(error)
             return False
 
-        if template not in template_names:
+        is_template_found = False
+        template_path = None
+
+        if template in template_names:
+            is_template_found = True
+            template_path = all_template_path + "/" + template
+        else:
+            self.log("Could not find template {} in {}".format(template, all_template_path))
+            # check if the template provided is a relative path, and not a package in the repo
+            if os.path.isabs(template):
+                self.log("Loading template from absolute path {}".format(template))
+                is_template_found = True
+                template_path = template
+            else:
+                # relative path ?
+                template_path = os.getcwd() + "/" + template
+
+                if os.path.isdir(template_path):
+                    self.log("Loading template from path {}".format(template_path))
+                    is_template_found = True
+
+        if not is_template_found:
             msg = "Template requested: {} unknown".format(template)
             self.log_error(msg)
             msg = "Available templates: {}".format(template_names)
             self.log_error(msg)
             return False
-
-        template_path = all_template_path + "/" + template
 
         # confirm this is a template...
         if not self.check_template_structure(template_path):
