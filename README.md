@@ -48,7 +48,8 @@ Main changes are:
 
 * The main element generated in a package is now named `component` (used to be `node`).
   This term is more generic, and enables considering more package types (version `2.0.0`).
-* In addition to the custom generator, jinja generator can also be used.
+* In addition to the custom generator, [jinja generator](https://jinja.palletsprojects.com/en/2.10.x/) can also be used for designing new templates.
+* The package template is not anymore provided as input parameters, but is now directly inserted into the package specification file.
 
 ## Getting started
 
@@ -74,35 +75,27 @@ rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO
 ### Use
 
 We assume we are at the ROS workspace root, and that the current git repository is accessible from the ROS workspace.
+We also suppose that we know the package template we would like to use.
 
 ```shell
 source devel/setup.bash
 # go to the place where we would like to place the new package
 cd src
-# create a ROS interface xml file
-gedit my_new_package_spec.ros_package
-# launch the code generation (for c++ package)
-rosrun package_generator generate_package my_new_package_spec.ros_package cpp_node_update
-# launch the code generation (for python package)
-rosrun package_generator generate_package my_new_package_spec.ros_package python_node_update
-```
-
-The template can be indicated either as:
-
-* an absolute path to a template directory
-* a relative path from the currently active directory
-* a directory name assumed to be existing in the template package
-
-The expected content of the xml file and the behaviour of the generated code is described in [template package readme][template_readme].
-Please take 5 minutes to read it.
-
-You can generate automatically the structure of the xml file using the script `generate_xml_skel`:
-
-```shell
+# create a ROS interface xml file, related to the template cpp_node_update
 rosrun package_generator generate_xml_skel cpp_node_update my_new_package_spec.ros_package
+# edit the file to insert the ROS interface we are interested in
+gedit my_new_package_spec.ros_package
+# launch the code generation
+rosrun package_generator generate_package my_new_package_spec.ros_package
+# open the generated package to insert the node logic.
 ```
 
-A basic structure of template specification (to be then filled) is then generated, based on the template considered.
+The expected content of the xml file `my_new_package_spec.ros_package` and the behaviour of the generated code is described in [template package readme][template_readme].
+Please take 5 minutes to read it.
+The script `generate_xml_skel` provides the interface file skeleton that the Developer as to adjust based on his needs.
+
+The template name is corresponding to the template folder name within the [package_generator_templates](package_generator_templates/templates).
+The possibility to indicate template located elsewhere will be soon resumed.
 
 [template_readme]: package_generator_templates/README.md
 
@@ -154,8 +147,6 @@ rosrun great_package_action_client node_action_client _ac_use_action_remap:=do_a
   * Remove sentence _This file is to be edited by the Developer_
   * Consider Forcing to "to require cmake 3.0.2 for Kinetic"
   * Ensure all class methods are camelCased.
-* Longer Term:
-  * Consider use of Jinja
 
 ## Acknowledgements
 

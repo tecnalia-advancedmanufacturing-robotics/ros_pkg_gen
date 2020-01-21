@@ -185,9 +185,6 @@ class JinjaGenerator(EnhancedObject):
         return True
 
 # todo:
-# * Define appropriate context structure
 # * Handle error situations
-# * update test files
 # * update jinja_generator docstrings
-# * update documentation
 # * handle the template sanity check (if Jinja used)
