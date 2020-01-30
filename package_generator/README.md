@@ -1,4 +1,4 @@
-# package generator
+# Package generator
 
 ## Overview
 

@@ -162,10 +162,29 @@ class JinjaGenerator(EnhancedObject):
             return False
         return True
 
+    def check_template_file(self, filename, is_filename=True):
+        env = jinja2.Environment()
+        # self.log("Checking file: {}".format(filename))
+
+        if is_filename:
+            try:
+                with open(filename) as template:
+                    env.parse(template.read())
+            except jinja2.exceptions.TemplateSyntaxError as err:
+                self.log_warn("Syntax error: line {}: {}".format(err.lineno, err))
+                return False
+            return True
+
+        # file provided is not a filename, but the outcome of another generator
+        str_template = "\n".join(filename)
+        try:
+            env.parse(str_template)
+        except jinja2.exceptions.TemplateSyntaxError as err:
+                self.log_warn("Syntax error: line {}: {}".format(err.lineno, err))
+                return False
+        return True
+
 # todo:
-# * Define appropriate context structure
 # * Handle error situations
-# * update test files
 # * update jinja_generator docstrings
-# * update documentation
 # * handle the template sanity check (if Jinja used)

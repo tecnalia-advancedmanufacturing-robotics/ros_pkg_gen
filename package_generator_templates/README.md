@@ -29,16 +29,26 @@ It is mainly used through the [package_generator](../README.md).
 As detailed there, when the code generation is launched,
 
 ```shell
-rosrun package_generator generate_package my_new_package_spec.ros_package python_node_update
+rosrun package_generator generate_package my_new_package_spec.ros_package
 ```
 
-The last argument (here `python_node_update`) can refer to a template supposed to be present in the `templates` directory of this package.
+a tag is searched in the xml specification file `my_new_package_spec.ros_package` that specifies the template to be used.
+Its value refers to a template supposed to be present in the [templates](templates) directory of this package.
 
 ### Content
 
 * [templates](templates): the current set of templates implemented.
 * [samples](samples): a set of package spec for both C++ and python templates, as examples.
 * [README_designer.md](README_designer.md) provides guidelines for creating new package templates.
+
+### Available templates
+
+* `cpp_node_update`: C++ node handling at a given frequency incoming messages (subscription) for generating and sending result messages.
+   Also gives access to all ROS interface.
+* `python_node_update`: similar life-cycle for python.
+* `cpp_service_server`: C++ node acting as a service server.
+* `python_service_server`: similar life-cycle for python.
+* `msg_srv_action`: Basic layers for creating an interface package
 
 ## The `{cpp|python}_node_update` patterns
 

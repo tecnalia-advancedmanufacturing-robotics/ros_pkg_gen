@@ -30,7 +30,7 @@ class PackageGeneratorTest(unittest.TestCase):
 
         file_content = (
             '<?xml version="1.0" encoding="UTF-8"?>' '\n'
-            '<package name="great_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO" copyright="TRI">' '\n'
+            '<package name="great_package" template="cpp_node_update" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO" copyright="TRI">' '\n'
             '   <component name="node_extended" frequency="100.0">' '\n'
             '       <publisher name="pub" type="std_msgs::Bool" description=""/>' '\n'
             '       <publisher name="pub_second" type="std_msgs::String" description=""/>' '\n'
@@ -52,7 +52,7 @@ class PackageGeneratorTest(unittest.TestCase):
 
         file_content_multi = (
             '<?xml version="1.0" encoding="UTF-8"?>' '\n'
-            '<package name="great_multi_node_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO" copyright="TRI">' '\n'
+            '<package name="great_multi_node_package" template="cpp_node_update" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO" copyright="TRI">' '\n'
             '   <component name="node_extended" frequency="100.0">' '\n'
             '       <publisher name="pub" type="std_msgs::Bool" description=""/>' '\n'
             '       <publisher name="pub_second" type="std_msgs::String" description=""/>' '\n'
@@ -103,13 +103,12 @@ class PackageGeneratorTest(unittest.TestCase):
         self.node_path_ = rospack.get_path('package_generator_templates')
         self.path_template_ = self.node_path_ + "/templates/cpp_node_update/"
 
+
     def test_package_generator(self):
         """direct call to the package genator component, with appropriate info
         """
 
         gen = PackageGenerator()
-
-        self.assertTrue(gen.set_package_template(self.path_template_))
 
         output_path = '/tmp/test_package_generation'
         # to generate in the ros workspace
@@ -125,8 +124,6 @@ class PackageGeneratorTest(unittest.TestCase):
         """
 
         gen = PackageGenerator()
-
-        self.assertTrue(gen.set_package_template(self.path_template_))
 
         output_path = '/tmp/test_multi_node_package_generation'
         # to generate in the ros workspace

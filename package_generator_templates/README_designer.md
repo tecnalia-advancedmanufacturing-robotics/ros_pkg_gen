@@ -266,3 +266,5 @@ The following context is made available:
 * `interface`: interface of the current component (list of dictionaries)
 
 To avoid useless warning, it is better to write simple variable access inserting a space in between the brackets and the variable name, i.e. write `{{ package.name }}` instead of `{{package.name}}`.
+
+_The template checking using command `check_template` is still experimental when jinja generator is used._
