@@ -23,6 +23,9 @@ See [LICENSE.md](LICENSE.md) for more details.
 " target="_blank"><img src="http://img.youtube.com/vi/qsNkYGQBW8U/0.jpg"
 alt="ROS Package Generator demo" width="560" height="315" border="0" /></a>
 
+Note that the video is related to version `1.0.0`.
+It should be updated... soonish?
+
 **Publications**:
 If you use this work in an academic context, please cite the following publication(s):
 
@@ -48,8 +51,8 @@ Main changes are:
 
 * The main element generated in a package is now named `component` (used to be `node`).
   This term is more generic, and enables considering more package types (version `2.0.0`).
-* In addition to the custom generator, [jinja generator](https://jinja.palletsprojects.com/en/2.10.x/) can also be used for designing new templates.
-* The package template is not anymore provided as input parameters, but is now directly inserted into the package specification file.
+* In addition to the custom generator, [jinja generator](https://jinja.palletsprojects.com/en/2.10.x/) can also be used for designing new templates (`2.1.0`).
+* The package template is not anymore provided as input parameters, but is now directly inserted into the package specification file (`3.0.0`).
 
 ## Getting started
 
