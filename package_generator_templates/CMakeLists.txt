@@ -51,5 +51,5 @@ catkin_package(
 ## Mark other files for installation (e.g. launch and bag files, etc.)
 install(DIRECTORY
     templates
-    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/templates
+    DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
