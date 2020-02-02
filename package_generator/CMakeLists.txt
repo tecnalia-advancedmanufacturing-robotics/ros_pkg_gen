@@ -51,6 +51,7 @@ include_directories(
 catkin_install_python(PROGRAMS
     scripts/generate_xml_skel
     scripts/generate_package
+    scripts/check_template
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
