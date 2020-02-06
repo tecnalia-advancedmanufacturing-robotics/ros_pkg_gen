@@ -481,7 +481,7 @@ class PackageXMLParser(EnhancedObject):
         # todo should we add the attribute template to the config?
         xml_pack.set("template", template_name)
 
-        xml_comp = ET.SubElement(xml_pack, "comp")
+        xml_comp = ET.SubElement(xml_pack, "component")
         for item in self.spec_.dico_['component_attributes']:
             xml_comp.set(item, '')
 
