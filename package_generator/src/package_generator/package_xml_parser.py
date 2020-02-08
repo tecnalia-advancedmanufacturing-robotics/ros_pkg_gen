@@ -86,6 +86,22 @@ class PackageXMLParser(EnhancedObject):
         self.active_comp_ = -1
         self.is_dependency_complete_ = True
 
+    def __repr__(self):
+        """Print object state
+        """
+        msg = "object_state: \n"
+        msg += "package spec: {}\n".format(self.data_pack_)
+        msg += "dependencies: {}\n".format(self.data_depend_)
+        msg += "components: {} \n".format(len(self.data_comp_))
+        for num, item in enumerate(self.data_comp_):
+            msg += "item {}\n".format(num)
+            msg += "attributes: {}\n".format(item['attributes'])
+            msg += "interface:\n".format()
+            for elt in item['interface'].items():
+                msg += "\t {}\n".format(elt)
+
+        return msg
+
     def set_template_spec(self, spec):
         """set the template specifications
 
@@ -144,10 +160,40 @@ class PackageXMLParser(EnhancedObject):
             self.log_error("Prb while parsing the file: {}".format(err.args))
             return False
 
+        if not self.sanity_check():
+            return False
+
         is_ok = self.extend_dependencies()
+
         if is_ok:
-            # self.print_xml_parsed()
             self.active_comp_ = 0
+        return is_ok
+
+    def sanity_check(self):
+        """Make sure the loaded spec is complete
+           All fields are to be filled.
+        Returns:
+            Bool -- operation success
+        """
+
+        is_ok = True
+        for [key, val] in self.data_pack_.items():
+            if not val or not val.strip():
+                self.log_error("Package attribute {} undefined".format(key))
+                is_ok = False
+
+        for num, one_comp in enumerate(self.data_comp_):
+            for [key, val] in one_comp['attributes'].items():
+                if not val or not val.strip():
+                    self.log_error("Component {} attribute {} undefined".format(num, key))
+                    is_ok = False
+            for [type_interface, list_interface] in one_comp['interface'].items():
+                for num_item, item in enumerate(list_interface):
+                    for key, val in item.items():
+                        if not val or not val.strip():
+                            self.log_error("Key {} of {}[{}] undefined".format(key, type_interface, num_item))
+                            is_ok = False
+
         return is_ok
 
     def extend_dependencies(self):
@@ -355,18 +401,6 @@ class PackageXMLParser(EnhancedObject):
 
         # TODO should not always return true!
         return True
-
-    def print_xml_parsed(self):
-        """Print the xml file that has been parsed
-        """
-        self.log("**************")
-        self.log("XML parsed: ")
-        self.log("**************")
-        self.log("{}".format(self.data_pack_))
-        self.log("**************")
-        self.log("{}".format(self.data_depend_))
-        self.log("**************")
-        self.log("{}".format(self.data_comp_))
 
     def get_comp_spec(self):
         """Return all components spec
@@ -642,11 +676,11 @@ def main_generate_xml():
 
         if os.path.isdir(path_attempt):
             path_template = path_attempt
-            print "Loading template from path {}".format(path_template)
+            print "Loading template: {}".format(path_template)
         else:
             if path_template in available_templates:
                 path_template = default_templates_path + path_template
-                msg = "Loading template from template package: {}"
+                msg = "Loading template: {}"
                 print msg.format(path_template)
             else:
                 msg = "Template name not found in package_generator_templates"
