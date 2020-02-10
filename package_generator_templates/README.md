@@ -38,7 +38,6 @@ Its value refers to a template supposed to be present in the [templates](templat
 ### Content
 
 * [templates](templates): the current set of templates implemented.
-* [samples](samples): a set of package spec for both C++ and python templates, as examples.
 * [README_designer.md](README_designer.md) provides guidelines for creating new package templates.
 
 ### Available templates

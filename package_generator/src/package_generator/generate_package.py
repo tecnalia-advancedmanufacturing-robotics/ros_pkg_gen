@@ -209,8 +209,6 @@ Revise the template, and compare to examples
             self.log_error(msg_err)
             return False
 
-        # self.xml_parser_.print_xml_parsed()
-
         # todo why only the custom generator is configured?
         if not self.file_generator_.configure(self.xml_parser_, self.spec_):
             return False
