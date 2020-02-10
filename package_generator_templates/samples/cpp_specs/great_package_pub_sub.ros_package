@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<package name="great_package_pub_sub" author="anthony" author_email="anthony@todo.todo" description="Node receiving an integer from the outside, and multiply it by 10" license="TODO" copyright="2018 Tecnalia Research and Innovation">
-   <component name="node_pub_sub" frequency="100.0">
-       <subscriber name="sub_int" type="std_msgs::Int32" description="value to process"/>
-       <publisher name="pub_int" type="std_msgs::Int32" description="value processed"/>
-   </component>
-<depend>std_msgs</depend>
-</package>
