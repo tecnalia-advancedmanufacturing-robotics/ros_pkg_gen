@@ -187,7 +187,8 @@ The subscription handler is triggered as soon as a message arrives.
 {description}
 <!--- protected region direct subscriber {name} end -->
 {endforalldirectSubscriber}
-
 {endforallcomponent}
+
+---
 
 *Package generated with the [ROS Package Generator](https://github.com/tecnalia-advancedmanufacturing-robotics/ros_pkg_gen).*
