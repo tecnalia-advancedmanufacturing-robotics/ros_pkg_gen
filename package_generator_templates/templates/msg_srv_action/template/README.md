@@ -2,9 +2,9 @@
 
 ## General description of the package
 
-<!--- protected region package descripion begin -->
+<!--- protected region package description begin -->
 {packageDescription}
-<!--- protected region package descripion end -->
+<!--- protected region package description end -->
 
 {ifmsg}
 
@@ -39,5 +39,7 @@
 {description}
 <!--- protected region msg {name} end -->
 {endforallaction}
+
+---
 
 *Package generated with the [ROS Package Generator](https://github.com/tecnalia-advancedmanufacturing-robotics/ros_pkg_gen).*
