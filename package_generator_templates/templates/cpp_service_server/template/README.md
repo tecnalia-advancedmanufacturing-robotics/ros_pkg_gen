@@ -2,14 +2,14 @@
 
 ## General description of the package
 
-<!--- protected region package descripion begin -->
+<!--- protected region package description begin -->
 {packageDescription}
-<!--- protected region package descripion end -->
+<!--- protected region package description end -->
 
 <!--- todo How to handle the image generation -->
 <!--- <img src="./model/{componentName}.png" width="300px" />-->
-
 {forallcomponent}
+
 ## Node: {componentName}
 
 <!--- protected region {componentName} begin -->
@@ -111,6 +111,8 @@ The subscription handler is triggered as soon as a message arrives.
 {description}
 <!--- protected region direct subscriber {name} end -->
 {endforalldirectSubscriber}
-
 {endforallcomponent}
+
+---
+
 *Package generated with the [ROS Package Generator](https://github.com/tecnalia-advancedmanufacturing-robotics/ros_pkg_gen).*

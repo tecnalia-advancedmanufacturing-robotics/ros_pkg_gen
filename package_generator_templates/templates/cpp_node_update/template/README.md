@@ -2,14 +2,14 @@
 
 ## General description of the package
 
-<!--- protected region package descripion begin -->
+<!--- protected region package description begin -->
 {packageDescription}
-<!--- protected region package descripion end -->
+<!--- protected region package description end -->
 
 <!--- todo How to handle the image generation -->
 <!--- <img src="./model/{componentName}.png" width="300px" />-->
-
 {forallcomponent}
+
 ## Node: {componentName}
 
 Update frequency: {componentFrequency} Hz.
@@ -95,10 +95,10 @@ rosrun {packageName} {componentName} [old_name]:=[new_name]
 
 ### Services proposed
 
-A remapping of the service name is made possible at node launch:
+Any service name can be adjusted using the ROS remapping functionality:
 
 ```shell
-rosrun {packageName} {componentName} _[old_name]_remap:=/[new_name]
+rosrun {packageName} {componentName} [old_name]:=[new_name]
 ```
 
 {endifserviceServer}
@@ -112,10 +112,10 @@ rosrun {packageName} {componentName} _[old_name]_remap:=/[new_name]
 
 ### Services used
 
-A remapping of the service name is made possible at node launch:
+Any service name can be adjusted using the ROS remapping functionality:
 
 ```shell
-rosrun {packageName} {componentName} _[old_name]_remap:=/[new_name]
+rosrun {packageName} {componentName} [old_name]:=[new_name]
 ```
 
 {endifserviceClient}
@@ -187,7 +187,8 @@ The subscription handler is triggered as soon as a message arrives.
 {description}
 <!--- protected region direct subscriber {name} end -->
 {endforalldirectSubscriber}
-
 {endforallcomponent}
+
+---
 
 *Package generated with the [ROS Package Generator](https://github.com/tecnalia-advancedmanufacturing-robotics/ros_pkg_gen).*
