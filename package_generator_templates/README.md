@@ -36,7 +36,7 @@ Its value is the name of the template folder within the [templates](templates) d
 * `python_node_update`: similar life-cycle for python (see previous description).
 * [cpp_service_server](templates/cpp_service_server/README.md): C++ node acting as a service server.
 * `python_service_server`: similar life-cycle for python.
-* `msg_srv_action`: Basic layers for creating an interface package
+* [msg_srv_action](templates/msg_srv_action/README.md): Basic layers for creating an interface package
 
 ## Q & A
 
