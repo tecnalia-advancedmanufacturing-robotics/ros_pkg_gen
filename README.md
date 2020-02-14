@@ -10,9 +10,7 @@ To do so the input needed are:
 * An _interface specification_: a xml file describing mainly the interface of the package to create, according to the template.
   This file is to be filled by the _Developer_, using the interface proposed by the template, according to the concrete needs of the package he is willing to create
 
-**Author**: Anthony Remazeilles
-
-**Maintainer**: Anthony Remazeilles, anthony.remazeilles@tecnalia.com
+**Author & Maintainer**: Anthony Remazeilles, anthony.remazeilles@tecnalia.com
 
 **Affiliation** : Tecnalia Research and Innovation, Spain
 
@@ -93,27 +91,25 @@ rosrun package_generator generate_package my_new_package_spec.ros_package
 # open the generated package to insert the node logic.
 ```
 
-The expected content of the xml file `my_new_package_spec.ros_package` and the behaviour of the generated code is described in [template package readme][template_readme].
+The expected content of the xml file `my_new_package_spec.ros_package` and
+the behaviour of the generated code is described in [template package readme][template_readme].
 Please take 5 minutes to read it.
-The script `generate_xml_skel` provides the interface file skeleton that the Developer as to adjust based on his needs.
+The script `generate_xml_skel` provides the interface file skeleton
+that the Developer as to adjust based on his needs.
 
-The template name is corresponding to the template folder name within the [package_generator_templates](package_generator_templates/templates).
-The possibility to indicate template located elsewhere will be soon resumed.
+The template name is corresponding to the template folder name within the
+[package_generator_templates](package_generator_templates/templates).
+Option for indicating template located elsewhere will be soon resumed.
 
 [template_readme]: package_generator_templates/README.md
 
 ## Content
 
-### `package_generator`
+* [`package_generator`](package_generator/README.md):
+  generates a package content based on a xml description.
 
-Generates a node / package content based on a xml description.
-
-See the dedicated [README](package_generator/README.md) for more details on its content.
-
-### `package_generator_templates`
-
-Gathers the package templates currently defined.
-More details in the dedicated [Readme file](package_generator_templates/README.md)
+* [`package_generator_templates`](package_generator_templates/README.md):
+  list of available package templates.
 
 ## Reminders
 
