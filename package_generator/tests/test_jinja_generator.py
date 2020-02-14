@@ -6,7 +6,7 @@
 @brief test the code generator
 
 Copyright (C) 2019 Tecnalia Research and Innovation
-Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
+Distributed under the Apache 2.0 license.
 
 To run a single test, type:
 python test_jinja_generator.py JinjaGeneratorTest.test_is_launching

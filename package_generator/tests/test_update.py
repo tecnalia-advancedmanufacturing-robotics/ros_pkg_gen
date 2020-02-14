@@ -6,7 +6,7 @@
 @brief test the management of update of existing node
 
 Copyright (C) 2017 Tecnalia Research and Innovation
-Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
+Distributed under the Apache 2.0 license.
 """
 
 import unittest
