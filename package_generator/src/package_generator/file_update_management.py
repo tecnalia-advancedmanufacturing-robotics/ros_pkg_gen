@@ -6,7 +6,7 @@
 @brief responsible of the management of file update
 
 Copyright (C) 2017 Tecnalia Research and Innovation
-Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
+Distributed under the Apache 2.0 license.
 """
 
 from copy import deepcopy

@@ -6,7 +6,7 @@ This package gathers templates proposed for the `package_generator`.
 
 **Affiliation**: Tecnalia Research and Innovation, Spain
 
-**License**: This project is under the NPOSL-3.0 License.
+**License**: This project is under the pache 2.0 License.
 See [LICENSE.md](../LICENSE.md) for more details.
 
 ## Getting Started

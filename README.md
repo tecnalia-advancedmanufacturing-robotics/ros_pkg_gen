@@ -1,3 +1,5 @@
+[![license - apache 2.0](https://img.shields.io/:license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 # Package generator
 
 The following packages are about the automatic creation of ROS packages (so far C++ and python).
@@ -14,7 +16,7 @@ To do so the input needed are:
 
 **Affiliation** : Tecnalia Research and Innovation, Spain
 
-**License**: This project is under the NPOSL-3.0 License.
+**License**: This project is under the Apache 2.0 License.
 See [LICENSE.md](LICENSE.md) for more details.
 
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=qsNkYGQBW8U

@@ -6,7 +6,7 @@
 @brief parse a ros template file, and generate the related file
 
 Copyright (C) 2017 Tecnalia Research and Innovation
-Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
+Distributed under the Apache 2.0 license.
 """
 
 import re

@@ -6,7 +6,7 @@
 @brief Common tools for python classes
 
 Copyright (C) 2018 Tecnalia Research and Innovation
-Distributed under the Non-Profit Open Software License 3.0 (NPOSL-3.0).
+Distributed under the Apache 2.0 license
 """
 
 from termcolor import colored
