@@ -31,16 +31,16 @@ Its value is the name of the template folder within the [templates](templates) d
 
 ### Available templates
 
-* [cpp_node_update](cpp_node_update/README.md): C++ node handling at a given frequency incoming messages (subscription) for generating and sending result messages.
+* [cpp_node_update](templates/cpp_node_update/README.md): C++ node handling at a given frequency incoming messages (subscription) for generating and sending result messages.
    Also gives access to all ROS interface.
 * `python_node_update`: similar life-cycle for python (see previous description).
-* `cpp_service_server`: C++ node acting as a service server.
+* [cpp_service_server](templates/cpp_service_server/README.md): C++ node acting as a service server.
 * `python_service_server`: similar life-cycle for python.
 * `msg_srv_action`: Basic layers for creating an interface package
 
 ## Q & A
 
-**_Where should I wrote my code?_**
+**_Where should I write my code?_**
 
 In the implementation file, anywhere and _only_ where special text indicates it.
 In C++ files:
