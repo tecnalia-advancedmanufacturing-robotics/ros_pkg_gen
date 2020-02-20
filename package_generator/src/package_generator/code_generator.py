@@ -623,7 +623,8 @@ class CodeGenerator(EnhancedObject):
         output = list()
 
         # self.log("Handling text: \n {} with interface {}".format(text, interface_type))
-        assert interface_type in self.comp_spec_["interface"], "Requested interface type {} unknown".format(interface_type)
+        assert interface_type in self.comp_spec_["interface"], (
+            "Requested interface type {} unknown".format(interface_type))
 
         # computing all upperlayer spec
         # TODO this could be avoided and done once
