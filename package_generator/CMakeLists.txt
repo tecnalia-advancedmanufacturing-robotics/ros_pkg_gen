@@ -6,6 +6,7 @@ project(package_generator)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  roslint
 )
 
 ## System dependencies are found with CMake's conventions
@@ -17,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 catkin_python_setup()
 
+roslint_python()
 
 ###################################
 ## catkin specific configuration ##
