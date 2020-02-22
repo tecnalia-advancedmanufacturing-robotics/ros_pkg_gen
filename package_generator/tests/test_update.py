@@ -33,12 +33,11 @@ class UpdateTest(unittest.TestCase):
         """Check the detection of protected areas in code file
         """
         file_content = (
-                   '# from CMakelists.txt' '\n'
+         '# from CMakelists.txt' '\n'
          '# protected region additional user defined REQUIREMENTS begin #' '\n'
          'protected_01' '\n'
          '# protected region additional user defined REQUIREMENTS end #' '\n'
          'unprotected_02' '\n'
-        #file_rest = (
          '# protected region additional user defined BUILD STATEMENTS begin #' '\n'
          'protected_03' '\n'
          '# protected region additional user defined BUILD STATEMENTS end #' '\n'

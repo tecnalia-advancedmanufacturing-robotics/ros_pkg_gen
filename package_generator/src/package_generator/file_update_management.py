@@ -222,7 +222,7 @@ class ProtectedLine(EnhancedObject):
         # if we may have several, it might be an issue by the way
         # To get the last, we search first occurence from the end, reversing both strings
         # to reverse a string: str[::-1]
-        pos_in_str = len(line) - line[::-1].find(str_del[::-1]) #- len(str_del)
+        pos_in_str = len(line) - line[::-1].find(str_del[::-1])
         if pos_in_str == -1:
             self.log_error("Prb while searching pose of {} in line {}".format(self.delimitor_[0], line))
             return False
@@ -350,26 +350,29 @@ class GeneratedFileAnalysis(EnhancedObject):
             # sanity check 2: the current one should be a start
             if not all_protected_lines[id_line].is_start_flag():
                 with all_protected_lines[id_line] as pl:
-                    self.log_error("Protected line({}) on line {}: not finding the begining of such zone".format(pl.protected_tag_, pl.num_line_))
+                    msg_err = "Protected line({}) on line {}: not finding the begining of such zone"
+                    self.log_error(msg_err.format(pl.protected_tag_, pl.num_line_))
                     return False
             # sanity check 3: an opening should be followed by a closure of same pattern
             if id_line == num_protected_lines - 1:
-                self.log_error("Missing end tag of protected area {} started on line {}".format(pl.protected_tag_, pl.num_line_))
+                msg_err = "Missing end tag of protected area {} started on line {}"
+                self.log_error(msg_err.format(pl.protected_tag_, pl.num_line_))
 
             if not all_protected_lines[id_line + 1].is_stop_flag():
                 pl = all_protected_lines[id_line]
                 pln = all_protected_lines[id_line + 1]
 
                 # with all_protected_lines[id_line], all_protected_lines[id_line + 1] as pl, pln:
-                self.log_error("Protected area ({}) on line {}: expected an end of area, found a new area on line: {}".format(pl.protected_tag_, pl.num_line_, pln.num_line_))
+                msg_err = "Protected area ({}) on line {}: expected an end of area, found a new area on line: {}"
+                self.log_error(msg_err.format(pl.protected_tag_, pl.num_line_, pln.num_line_))
                 return False
 
             if all_protected_lines[id_line].protected_tag_ != all_protected_lines[id_line + 1].protected_tag_:
                 pl = all_protected_lines[id_line]
                 pln = all_protected_lines[id_line + 1]
 
-                # with all_protected_lines[id_line], all_protected_lines[id_line + 1] as pl, pln:
-                self.log_error("A end is expected for protected area [{}] from line {}.".format(pl.protected_tag_, pl.num_line_))
+                msg_err = "A end is expected for protected area [{}] from line {}."
+                self.log_error(msg_err.format(pl.protected_tag_, pl.num_line_))
                 self.log_error("Found protected area [{}] on line {}".format(pln.protected_tag_, pln.num_line_))
                 return False
 

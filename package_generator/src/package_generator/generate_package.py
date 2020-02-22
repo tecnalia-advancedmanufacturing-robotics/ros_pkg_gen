@@ -339,7 +339,6 @@ Revise the template, and compare to examples
         else:
             return gen_two.check_template_file(template_file)
 
-
     def write_generated_file(self, result_file):
         """Write a generated file
 

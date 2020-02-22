@@ -276,7 +276,9 @@ class PackageXMLParser(EnhancedObject):
         attributes_package = self.spec_.dico_['package_attributes']
 
         for attrib in attributes_package:
-            assert attrib in self.root_.attrib.keys(), "Missing required attrib {} for package description".format(attrib)
+            if attrib not in self.root_.attrib.keys():
+                raise AssertionError("Missing required attrib {} for package description".format(attrib))
+
             # self.log("package attribute {} set to {}".format(attrib, self.root_.attrib[attrib]))
             self.data_pack_[attrib] = self.root_.attrib[attrib]
 
@@ -306,14 +308,18 @@ class PackageXMLParser(EnhancedObject):
         attributes = self.spec_.dico_['component_interface'][xml_interface.tag]
 
         for attrib in attributes:
-            assert attrib in xml_interface.attrib.keys(), 'Missing required attribute {} for {} interface. Check line {}'.format(attrib, xml_interface.tag, xml_interface.attrib)
+            if attrib not in xml_interface.attrib.keys():
+                msg_err = 'Missing required attribute {} for {} interface. Check line {}'
+                raise AssertionError(msg_err.format(attrib, xml_interface.tag, xml_interface.attrib))
+
             interface_spec["attributes"][attrib] = xml_interface.attrib[attrib]
 
         # self.log("Requested interface for {} correct".format(xml_interface.tag))
 
         for attrib in xml_interface.attrib.keys():
             if attrib not in attributes:
-                self.log_warn("Provided attrib {} of interface {} ignored (check {})".format(attrib, xml_interface.tag, xml_interface.attrib))
+                msg_err = "Provided attrib {} of interface {} ignored (check {})"
+                self.log_warn(msg_err.format(attrib, xml_interface.tag, xml_interface.attrib))
         return interface_spec
 
     def load_comp_spec(self, xml_comp):
@@ -465,9 +471,12 @@ class PackageXMLParser(EnhancedObject):
         Returns:
             TYPE: Description
         """
+
         assert self.active_comp_ != -1, "No active component defined"
-        assert self.active_comp_ < len(self.data_comp_), "Active component {} should be less than {}".format(self.active_comp_,
-                                                                                                        len(self.data_comp_))
+        if self.active_comp_ >= len(self.data_comp_):
+            msg_err = "Active component {} should be less than {}"
+            raise AssertionError(msg_err.format(self.active_comp_, len(self.data_comp_)))
+
         return self.data_comp_[self.active_comp_]
 
     def write_xml(self, filename):

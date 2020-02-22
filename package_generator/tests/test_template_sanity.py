@@ -24,6 +24,7 @@ from package_generator.package_xml_parser import PackageXMLParser
 class TemplateSanityTest(unittest.TestCase):
 
     counter_ = 0
+
     def setUp(self):
 
         rospack = rospkg.RosPack()
