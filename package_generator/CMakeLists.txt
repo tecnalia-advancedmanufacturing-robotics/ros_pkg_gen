@@ -6,19 +6,12 @@ project(package_generator)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
-  roslint
 )
-
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 catkin_python_setup()
-
-roslint_python()
 
 ###################################
 ## catkin specific configuration ##
@@ -63,5 +56,10 @@ catkin_install_python(PROGRAMS
 
 ## Add folders to be run by python nosetests
 if (CATKIN_ENABLE_TESTING)
+  find_package(roslint)
+  roslint_python()
+  roslint_add_test()
+  find_package(haros_catkin)
+  haros_report()
   catkin_add_nosetests(tests)
 endif()

@@ -23,9 +23,11 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>rospy</depend>
-  <build_depend>roslint</build_depend>
   <exec_depend>python-termcolor</exec_depend>
   <exec_depend>python-jinja2</exec_depend>
+
+  <test_depend>roslint</test_depend>
+  <test_depend>haros_catkin</test_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
