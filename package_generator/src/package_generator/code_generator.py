@@ -140,6 +140,8 @@ class CodeGenerator(EnhancedObject):
         """
         comp_interface = self.spec_.dico_['component_interface'].keys()
 
+        lambda_unused = lambda d: lambda t: self.convert_forall(d, t)
+
         for item in comp_interface:
             # self.log_warn("Adding tag for {}".format(item))
             tag = "forall" + item
