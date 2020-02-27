@@ -35,7 +35,8 @@ class JinjaGeneratorTest(unittest.TestCase):
         """
         file_content = (
             '<?xml version="1.0" encoding="UTF-8"?>' '\n'
-            '<package name="great_package" author="anthony" author_email="anthony@todo.todo" description="The extended package" license="TODO" copyright="TRI">' '\n'
+            '<package name="great_package" author="anthony" author_email="anthony@todo.todo"' '\n'
+            '         description="The extended package" license="TODO" copyright="TRI">' '\n'
             '   <component name="node_extended" frequency="100.0">' '\n'
             '       <publisher name="pub" type="std_msgs::Bool" description="a description"/>' '\n'
             '       <publisher name="pub_second" type="std_msgs::String" description="a description"/>' '\n'
@@ -44,8 +45,10 @@ class JinjaGeneratorTest(unittest.TestCase):
             '       <serviceServer name="service_server" type="std_srvs::SetBool" description="a description"/>' '\n'
             '       <parameter name="param_one" type="std::string" value="Empty" description="a description"/>'  '\n'
             '       <parameter name="param_two" type="bool" value="1" description="a description"/>'  '\n'
-            '       <actionServer name="action_server" type="bride_tutorials::TriggerPublish" description="a description"/>' '\n'
-            '       <actionClient name="action_client" type="bride_tutorials::TriggerPublish" description="a description"/>' '\n'
+            '       <actionServer name="action_server" type="bride_tutorials::TriggerPublish"' '\n'
+            '                     description="a description"/>' '\n'
+            '       <actionClient name="action_client" type="bride_tutorials::TriggerPublish"' '\n'
+            '                     description="a description"/>' '\n'
             '   </component>' '\n'
             '<depend>std_msgs</depend>' '\n'
             '<depend>std_srvs</depend>' '\n'

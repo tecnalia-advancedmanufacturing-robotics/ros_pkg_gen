@@ -10,6 +10,7 @@ Distributed under the Apache 2.0 license.
 """
 
 import re
+from functools import partial
 from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.enhanced_object import EnhancedObject
 from package_generator.template_spec import TemplateSpec
@@ -139,22 +140,17 @@ class CodeGenerator(EnhancedObject):
         """
         comp_interface = self.spec_.dico_['component_interface'].keys()
 
-        lambda_for = lambda d: lambda t: self.convert_forall(d, t)
-        lambda_if = lambda u: lambda v: self.convert_if(u, v)
-        lambda_for_deps = lambda text: self.convert_forall_dependencies(text)
-        lambda_for_comps = lambda text: self.convert_forall_comps(text)
-
         for item in comp_interface:
             # self.log_warn("Adding tag for {}".format(item))
             tag = "forall" + item
-            self.transformation_loop_[tag] = lambda_for(item)
+            self.transformation_loop_[tag] = partial(self.convert_forall, item)
             tag = "if" + item
-            self.transformation_loop_[tag] = lambda_if(item)
+            self.transformation_loop_[tag] = partial(self.convert_if, item)
 
         # TODO check how to make this even generic,
         # we should not assume these names are provided
-        self.transformation_loop_['foralldependencies'] = lambda_for_deps
-        self.transformation_loop_['forallcomponent'] = lambda_for_comps
+        self.transformation_loop_['foralldependencies'] = self.convert_forall_dependencies
+        self.transformation_loop_['forallcomponent'] = self.convert_forall_comps
 
     # TODO empty self.transformation_functions_ before/when entering here
     def generate_apply_functions(self):
@@ -623,7 +619,8 @@ class CodeGenerator(EnhancedObject):
         output = list()
 
         # self.log("Handling text: \n {} with interface {}".format(text, interface_type))
-        assert interface_type in self.comp_spec_["interface"], "Requested interface type {} unknown".format(interface_type)
+        assert interface_type in self.comp_spec_["interface"], (
+            "Requested interface type {} unknown".format(interface_type))
 
         # computing all upperlayer spec
         # TODO this could be avoided and done once
@@ -666,7 +663,8 @@ class CodeGenerator(EnhancedObject):
                             else:
                                 res = ""
                         except Exception as e:
-                            self.log_error("Exception detected in processing apply on line [{}]: {} \n {} \n with item {}".format(num_line, line, e, item))
+                            msg_err = "Exception detected in processing apply on line [{}]: {} \n {} \n with item {}"
+                            self.log_error(msg_err.format(num_line, line, e, item))
                             raise
                         # self.log_warn("result would be {}".format(res))
                         # self.log_warn("Here we are")
@@ -675,7 +673,7 @@ class CodeGenerator(EnhancedObject):
                 output.append(line_processed)
 
         self.rendered_ += output
-        # self.log_error("Sanity check: Is dictinnary extended?\n {}".format(self.comp_spec_["interface"][interface_type]))
+        # self.log_error("Sanity check: is dico  extended?\n {}".format(self.comp_spec_["interface"][interface_type]))
         # self.log("created: {}".format(type(output)))
         # todo no false case?
         return True
