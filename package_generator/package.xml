@@ -27,7 +27,6 @@
   <exec_depend>python-jinja2</exec_depend>
 
   <test_depend>roslint</test_depend>
-  <test_depend>haros_catkin</test_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
