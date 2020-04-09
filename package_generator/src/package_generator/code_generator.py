@@ -375,8 +375,8 @@ class CodeGenerator(EnhancedObject):
                 # look for apply generator
                 # TODO presense of loop / conditional tag not handled.
                 matches = self.get_all_tags_pattern("apply", line)
-                for m in matches:
-                    operation = m[0].split("-")[1]
+                for one_m in matches:
+                    operation = one_m[0].split("-")[1]
                     # self.log("operation is: {}".format(operation))
                     # make sure the operation exist
                     if operation not in self.transformation_functions_:
@@ -392,7 +392,7 @@ class CodeGenerator(EnhancedObject):
                         raise
                     # self.log_warn("result would be {}".format(res))
                     # self.log_warn("Here we are")
-                    line = convert(line, **{m[0]: res})
+                    line = convert(line, **{one_m[0]: res})
 
                 # look for the other tags
                 matches = self.get_all_tags(line)
@@ -576,8 +576,7 @@ class CodeGenerator(EnhancedObject):
 
         if output is None:
             return ""
-        else:
-            return output
+        return output
 
     # TODO error to be checked
     def convert_forall_dependencies(self, iter_text):
@@ -650,8 +649,8 @@ class CodeGenerator(EnhancedObject):
                 matches = self.get_all_tags_pattern("apply", line_processed)
                 if matches:
                     # self.log_warn("Found matches: {}".format(matches))
-                    for m in matches:
-                        operation = m[0].split("-")[1]
+                    for one_m in matches:
+                        operation = one_m[0].split("-")[1]
                         # self.log("operation is: {}".format(operation))
                         # make sure the operation exist
                         if operation not in self.transformation_functions_:
@@ -668,7 +667,7 @@ class CodeGenerator(EnhancedObject):
                             raise
                         # self.log_warn("result would be {}".format(res))
                         # self.log_warn("Here we are")
-                        line_processed = convert(line_processed, **{m[0]: res})
+                        line_processed = convert(line_processed, **{one_m[0]: res})
 
                 output.append(line_processed)
 

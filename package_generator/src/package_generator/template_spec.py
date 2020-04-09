@@ -8,9 +8,9 @@
 Copyright (C) 2018 Tecnalia Research and Innovation
 Distributed under the Apache 2.0 license.
 """
+import os
 from package_generator.enhanced_object import EnhancedObject
 import yaml
-import os
 
 
 class TemplateSpec(EnhancedObject):
@@ -211,8 +211,7 @@ class TemplateSpec(EnhancedObject):
 
 
 if __name__ == "__main__":
-    """
-    main
+    """ main
     """
     print "Hello World"
 

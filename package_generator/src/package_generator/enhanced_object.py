@@ -9,8 +9,8 @@ Copyright (C) 2018 Tecnalia Research and Innovation
 Distributed under the Apache 2.0 license
 """
 
-from termcolor import colored
 import inspect
+from termcolor import colored
 
 
 class EnhancedObject(object):
