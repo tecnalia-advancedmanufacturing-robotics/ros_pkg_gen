@@ -16,7 +16,6 @@ variables:
   # UPSTREAM_WORKSPACE: file
   # ROSINSTALL_FILENAME: ".rosinstall"
   NOT_TEST_INSTALL: "true"
-  CATKIN_CONFIG: '--blacklist cpp_node_update cpp_service_server msg_srv_action python_node_update python_service_server'
 
 ici_kinetic:
   script: .ci_config/gitlab.sh
