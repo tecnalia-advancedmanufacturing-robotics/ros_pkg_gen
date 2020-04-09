@@ -1,0 +1,17 @@
+{ifpublisher}
+<launch>
+    <node name="{componentNode}" pkg="{componentPackage}" type="{componentNode}" />
+{forallpublisher}
+    <!-- protected region {componentName} {name} additional configuration begin -->
+    <!-- protected region {componentName} {name} additional configuration end -->
+    <test test-name="hz_loop_test_{componentNode}_{name}" pkg="rostest" type="publishtest" name="pub_test_{componentNode}_{name}">
+        <rosparam>
+            topics:
+                - name: {name}
+                - timeout: 10
+                - negative: {False}
+        </rosparam>
+    </test>
+{endforallpublisher}
+</launch>
+{endifpublisher}
