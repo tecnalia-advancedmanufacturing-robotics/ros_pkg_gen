@@ -130,18 +130,18 @@ class CodeGeneratorTest(unittest.TestCase):
         Test  the conversion of multi-line
         """
         filename = self.dir_name + "/template_test_multiple_line.cpp"
-        file_content = ('hello {componentName}' '\n'
-                        '{forallpublisher}' '\n'
-                        'if (component_data_.{name}_active)' '\n'
-                        '  pub_.publish(component_data_.{name});' '\n'
-                        '{endforallpublisher}' '\n'
-                        )
+        file_content = (
+            'hello {componentName}' '\n'
+            '{forallpublisher}' '\n'
+            'if (component_data_.{name}_active)' '\n'
+            '  pub_.publish(component_data_.{name});' '\n'
+            '{endforallpublisher}' '\n')
         expected_output = (
-                          "hello node_extended" "\n"
-                          "if (component_data_.pub_active)" "\n"
-                          "  pub_.publish(component_data_.pub);" "\n"
-                          "if (component_data_.pub_second_active)" "\n"
-                          "  pub_.publish(component_data_.pub_second);" "\n")
+            "hello node_extended" "\n"
+            "if (component_data_.pub_active)" "\n"
+            "  pub_.publish(component_data_.pub);" "\n"
+            "if (component_data_.pub_second_active)" "\n"
+            "  pub_.publish(component_data_.pub_second);" "\n")
 
         with open(filename, 'w') as open_file:
             open_file.write(file_content)
@@ -156,25 +156,26 @@ class CodeGeneratorTest(unittest.TestCase):
         Test correct management of multi-line with bracket
         """
         filename = self.dir_name + "/template_test_multiple_line.cpp"
-        file_content = ('hello {componentName}' '\n'
-                        '{forallpublisher}' '\n'
-                        'if (component_data_.{name}_active)' '\n'
-                        '{' '\n'
-                        '   pub_.publish(component_data_.{name});' '\n'
-                        '}' '\n'
-                        '{endforallpublisher}' '\n'
-                        )
+        file_content = (
+            'hello {componentName}' '\n'
+            '{forallpublisher}' '\n'
+            'if (component_data_.{name}_active)' '\n'
+            '{' '\n'
+            '   pub_.publish(component_data_.{name});' '\n'
+            '}' '\n'
+            '{endforallpublisher}' '\n'
+        )
         expected_output = (
-                           "hello node_extended" "\n"
-                           "if (component_data_.pub_active)" "\n"
-                           "{" "\n"
-                           "   pub_.publish(component_data_.pub);" "\n"
-                           "}" "\n"
-                           "if (component_data_.pub_second_active)" "\n"
-                           "{" "\n"
-                           "   pub_.publish(component_data_.pub_second);" "\n"
-                           "}" "\n"
-                           )
+            "hello node_extended" "\n"
+            "if (component_data_.pub_active)" "\n"
+            "{" "\n"
+            "   pub_.publish(component_data_.pub);" "\n"
+            "}" "\n"
+            "if (component_data_.pub_second_active)" "\n"
+            "{" "\n"
+            "   pub_.publish(component_data_.pub_second);" "\n"
+            "}" "\n"
+        )
         with open(filename, 'w') as open_file:
             open_file.write(file_content)
 
@@ -195,7 +196,7 @@ class CodeGeneratorTest(unittest.TestCase):
             'hello {componentName}' '\n'
             '    void update({componentName}_data &data, {componentName}_config config)' '\n'
             'Bye Bye' '\n'
-            )
+        )
         expected_output = (
             "Let us start !!!!" "\n"
             "hello node_extended" "\n"
@@ -227,14 +228,14 @@ class CodeGeneratorTest(unittest.TestCase):
             '<build_depend>actionlib</build_depend>' '\n'
             '<run_depend>actionlib</run_depend>' '\n'
             '{endifactionServer}' '\n'
-            )
+        )
         expected_output = (
             "Let us start !!!!" "\n"
             "<build_depend>dynamic_reconfigure</build_depend>" "\n"
             "<run_depend>dynamic_reconfigure</run_depend>" "\n"
             "<build_depend>actionlib</build_depend>" "\n"
             "<run_depend>actionlib</run_depend>" "\n"
-            )
+        )
 
         with open(filename, 'w') as openfile:
             openfile.write(file_content)

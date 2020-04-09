@@ -9,12 +9,12 @@ Copyright (C) 2019 Tecnalia Research and Innovation
 Distributed under the Apache 2.0 license.
 """
 
-import jinja2
 from package_generator.enhanced_object import EnhancedObject
 
 # Todo should these import be maintained?
 from package_generator.template_spec import TemplateSpec
 from package_generator.package_xml_parser import PackageXMLParser
+import jinja2
 
 
 class JinjaGenerator(EnhancedObject):
@@ -163,6 +163,17 @@ class JinjaGenerator(EnhancedObject):
         return True
 
     def check_template_file(self, filename, is_filename=True):
+        """check if the template file is valid
+
+        Args:
+            filename {str} --  str (either absolute filename or file content)
+
+        Keyword Arguments:
+            is_filename {bool} -- to distinguish the two cases (default: {True})
+
+        Returns:
+            bool -- check success
+        """
         env = jinja2.Environment()
         # self.log("Checking file: {}".format(filename))
 
@@ -180,8 +191,8 @@ class JinjaGenerator(EnhancedObject):
         try:
             env.parse(str_template)
         except jinja2.exceptions.TemplateSyntaxError as err:
-                self.log_warn("Syntax error: line {}: {}".format(err.lineno, err))
-                return False
+            self.log_warn("Syntax error: line {}: {}".format(err.lineno, err))
+            return False
         return True
 
 # todo:

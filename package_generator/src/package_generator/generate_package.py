@@ -11,7 +11,6 @@ Distributed under the Apache 2.0 license.
 
 """
 
-from termcolor import colored
 import os
 import datetime
 import shutil
@@ -24,6 +23,7 @@ from package_generator.package_xml_parser import PackageXMLParser
 from package_generator.file_update_management import GeneratedFileAnalysis
 from package_generator.enhanced_object import EnhancedObject
 from package_generator.template_spec import TemplateSpec
+from termcolor import colored
 
 
 class PackageGenerator(EnhancedObject):
@@ -120,7 +120,11 @@ Revise the template, and compare to examples
         return True
 
     def get_template_info(self):
+        """Get information about the available package templates
 
+        Returns:
+            list: tuple with [absolute package path, list of package names]
+        """
         rospack = rospkg.RosPack()
         path_template = rospack.get_path('package_generator_templates')
         path_template += "/templates/"
@@ -336,8 +340,7 @@ Revise the template, and compare to examples
 
         if self.spec_.generators_[1] == "jinja":
             return gen_two.check_template_file(gen_one.rendered_, is_filename=False)
-        else:
-            return gen_two.check_template_file(template_file)
+        return gen_two.check_template_file(template_file)
 
     def write_generated_file(self, result_file):
         """Write a generated file
@@ -366,17 +369,17 @@ Revise the template, and compare to examples
 
         return generator[self.spec_.generators_[-1]].rendered_
 
-    def set_generated_file(self, buffer):
+    def set_generated_file(self, l_file):
         """set the generated file
 
         Args:
-            buffer (list): list of of each line of the generated file
+            l_file (list): list of of each line of the generated file
         """
         generator = dict()
         generator["custom"] = self.file_generator_
         generator["jinja"] = self.jinja_generator_
 
-        generator[self.spec_.generators_[-1]].rendered_ = buffer
+        generator[self.spec_.generators_[-1]].rendered_ = l_file
 
     def handle_maintained_files(self):
         """Restore file Developer requests to maintain
@@ -535,11 +538,11 @@ Revise the template, and compare to examples
 
             new_item = item.replace('package_name', package_name)
             if 'component' in item:
-                for id, one_name in enumerate(comps_name):
+                for num, one_name in enumerate(comps_name):
                     generation_list.append([item,
                                             new_item.replace('component',
                                                              one_name),
-                                            id])
+                                            num])
             else:
                 # todo if no component active I should not set one
                 generation_list.append([item, new_item, 0])
@@ -626,8 +629,8 @@ Revise the template, and compare to examples
                     return False
 
                 # todo handle this in case jinja is involved.
-                buffer = self.get_generated_file()
-                if len(buffer) == 0:
+                l_gen = self.get_generated_file()
+                if not l_gen:
                     msg = "New generated file empty. No code maintained from previous version"
                     self.log_warn(msg)
                     # we write it if forced
@@ -635,8 +638,8 @@ Revise the template, and compare to examples
                         is_ok = self.write_generated_file(result_file)
                 else:
                     self.log("Merging with previous version")
-                    buffer = file_analyzor.update_file(buffer)
-                    self.set_generated_file(buffer)
+                    l_gen = file_analyzor.update_file(l_gen)
+                    self.set_generated_file(l_gen)
                     is_ok = self.write_generated_file(result_file)
 
                 if self.handle_status_and_advise(template_file,
@@ -829,6 +832,7 @@ def main():
     else:
         print colored("Package generated", "green")
     print "Bye bye"
+    return 0
 
 
 USAGE_CHECK = """ usage: check_template package_template
@@ -878,3 +882,4 @@ def main_check():
     else:
         print colored("No issue detected", "green")
     print "Bye bye"
+    return 0

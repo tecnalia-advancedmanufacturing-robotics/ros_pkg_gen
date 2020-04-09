@@ -111,6 +111,9 @@ class JinjaGeneratorTest(unittest.TestCase):
             self.assertEqual(generated, groundtruth)
 
     def test_jinja(self):
+        """
+        General test
+        """
         filename = self.dir_name + "/template_test_apply_function.cpp"
 
         file_content = (
@@ -150,6 +153,8 @@ class JinjaGeneratorTest(unittest.TestCase):
             self.assertEqual(generated, groundtruth)
 
     def test_custom_on_jinja(self):
+        """to be completed
+        """
         filename = self.dir_name + "/template_test_apply_function.cpp"
 
         file_content = (

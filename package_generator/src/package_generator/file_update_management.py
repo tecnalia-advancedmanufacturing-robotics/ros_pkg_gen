@@ -326,13 +326,13 @@ class GeneratedFileAnalysis(EnhancedObject):
             if not protected_line.is_protected_line(line):
                 continue
             protected_line.set_line_content(line)
-            pl = deepcopy(protected_line)
+            pl_copy = deepcopy(protected_line)
             # self.log_warn("protection detected on line {}".format(id_line))
-            if not pl.deduce_comment_format():
+            if not pl_copy.deduce_comment_format():
                 self.log_error("Not able to deduce comment type from line {}".format(line))
                 return False
-            pl.num_line_ = id_line
-            all_protected_lines.append(pl)
+            pl_copy.num_line_ = id_line
+            all_protected_lines.append(pl_copy)
 
         # self.log("End of the protection search")
         num_protected_lines = len(all_protected_lines)
@@ -342,38 +342,39 @@ class GeneratedFileAnalysis(EnhancedObject):
         # sanity check 1: number should be even
         if num_protected_lines % 2 != 0:
             self.log_error("Unbalanced set of protection")
-            # we do not return yet, to check where is the unbalacing in the file
+            # we do not return yet, to check where is the unbalancing in the file
 
         # todo: this could be done progressively by removing element from the list
         id_line = 0
         while id_line < num_protected_lines:
             # sanity check 2: the current one should be a start
             if not all_protected_lines[id_line].is_start_flag():
-                with all_protected_lines[id_line] as pl:
+                with all_protected_lines[id_line] as pline:
                     msg_err = "Protected line({}) on line {}: not finding the begining of such zone"
-                    self.log_error(msg_err.format(pl.protected_tag_, pl.num_line_))
+                    self.log_error(msg_err.format(pline.protected_tag_, pline.num_line_))
                     return False
             # sanity check 3: an opening should be followed by a closure of same pattern
             if id_line == num_protected_lines - 1:
                 msg_err = "Missing end tag of protected area {} started on line {}"
-                self.log_error(msg_err.format(pl.protected_tag_, pl.num_line_))
+                pline = all_protected_lines[id_line]
+                self.log_error(msg_err.format(pline.protected_tag_, pline.num_line_))
 
             if not all_protected_lines[id_line + 1].is_stop_flag():
-                pl = all_protected_lines[id_line]
-                pln = all_protected_lines[id_line + 1]
+                pline = all_protected_lines[id_line]
+                plinep = all_protected_lines[id_line + 1]
 
                 # with all_protected_lines[id_line], all_protected_lines[id_line + 1] as pl, pln:
                 msg_err = "Protected area ({}) on line {}: expected an end of area, found a new area on line: {}"
-                self.log_error(msg_err.format(pl.protected_tag_, pl.num_line_, pln.num_line_))
+                self.log_error(msg_err.format(pline.protected_tag_, pline.num_line_, plinep.num_line_))
                 return False
 
             if all_protected_lines[id_line].protected_tag_ != all_protected_lines[id_line + 1].protected_tag_:
-                pl = all_protected_lines[id_line]
-                pln = all_protected_lines[id_line + 1]
+                pline = all_protected_lines[id_line]
+                plinep = all_protected_lines[id_line + 1]
 
                 msg_err = "A end is expected for protected area [{}] from line {}."
-                self.log_error(msg_err.format(pl.protected_tag_, pl.num_line_))
-                self.log_error("Found protected area [{}] on line {}".format(pln.protected_tag_, pln.num_line_))
+                self.log_error(msg_err.format(pline.protected_tag_, pline.num_line_))
+                self.log_error("Found protected area [{}] on line {}".format(plinep.protected_tag_, plinep.num_line_))
                 return False
 
             id_line += 2
@@ -393,7 +394,7 @@ class GeneratedFileAnalysis(EnhancedObject):
         # checking areas without Developper contribution
         empty_keys = list()
         # self.log("Keys used")
-        for key in self.extracted_areas_.keys():
+        for key in self.extracted_areas_:
             # self.log("|{}|: ({}, {})".format(key,
             #                                 self.extracted_areas_[key].num_line_start_,
             #                                 self.extracted_areas_[key].num_line_stop_))
@@ -435,7 +436,7 @@ class GeneratedFileAnalysis(EnhancedObject):
         # # should be skipped.
         wait_for_end_area = False
 
-        for id_line, line in enumerate(file_in_list, start=1):
+        for _, line in enumerate(file_in_list, start=1):
             # self.log("Process line [{}]: {}".format(id_line, line))
             if not protected_line.is_protected_line(line):
                 # not protected, we add it as it is
@@ -467,7 +468,7 @@ class GeneratedFileAnalysis(EnhancedObject):
             if tag in self.extracted_areas_:
                 # get the stored lines
                 # self.log_error("Protected code: ")
-                for tmp_id, user_line in enumerate(self.extracted_areas_[tag].protected_lines_):
+                for _, user_line in enumerate(self.extracted_areas_[tag].protected_lines_):
                     # self.log_error("Adding: [{}]: {}".format(tmp_id, user_line))
                     file_updated.append(user_line)
                 if self.extracted_areas_[tag].protected_lines_:

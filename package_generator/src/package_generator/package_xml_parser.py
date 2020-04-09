@@ -10,15 +10,15 @@ Distributed under the Apache 2.0 license.
 
 """
 
-from termcolor import colored
 import sys
 import os
-import rospkg
 import xml.etree.cElementTree as ET
 from xml.dom import minidom
+import rospkg
 
 from package_generator.enhanced_object import EnhancedObject
 from package_generator.template_spec import TemplateSpec
+from termcolor import colored
 
 
 def remove_empty_line(text):
@@ -53,7 +53,14 @@ class PackageXMLParser(EnhancedObject):
     """
 
     def get_template(self, filename):
+        """Get the template defined in the xml spec
 
+        Args:
+            filename {str} -- XML filename
+
+        Returns:
+            str -- value of the template flag
+        """
         try:
             tree = ET.ElementTree(file=filename)
         except IOError:
