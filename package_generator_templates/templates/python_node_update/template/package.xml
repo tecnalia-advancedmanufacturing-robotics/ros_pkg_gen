@@ -13,8 +13,8 @@
   {foralldependencies}
   <depend>{dependencyName}</depend>
   {endforalldependencies}
+  <test_depend>rostest</test_depend>
 
   <!-- protected region additional package statements begin -->
   <!-- protected region additional package statements end -->
-
 </package>
