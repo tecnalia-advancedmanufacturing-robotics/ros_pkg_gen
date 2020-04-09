@@ -56,7 +56,6 @@ catkin_package(
 include_directories(common/src)
 include_directories(${catkin_INCLUDE_DIRS})
 
-
 ## Declare cpp executable
 {forallcomponent}
 add_executable({componentName} ros/src/{componentName}_ros.cpp)
@@ -75,6 +74,18 @@ target_link_libraries({componentName} ${catkin_LIBRARIES}
 # protected region additional user defined BUILD STATEMENTS begin #
 # protected region additional user defined BUILD STATEMENTS end #
 
+##########
+## Test ##
+##########
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+{forallcomponent}
+{ifdynParameter}
+  add_rostest(test/test_{componentName}_dyn_param.test)
+{endifdynParameter}
+{endforallcomponent}
+endif()
 
 #############
 ## Install ##

@@ -1,0 +1,14 @@
+{ifdynParameter}
+<launch>
+    <node name="{componentName}" pkg="{packageName}" type="{componentName}" />
+{foralldynParameter}
+    <!-- protected region {componentName} {name} additional configuration begin -->
+    <!-- protected region {componentName} {name} additional configuration end -->
+    <test test-name="dyn_param_test_{componentName}_{name}" pkg="rostest" type="paramtest" name="dyn_param_test_{componentName}_{name}">
+        <param name="param_name_target" value="/{componentName}/{name}" />
+        <param name="test_duration" value="5.0" />
+        <param name="wait_time" value="5.0" />
+    </test>
+{endforalldynParameter}
+</launch>
+{endifdynParameter}
