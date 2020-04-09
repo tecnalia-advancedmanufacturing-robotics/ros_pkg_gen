@@ -15,6 +15,7 @@ variables:
   # only if specific dependencies are to be pulled
   # UPSTREAM_WORKSPACE: file
   # ROSINSTALL_FILENAME: ".rosinstall"
+  NOT_TEST_INSTALL: "true"
 
 ici_kinetic:
   script: .ci_config/gitlab.sh
