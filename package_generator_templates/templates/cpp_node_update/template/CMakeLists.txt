@@ -83,6 +83,9 @@ if (CATKIN_ENABLE_TESTING)
 {ifpublisher}
   add_rostest(test/test_{componentName}_hz_loop.test)
 {endifpublisher}
+{ifdynParameter}
+  add_rostest(test/test_{componentName}_dyn_param.test)
+{endifdynParameter}
 {endforallcomponent}
 endif()
 

@@ -6,7 +6,6 @@
   <maintainer email="{packageAuthorEmail}">{packageAuthor}</maintainer>
   <author email="{packageAuthorEmail}">{packageAuthor}</author>
   <license>{packageLicense}</license>
-  <url></url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -14,8 +13,8 @@
   {foralldependencies}
   <depend>{dependencyName}</depend>
   {endforalldependencies}
+  <test_depend>rostest</test_depend>
 
   <!-- protected region additional package statements begin -->
   <!-- protected region additional package statements end -->
-
 </package>

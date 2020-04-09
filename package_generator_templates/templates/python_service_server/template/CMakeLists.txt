@@ -59,6 +59,18 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(${catkin_INCLUDE_DIRS})
 
+##########
+## Test ##
+##########
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+{forallcomponent}
+{ifdynParameter}
+  add_rostest(test/test_{componentName}_dyn_param.test)
+{endifdynParameter}
+{endforallcomponent}
+endif()
 
 #############
 ## Install ##
