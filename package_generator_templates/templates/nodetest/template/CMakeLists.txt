@@ -4,11 +4,7 @@ project({packageName})
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  {foralldependencies}
-  {dependencyName}
-  {endforalldependencies}
-)
+find_package(catkin REQUIRED)
 
 # protected region additional user defined REQUIREMENTS begin #
 # protected region additional user defined REQUIREMENTS end #
@@ -22,22 +18,11 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
-catkin_package(
-  INCLUDE_DIRS
-    common/src
-  CATKIN_DEPENDS
-    {foralldependencies}
-    {dependencyName}
-    {endforalldependencies}
-)
+catkin_package()
 
 ###########
 ## Build ##
 ###########
-
-## Specify additional locations of header files
-## Your package locations should be listed before other locations
-include_directories(${catkin_INCLUDE_DIRS})
 
 # protected region additional user defined BUILD STATEMENTS begin #
 # protected region additional user defined BUILD STATEMENTS end #
@@ -50,13 +35,13 @@ if (CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
 {forallcomponent}
 {ifpublisher}
-  add_rostest(test/test_{componentPackage}_{componentNode}_pub.test)
+  add_rostest(test/{componentName}_pub.test)
 {endifpublisher}
 {ifcyclicPublisher}
-  add_rostest(test/test_{componentPackage}_{componentNode}_pub.test)
+  add_rostest(test/{componentName}_hz_loop.test)
 {endifcyclicPublisher}
 {ifdynParameter}
-  add_rostest(test/test_{componentPackage}_{componentNode}_dyn_param.test)
+  add_rostest(test/{componentName}_dyn_param.test)
 {endifdynParameter}
 {endforallcomponent}
 endif()

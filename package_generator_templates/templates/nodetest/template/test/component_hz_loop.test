@@ -1,10 +1,10 @@
 {ifcyclicPublisher}
 <launch>
-    <node name="{componentNode}" pkg="{componentPackage}" type="{componentNode}" />
+    <node name="{componentName}" pkg="{componentPackage}" type="{componentName}" />
 {forallcyclicPublisher}
     <!-- protected region {componentName} {name} additional configuration begin -->
     <!-- protected region {componentName} {name} additional configuration end -->
-    <test test-name="hz_loop_test_{componentNode}_{name}" pkg="rostest" type="hztest" name="hz_test_{componentName}_{name}">
+    <test test-name="hz_loop_test_{componentName}_{name}" pkg="rostest" type="hztest" name="hz_test_{componentName}_{name}">
         <param name="topic" value="{name}" />
         <param name="hz" value="{frequency}" />
         <param name="hzerror" value="0.5" />
