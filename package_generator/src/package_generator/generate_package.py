@@ -783,7 +783,8 @@ Revise the template, and compare to examples
 
 # todo complete the usage description with available templates
 # and with existing commands
-USAGE_GEN = """ usage: generate_package package_spec package_template
+USAGE_GEN = """ usage: generate_package [package_spec]
+
 package_spec: xml description of the component(s) interface
 
 """
