@@ -23,7 +23,7 @@ See [LICENSE.md](LICENSE.md) for more details.
   <img src="https://img.youtube.com/vi/x0OiNmt7Vdw/0.jpg"
         alt="ROS Package Generator demo"
         width="560" height="315" border="0"/>
-s</a>
+</a>
 
 **Publications**:
 If you use this work in an academic context, please cite the following publication(s):
