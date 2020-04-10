@@ -4,7 +4,11 @@ project({packageName})
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED COMPONENTS
+{forallcomponent}
+  {componentPackage}
+{endforallcomponent}
+)
 
 # protected region additional user defined REQUIREMENTS begin #
 # protected region additional user defined REQUIREMENTS end #

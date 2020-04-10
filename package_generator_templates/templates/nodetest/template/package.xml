@@ -11,6 +11,9 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <!-- user dependencies -->
+  {forallcomponent}
+  <depend>{componentPackage}</depend>
+  {endforallcomponent}
   {foralldependencies}
   <depend>{dependencyName}</depend>
   {endforalldependencies}
