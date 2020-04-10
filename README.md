@@ -19,12 +19,11 @@ To do so the input needed are:
 **License**: This project is under the Apache 2.0 License.
 See [LICENSE.md](LICENSE.md) for more details.
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=qsNkYGQBW8U
-" target="_blank"><img src="http://img.youtube.com/vi/qsNkYGQBW8U/0.jpg"
-alt="ROS Package Generator demo" width="560" height="315" border="0" /></a>
-
-Note that the video is related to version `1.0.0`.
-It should be updated... soonish?
+<a href="https://www.youtube.com/embed/x0OiNmt7Vdw" target="_blank">
+  <img src="https://img.youtube.com/vi/x0OiNmt7Vdw/0.jpg"
+        alt="ROS Package Generator demo"
+        width="560" height="315" border="0"/>
+s</a>
 
 **Publications**:
 If you use this work in an academic context, please cite the following publication(s):
