@@ -1,0 +1,9 @@
+package_attributes: ["name", "author", "author_email",
+                     "description", "license", "copyright"]
+
+component_attributes: ["name", "package"]
+
+component_interface:
+    publisher: ["name"]
+    cyclicPublisher: ["name", "frequency"]
+    dynParameter: ["name"]

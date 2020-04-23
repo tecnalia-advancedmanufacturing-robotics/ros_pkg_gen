@@ -1,0 +1,17 @@
+{ifpublisher}
+<launch>
+    <node name="{componentName}" pkg="{componentPackage}" type="{componentName}" />
+    <!-- protected region {componentName} additional configuration begin -->
+    <!-- protected region {componentName} additional configuration end -->
+    <test test-name="publishtest" pkg="rostest" type="publishtest" name="publishtest">
+        <rosparam>
+            topics:
+{forallpublisher}
+                - name: {name}
+                  timeout: 5
+                  negative: False
+{endforallpublisher}
+        </rosparam>
+    </test>
+</launch>
+{endifpublisher}

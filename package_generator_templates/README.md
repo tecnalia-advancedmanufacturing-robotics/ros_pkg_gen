@@ -6,7 +6,7 @@ This package gathers templates proposed for the `package_generator`.
 
 **Affiliation**: Tecnalia Research and Innovation, Spain
 
-**License**: This project is under the pache 2.0 License.
+**License**: This project is under the Apache 2.0 License.
 See [LICENSE.md](../LICENSE.md) for more details.
 
 ## Getting Started
@@ -37,6 +37,7 @@ Its value is the name of the template folder within the [templates](templates) d
 * [cpp_service_server](templates/cpp_service_server/README.md): C++ node acting as a service server.
 * `python_service_server`: similar life-cycle for python.
 * [msg_srv_action](templates/msg_srv_action/README.md): Basic layers for creating an interface package
+* [nodetest](templates/nodetest/README.md): to create a package dedicated to testing.
 
 ## Q & A
 

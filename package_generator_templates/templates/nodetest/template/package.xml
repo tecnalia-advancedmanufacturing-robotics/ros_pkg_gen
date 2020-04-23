@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>{packageName}</name>
+  <description>{packageDescription}</description>
+  <version>0.0.0</version>
+  <maintainer email="{packageAuthorEmail}">{packageAuthor}</maintainer>
+  <author email="{packageAuthorEmail}">{packageAuthor}</author>
+  <license>{packageLicense}</license>
+  <url></url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- user dependencies -->
+  {forallcomponent}
+  <depend>{componentPackage}</depend>
+  {endforallcomponent}
+  {foralldependencies}
+  <depend>{dependencyName}</depend>
+  {endforalldependencies}
+  <test_depend>rostest</test_depend>
+  <!-- protected region additional package statements begin -->
+  <!-- protected region additional package statements end -->
+</package>
