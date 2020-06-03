@@ -30,4 +30,10 @@ def dependencies_from_interface(interface_name, context):
         list: List of dependencies that should be added according to
               the interface used and the attributes values
     """
-    return []
+
+    list_dep = []
+
+    if interface_name in ['service', 'filter']:
+        list_dep.append('node_test')
+    return list_dep
+

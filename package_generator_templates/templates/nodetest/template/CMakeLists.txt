@@ -47,6 +47,9 @@ if (CATKIN_ENABLE_TESTING)
 {ifdynParameter}
   add_rostest(test/{componentName}_dyn_param.test)
 {endifdynParameter}
+{ifservice}
+  add_rostest(test/{componentName}_service.test)
+{endifservice}
 {endforallcomponent}
 endif()
 
