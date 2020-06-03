@@ -38,3 +38,13 @@ Here a _component_ refers to a _node_ we want to test
 **dynParameter**: to verify a dynamic parameter is being defined by the component
 
 * `name`: name of the dynamic parameter
+
+**service**: to check the output generated given an input.
+
+* `name`: name of the service to test.
+
+>[!WARNING]
+> the generated file in test folder has to be edited to define the input and output values, in python dictionary format.
+
+The test generated can be copied and paste to add more cases with different input-output value.
+Note that if the package generator is called again, introduced changes will be erased (temporally stored in `/tmp` as indicated)
