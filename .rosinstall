@@ -1,0 +1,4 @@
+- git:
+    local-name: 'ros_node_test'
+    uri: 'https://github.com/tecnalia-advancedmanufacturing-robotics/ros_node_test.git'
+    version: 'master'

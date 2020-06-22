@@ -7,3 +7,5 @@ component_interface:
     publisher: ["name"]
     cyclicPublisher: ["name", "frequency"]
     dynParameter: ["name"]
+    service: ["name"]
+    filter: ["topic_in", "topic_out"]

@@ -1,0 +1,17 @@
+{iffilter}
+<launch>
+    <node name="{apply-get_name_no_py}" pkg="{componentPackage}" type="{componentName}" />
+{forallfilter}
+    <!-- protected region {componentName} {name} additional configuration begin -->
+    <!-- protected region {componentName} {name} additional configuration end -->
+    <test test-name="filter_test_{apply-get_name_no_py}_{topic_out}" pkg="node_test" type="test_filter" name="filter_test_{apply-get_name_no_py}_{topic_out}">
+        <param name="topic_in" value="/{topic_in}" />
+        <param name="topic_out" value="/{topic_out}" />
+        <rosparam param="msg_in"> {TOBEDEFINED} </rosparam>
+        <rosparam param="msg_out"> {TOBEDEFINED} </rosparam>
+        <!--Maximum filter generation duration (sec), please adjust time-->
+        <rosparam param="timeout"> 1.0 </rosparam>
+    </test>
+{endforallfilter}
+</launch>
+{endiffilter}

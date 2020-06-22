@@ -206,7 +206,6 @@ def dependencies_from_template():
     return ['roscpp']
 
 
-
 def dependencies_from_interface(interface_name, context):
     """return package dependencies according to the interface name
 

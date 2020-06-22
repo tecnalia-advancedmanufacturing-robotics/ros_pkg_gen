@@ -8,17 +8,8 @@
 
   <maintainer email="anthony.remazeilles@tecnalia.com">Anthony Remazeilles</maintainer>
 
-  <license>NPOSL-3.0</license>
+  <license>Apache 2.0</license>
 
-  <!-- Url tags are optional, but mutiple are allowed, one per tag -->
-  <!-- Optional attribute type can be: website, bugtracker, or repository -->
-  <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/package_generator</url> -->
-
-
-  <!-- Author tags are optional, mutiple are allowed, one per tag -->
-  <!-- Authors do not have to be maintianers, but could be -->
-  <!-- Example: -->
   <author email="anthony.remazeilles@tecnalia.com">Anthony Remazeilles</author>
 
   <buildtool_depend>catkin</buildtool_depend>

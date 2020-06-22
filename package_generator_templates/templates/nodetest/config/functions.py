@@ -10,6 +10,25 @@ Distributed under the Apache 2.0 license.
 """
 
 
+def get_name_no_py(context):
+    """return the component name without .py extension (if existing)
+
+    Args:
+        context (dict): complete package and component transformation
+
+    Returns:
+        str: component name without possible .py extension.
+
+    Examples:
+        >>> get_name_no_py({'componentName':"nopy"})
+        >>> 'nopy'
+         >>> get_name_no_py({'componentName':"nopy.py"})
+        >>> 'nopy'
+    """
+
+    return context['componentName'].replace('.py', '')
+
+
 def dependencies_from_template():
     """provides the dependencies required by the template
 
@@ -30,4 +49,10 @@ def dependencies_from_interface(interface_name, context):
         list: List of dependencies that should be added according to
               the interface used and the attributes values
     """
-    return []
+
+    list_dep = []
+
+    if interface_name in ['service', 'filter']:
+        list_dep.append('node_test')
+    return list_dep
+
