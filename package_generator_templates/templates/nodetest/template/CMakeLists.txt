@@ -50,6 +50,9 @@ if (CATKIN_ENABLE_TESTING)
 {ifservice}
   add_rostest(test/{componentName}_service.test)
 {endifservice}
+{iffilter}
+  add_rostest(test/{componentName}_filter.test)
+{endiffilter}
 {endforallcomponent}
 endif()
 
