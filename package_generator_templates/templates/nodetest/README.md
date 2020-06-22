@@ -48,3 +48,14 @@ Here a _component_ refers to a _node_ we want to test
 
 The test generated can be copied and paste to add more cases with different input-output value.
 Note that if the package generator is called again, introduced changes will be erased (temporally stored in `/tmp` as indicated)
+
+**filter**: to test a filter node behaviour, in which a message is published after processing a received message.
+
+* `topic_in`: input topic name (where we will publish a teat message).
+* `topic_out`: output topic name (where we expect receiving an answer).
+
+>[!WARNING]
+> the generated file in test folder has to be edited to define the input and output values, in python dictionary format.
+
+The test generated can be copied and paste to add more cases with different input-output value.
+Note that if the package generator is called again, introduced changes will be erased (temporally stored in `/tmp` as indicated)

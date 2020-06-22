@@ -10,6 +10,25 @@ Distributed under the Apache 2.0 license.
 """
 
 
+def get_name_no_py(context):
+    """return the component name without .py extension (if existing)
+
+    Args:
+        context (dict): complete package and component transformation
+
+    Returns:
+        str: component name without possible .py extension.
+
+    Examples:
+        >>> get_name_no_py({'componentName':"nopy"})
+        >>> 'nopy'
+         >>> get_name_no_py({'componentName':"nopy.py"})
+        >>> 'nopy'
+    """
+
+    return context['componentName'].replace('.py', '')
+
+
 def dependencies_from_template():
     """provides the dependencies required by the template
 

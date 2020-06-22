@@ -7,7 +7,7 @@
     <test test-name="hz_loop_test_{componentName}_{name}" pkg="rostest" type="hztest" name="hz_test_{componentName}_{name}">
         <param name="topic" value="{name}" />
         <param name="hz" value="{componentFrequency}" />
-        <param name="hzerror" value="0.5" />
+        <param name="hzerror" value="1" />
         <param name="test_duration" value="5.0" />
     </test>
 {endforallpublisher}
