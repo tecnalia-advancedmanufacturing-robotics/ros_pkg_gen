@@ -1,0 +1,14 @@
+{ifserviceServer}
+<launch>
+    <node name="{componentName}" pkg="{packageName}" type="{componentName}" />
+{forallserviceServer}
+    <!-- protected region {componentName} {name} additional configuration begin -->
+    <!-- protected region {componentName} {name} additional configuration end -->
+    <test test-name="service_test_{componentName}_{name}" pkg="node_test" type="test_service" name="service_test_{componentName}_{name}">
+        <param name="service_name" value="/{name}" />
+        <rosparam param="service_input"> {TOBEDEFINED} </rosparam>
+        <rosparam param="service_output"> {TOBEDEFINED} </rosparam>
+    </test>
+{endforallserviceServer}
+</launch>
+{endifserviceServer}
