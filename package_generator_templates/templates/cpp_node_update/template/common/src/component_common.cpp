@@ -8,10 +8,7 @@
 *        This file is to be edited by the Developer
 **/
 
-// ROS message includes
 #include "ros/ros.h"
-
-// ROS message & services includes
 
 {ifactionServer}
 #include <actionlib/server/simple_action_server.h>
@@ -30,7 +27,6 @@
 #include <{packageName}/{componentName}Config.h>
 
 {endifdynParameter}
-// ROS message & services includes
 {forallpublisher}
 #include <{apply-get_cpp_path}.h>
 {endforallpublisher}
