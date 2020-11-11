@@ -4,7 +4,9 @@
 {forallserviceServer}
     <!-- protected region {componentName} {name} additional configuration begin -->
     <!-- protected region {componentName} {name} additional configuration end -->
-    <test test-name="service_test_{componentName}_{name}" pkg="node_test" type="test_service" name="service_test_{componentName}_{name}">
+    <test test-name="service_test_{componentName}_{name}"
+        pkg="rostest_node_interface_validation" type="test_service"
+        name="service_test_{componentName}_{name}">
         <rosparam>
             calls:
                 - name: /{name}

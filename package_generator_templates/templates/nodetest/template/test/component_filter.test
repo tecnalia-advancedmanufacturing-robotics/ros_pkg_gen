@@ -4,7 +4,9 @@
 {forallfilter}
     <!-- protected region {componentName} {name} additional configuration begin -->
     <!-- protected region {componentName} {name} additional configuration end -->
-    <test test-name="filter_test_{apply-get_name_no_py}_{topic_out}" pkg="node_test" type="test_filter" name="filter_test_{apply-get_name_no_py}_{topic_out}">
+    <test test-name="filter_test_{apply-get_name_no_py}_{topic_out}"
+        pkg="rostest_node_interface_validation" type="test_filter"
+        name="filter_test_{apply-get_name_no_py}_{topic_out}">
         <rosparam>
             filters:
                 - topic_in: /{topic_in}
