@@ -1,4 +1,4 @@
 - git:
-    local-name: 'ros_node_test'
-    uri: 'https://github.com/tecnalia-advancedmanufacturing-robotics/ros_node_test.git'
-    version: 'master'
+    local-name: 'rostest_node_interface_validation'
+    uri: 'https://github.com/tecnalia-advancedmanufacturing-robotics/rostest_node_interface_validation.git'
+    version: 'melodic-devel'

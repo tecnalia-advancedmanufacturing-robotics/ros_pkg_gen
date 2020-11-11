@@ -53,6 +53,6 @@ def dependencies_from_interface(interface_name, context):
     list_dep = []
 
     if interface_name in ['service', 'filter']:
-        list_dep.append('node_test')
+        list_dep.append('rostest_node_interface_validation')
     return list_dep
 
