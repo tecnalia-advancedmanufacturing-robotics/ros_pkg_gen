@@ -14,8 +14,9 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>rospy</depend>
-  <exec_depend>python-termcolor</exec_depend>
-  <exec_depend>python-jinja2</exec_depend>
+  
+  <exec_depend>python3-termcolor</exec_depend>
+  <exec_depend>python3-jinja2</exec_depend>
 
   <test_depend>roslint</test_depend>
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 @package package_generator
 @file test_dic_generator.py
@@ -32,7 +32,7 @@ class GenerateDictTest(unittest.TestCase):
         # creating a temporary repo for trials
         self.dir_name = "/tmp/test_template_spec"
         if not os.path.exists(self.dir_name):
-            print "Creating the repo {}".format(self.dir_name)
+            print ("Creating the repo {}".format(self.dir_name))
             os.makedirs(self.dir_name)
 
     def test_undef_files(self):
@@ -52,6 +52,6 @@ class GenerateDictTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print "test_dic_generator -- begin"
+    print ("test_dic_generator -- begin")
     unittest.main()
-    print "test_dic_generator -- end"
+    print ("test_dic_generator -- end")

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 @package package_generator
 @file test_code_generator.py
@@ -62,7 +62,7 @@ class JinjaGeneratorTest(unittest.TestCase):
 
         self.dir_name = "/tmp/test_package_generator"
         if not os.path.exists(self.dir_name):
-            print "Creating the repo {}".format(self.dir_name)
+            print ("Creating the repo {}".format(self.dir_name))
             os.makedirs(self.dir_name)
 
         file_xml = self.dir_name + "/node_spec.ros_package"
@@ -107,7 +107,7 @@ class JinjaGeneratorTest(unittest.TestCase):
 
         for generated, groundtruth in zip(self.generator_.rendered_,
                                           file_content.splitlines()):
-            # print "Comparing |{}| with |{}|".format(generated, groundtruth)
+            # print ("Comparing |{}| with |{}|".format(generated, groundtruth))
             self.assertEqual(generated, groundtruth)
 
     def test_jinja(self):
@@ -193,18 +193,18 @@ class JinjaGeneratorTest(unittest.TestCase):
 
         self.assertTrue(custom_generator.process_file(filename))
 
-        # print "Custom generation \n"
+        # print ("Custom generation \n")
         # for line in custom_generator.rendered_:
         #    print line
 
         self.assertTrue(self.generator_.generate_open_file(custom_generator.rendered_))
 
-        # print "Rendered file \n"
+        # print ("Rendered file \n")
         # print self.generator_.rendered_
 
         for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
-            # print "Comparing |{}| with |{}|".format(generated, groundtruth)
+            # print ("Comparing |{}| with |{}|".format(generated, groundtruth))
 
             self.assertEqual(generated, groundtruth)
 
@@ -245,13 +245,13 @@ class JinjaGeneratorTest(unittest.TestCase):
 
         for generated, groundtruth in zip(lines,
                                           expected_output.splitlines()):
-            # print "Comparing |{}| with |{}|".format(generated, groundtruth)
+            # print ("Comparing |{}| with |{}|".format(generated, groundtruth))
 
             self.assertEqual(generated, groundtruth)
         # todo check write request with bad filename
 
 
 if __name__ == '__main__':
-    print "test_jinja_generator -- begin"
+    print ("test_jinja_generator -- begin")
     unittest.main()
-    print "test_jina_generator -- end"
+    print ("test_jina_generator -- end")

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 @package package_generator
 @file code_generator.py
@@ -33,7 +33,7 @@ def convert(line, delimiter=None, **kwargs):
         delimiter = ['{', '}']
     result_line = line
 
-    for key, value in kwargs.iteritems():
+    for key, value in kwargs.items():
         splitted = result_line.split(delimiter[0] + key + delimiter[1])
 
         acc = splitted[0]
@@ -105,7 +105,7 @@ class CodeGenerator(EnhancedObject):
             self.generate_flow_tags()
             self.generate_apply_functions()
             self.rendered_[:] = []
-        except AssertionError, err:
+        except AssertionError as err:
             self.log_error("Prb during configuration: {}".format(err))
             return False
         return True
@@ -196,10 +196,10 @@ class CodeGenerator(EnhancedObject):
         """
         if filename is None:
             self.log("Resulting file:")
-            print"----"
+            print ("----")
             for item in self.rendered_:
-                print item
-            print"----"
+                print (item)
+            print ("----")
             return True
 
         try:
@@ -369,7 +369,8 @@ class CodeGenerator(EnhancedObject):
         try:
             is_ok = True
             while is_ok:
-                num_line, line = iter_enum_lines.next()
+
+                num_line, line = next(iter_enum_lines)
                 # self.log("Processing line [{}]: {}".format(num_line, line))
 
                 # look for apply generator
@@ -454,7 +455,7 @@ class CodeGenerator(EnhancedObject):
                     try:
                         while not tag_found:
                             # todo: avoid using an accumulated line here.
-                            _, sub_line = iter_enum_lines.next()
+                            _, sub_line = next(iter_enum_lines)
                             # self.log("Sub Checking line: {}".format(sub_line))
 
                             sub_matches = self.get_all_tags(sub_line)
@@ -466,7 +467,7 @@ class CodeGenerator(EnhancedObject):
                             accumulated_lines.append(sub_line)
                             continue
 
-                    except StopIteration, e:
+                    except StopIteration as e:
                         error_msg = "missing closing tag {} openned on line {}".format(search_tag, num_line)
                         raise SyntaxError('Syntax ERROR',
                                           {'filename': 'unknown',
@@ -484,18 +485,18 @@ class CodeGenerator(EnhancedObject):
                                    'lineno': "{}".format(num_line),
                                    'offset': "{}".format(indent),
                                    'text': "unknown tag {}".format(tag)})
-        except AssertionError, err:
+        except AssertionError as err:
             self.log_error("Assertion Error on line {}: {}".format(num_line,
                                                                    err.args))
             return False
-        except SyntaxError, err:
+        except SyntaxError as err:
             self.log_error("Syntax Error on line {}: {}".format(num_line,
                                                                 err.args))
             return False
-        except StopIteration, err:
+        except StopIteration as err:
             # self.log("All file has been processed")
             return True
-        except Exception, err:
+        except Exception as err:
             self.log_error("Error detected around line {}: {}".format(num_line,
                                                                       err.args))
             return False
@@ -756,21 +757,21 @@ def main():
     spec = TemplateSpec()
 
     if not spec.load_spec(dir_template_spec):
-        print "Could not load the template spec"
-        print "Bye"
+        print ("Could not load the template spec")
+        print ("Bye")
         return
 
     if not xml_parser.set_template_spec(spec):
-        print "template spec not compatible with parser requirements"
-        print "Bye"
+        print ("template spec not compatible with parser requirements")
+        print ("Bye")
         return
 
     filename = rospack.get_path('package_generator')
     filename += '/tests/data/demo.ros_package'
 
     if not xml_parser.load(filename):
-        print "Error while parsing the xml file {}".format(filename)
-        print "Bye"
+        print ("Error while parsing the xml file {}".format(filename))
+        print ("Bye")
         return
 
     xml_parser.set_active_comp(0)
@@ -784,9 +785,9 @@ def main():
     if gen.process_file(filename):
         output_file = "README.md"
         gen.write_rendered_file(output_file)
-        print "Output written in file {}".format(output_file)
+        print ("Output written in file {}".format(output_file))
     else:
-        print "Debug!"
+        print ("Debug!")
 
 
 if __name__ == '__main__':

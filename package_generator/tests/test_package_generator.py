@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 @package package_generator
 @file test_package_generator.py
@@ -90,7 +90,7 @@ class PackageGeneratorTest(unittest.TestCase):
 
         self.dir_name = "/tmp/test_package_generator"
         if not os.path.exists(self.dir_name):
-            print "Creating the repo {}".format(self.dir_name)
+            print ("Creating the repo {}".format(self.dir_name))
             os.makedirs(self.dir_name)
 
         filename = self.dir_name + "/node_spec.ros_package"
@@ -118,7 +118,7 @@ class PackageGeneratorTest(unittest.TestCase):
         output_path = '/tmp/test_package_generation'
         # to generate in the ros workspace
         # output_path = os.path.normpath(self.node_path_ + "/../")
-        print "Package to be placed in {}".format(output_path)
+        print ("Package to be placed in {}".format(output_path))
 
         if not os.path.exists(output_path):
             os.makedirs(output_path)
@@ -133,7 +133,7 @@ class PackageGeneratorTest(unittest.TestCase):
         output_path = '/tmp/test_multi_node_package_generation'
         # to generate in the ros workspace
         # output_path = os.path.normpath(self.node_path_ + "/../")
-        print "Package to be placed in {}".format(output_path)
+        print ("Package to be placed in {}".format(output_path))
 
         if not os.path.exists(output_path):
             os.makedirs(output_path)
@@ -199,6 +199,6 @@ class PackageGeneratorTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print "test_package_generator -- begin"
+    print ("test_package_generator -- begin")
     unittest.main()
-    print "test_package_generator -- end"
+    print ("test_package_generator -- end")

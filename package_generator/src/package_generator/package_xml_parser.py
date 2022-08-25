@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 @package package_generator
 @file package_xml_parser.py
@@ -163,7 +163,7 @@ class PackageXMLParser(EnhancedObject):
 
         try:
             is_ok = self.load_all_spec()
-        except AssertionError, err:
+        except AssertionError as err:
             self.log_error("Prb while parsing the file: {}".format(err.args))
             return False
 
@@ -502,9 +502,8 @@ class PackageXMLParser(EnhancedObject):
         reparsed = minidom.parseString(str_tmp)
         res = reparsed.toprettyxml(indent="  ", encoding="utf-8")
         res = remove_empty_line(res)
+        res = [str(x, 'utf-8') for x in res]
 
-        # with open("Output.txt", "w") as text_file:
-        #     text_file.write(res2)
         with open(filename, 'w') as file_handler:
             for item in res:
                 file_handler.write("{}\n".format(item))
@@ -521,6 +520,7 @@ class PackageXMLParser(EnhancedObject):
             Bool: Operation success
         """
 
+        self.log(f'generating xml file based on template {template_name}')
         if self.spec_ is None:
             self.log_error("Template spec is missing")
             return False
@@ -558,13 +558,12 @@ class PackageXMLParser(EnhancedObject):
                 xml_dep.text = item
 
         data_string = ET.tostring(xml_pack, 'utf-8')
+
         reparsed = minidom.parseString(data_string)
         res = reparsed.toprettyxml(indent="  ", encoding="utf-8")
 
-        # self.log("generating template: \n {} \n".format(res))
-
-        with open(filename, 'w') as file_handler:
-            file_handler.write("{}".format(res))
+        with open(filename, 'wb') as file_handler:
+            file_handler.write(res)
         self.log("XML skeleton written in file {}".format(filename))
         self.log("Edit the file, remove or comment unused interface")
         return True
@@ -641,8 +640,8 @@ def main_generate_xml():
         default_templates_path += "/templates/"
     except rospkg.common.ResourceNotFound as error:
         msg = "Package package_generator_templates not found in rospack"
-        print colored(msg, "yellow")
-        print colored("{}".format(error), "yellow")
+        print (colored(msg, "yellow"))
+        print (colored("{}".format(error), "yellow"))
         default_templates_path = None
 
     available_templates = None
@@ -651,12 +650,12 @@ def main_generate_xml():
         available_templates = os.listdir(default_templates_path)
 
     if len(sys.argv) != 3:
-        print colored("Wrong input parameters !", "red")
-        print colored(USAGE, "yellow")
+        print (colored("Wrong input parameters !", "red"))
+        print (colored(USAGE, "yellow"))
         if available_templates is not None:
             msg = "Available templates are: {}"
-            print colored(msg.format(available_templates), 'yellow')
-        print "Bye bye"
+            print (colored(msg.format(available_templates), 'yellow'))
+        print ("Bye bye")
         return -1
 
     path_template = sys.argv[1]
@@ -666,9 +665,9 @@ def main_generate_xml():
     # we do not accept the name to be an existing file
 
     if os.path.isfile(package_spec):
-        print colored("file {} already exists".format(package_spec), "red")
-        print colored("Please select another filename, or remove the file")
-        print "Bye Bye"
+        print (colored("file {} already exists".format(package_spec), "red"))
+        print (colored("Please select another filename, or remove the file"))
+        print ("Bye Bye")
         return -1
 
     # if relative path or absolute path, check the containing folder exists
@@ -676,14 +675,14 @@ def main_generate_xml():
 
     if folder and not os.path.isdir(folder):
         msg_err = "file {} cannot be created in {}".format(package_spec, folder)
-        print colored(msg_err, "red")
-        print colored("Please adjust parameter")
-        print "Bye Bye"
+        print (colored(msg_err, "red"))
+        print (colored("Please adjust parameter"))
+        print ("Bye Bye")
         return -1
 
     # searching for the template location
     if os.path.isabs(path_template):
-        print "Loading model from absolute path {}".format(path_template)
+        print ("Loading model from absolute path {}".format(path_template))
     else:
         # relative path.
         # either from the current path, or from the template package
@@ -692,16 +691,16 @@ def main_generate_xml():
 
         if os.path.isdir(path_attempt):
             path_template = path_attempt
-            print "Loading template: {}".format(path_template)
+            print ("Loading template: {}".format(path_template))
         else:
             if path_template in available_templates:
                 path_template = default_templates_path + path_template
                 msg = "Loading template: {}"
-                print msg.format(path_template)
+                print (msg.format(path_template))
             else:
                 msg = "Template name not found in package_generator_templates"
-                print colored(msg, "red")
-                print colored("Please verify your setup", "red")
+                print (colored(msg, "red"))
+                print (colored("Please verify your setup", "red"))
                 return -1
 
     package_parser = PackageXMLParser()
@@ -710,15 +709,15 @@ def main_generate_xml():
     spec = TemplateSpec()
 
     if not spec.load_spec(dir_template_spec):
-        print colored("Could not load the template spec", "red")
+        print (colored("Could not load the template spec", "red"))
         return -1
 
-    # print "Setting the template spec to \n {}".format(spec.dico_)
+    # print ("Setting the template spec to \n {}".format(spec.dico_))
     if not package_parser.set_template_spec(spec):
-        print colored("Prb while setting the parser dictionary", "red")
+        print (colored("Prb while setting the parser dictionary", "red"))
         return -1
 
     package_parser.generate_xml_from_spec(os.path.basename(path_template), package_spec)
 
-    print colored("Bye bye", "green")
+    print (colored("Bye bye", "green"))
     return 0

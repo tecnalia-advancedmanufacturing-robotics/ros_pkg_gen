@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 @package package_generator
 @file test_code_generator.py
@@ -59,7 +59,7 @@ class CodeGeneratorTest(unittest.TestCase):
 
         self.dir_name = "/tmp/test_package_generator"
         if not os.path.exists(self.dir_name):
-            print "Creating the repo {}".format(self.dir_name)
+            print ("Creating the repo {}".format(self.dir_name))
             os.makedirs(self.dir_name)
 
         file_xml = self.dir_name + "/node_spec.ros_package"
@@ -122,7 +122,7 @@ class CodeGeneratorTest(unittest.TestCase):
 
         for generated, groundtruth in zip(self.generator_.rendered_,
                                           expected_output.splitlines()):
-            # print "Comparing |{}| with |{}|".format(generated, groundtruth)
+            # print ("Comparing |{}| with |{}|".format(generated, groundtruth))
             self.assertEqual(generated, groundtruth)
 
     def test_multi_line(self):
@@ -306,6 +306,6 @@ class CodeGeneratorTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print "test_code_generator -- begin"
+    print ("test_code_generator -- begin")
     unittest.main()
-    print "test_code_generator -- end"
+    print ("test_code_generator -- end")

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 @package package_generator
 @file generate_dict.py
@@ -103,11 +103,11 @@ class TemplateSpec(EnhancedObject):
         """
         try:
             with open(yaml_file, 'r') as open_file:
-                self.dico_ = yaml.load(open_file)
-        except IOError, err:
+                self.dico_ = yaml.load(open_file, Loader=yaml.FullLoader)
+        except IOError as err:
             self.log_error("IO Error: {}".format(err))
             return False
-        except yaml.parser.ParserError, err:
+        except yaml.parser.ParserError as err:
             self.log_error("Parsing Error detected: {}".format(err))
             return False
 
@@ -130,13 +130,13 @@ class TemplateSpec(EnhancedObject):
         content = dict()
         try:
             with open(yaml_file, 'r') as open_file:
-                content = yaml.load(open_file)
-        except IOError, err:
+                content = yaml.load(open_file, Loader=yaml.FullLoader)
+        except IOError as err:
             self.log_error("IO Error: {}".format(err))
             self.log_error("Generator forced to custom")
             self.generators_ = ['custom']
             return False
-        except yaml.parser.ParserError, err:
+        except yaml.parser.ParserError as err:
             self.log_error("Parsing Error detected: {}".format(err))
             self.log_error("Generator forced to custom")
             self.generators_ = ['custom']
@@ -184,7 +184,7 @@ class TemplateSpec(EnhancedObject):
         try:
             with open(py_file) as open_file:
                 exec(open_file.read(), self.transformation_functions_)
-        except IOError, err:
+        except IOError as err:
             self.log_error("IO Error: {}".format(err))
             return False
 
@@ -213,10 +213,10 @@ class TemplateSpec(EnhancedObject):
 if __name__ == "__main__":
     """ main
     """
-    print "Hello World"
+    print ("Hello World")
 
     TSPEC = TemplateSpec()
     CFG_PATH = "../../../package_generator_templates/templates/cpp_node_update/config/"
 
     TSPEC.load_spec(CFG_PATH)
-    print "Done"
+    print ("Done")

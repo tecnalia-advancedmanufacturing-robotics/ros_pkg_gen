@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 @package package_generator
 @file test_xml_parser.py
@@ -30,7 +30,7 @@ class PackageXMLParserTest(unittest.TestCase):
 
         self.dir_storage = "/tmp/test_package_generator"
         if not os.path.exists(self.dir_storage):
-            print "Creating folder {}".format(self.dir_storage)
+            print ("Creating folder {}".format(self.dir_storage))
             os.makedirs(self.dir_storage)
 
     def test_parsing(self):
@@ -78,6 +78,6 @@ class PackageXMLParserTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print "test_xml_parser -- begin"
+    print ("test_xml_parser -- begin")
     unittest.main()
-    print "test_xml_parser -- end"
+    print ("test_xml_parser -- end")

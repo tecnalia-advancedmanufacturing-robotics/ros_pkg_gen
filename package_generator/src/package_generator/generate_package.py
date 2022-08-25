@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 @package package_generator
 @file package_generator.py
@@ -803,36 +803,36 @@ def main():
     gen = PackageGenerator()
 
     if len(sys.argv) != 2:
-        print colored("Wrong input parameters !", "red")
-        print colored(USAGE_GEN, "yellow")
+        print (colored("Wrong input parameters !", "red"))
+        print (colored(USAGE_GEN, "yellow"))
 
         try:
             [_, template_names] = gen.get_template_info()
         except rospkg.common.ResourceNotFound as error:
             msg = "Package package_generator_templates not found in rospack"
-            print colored(msg, 'red')
-            print colored(error, 'red')
+            print (colored(msg, 'red'))
+            print (colored(error, 'red'))
             return -1
         except OSError as error:
             msg = "No template found in package_generator_templates"
-            print colored(msg, 'red')
-            print colored(error, 'red')
+            print (colored(msg, 'red'))
+            print (colored(error, 'red'))
             return -1
 
         msg = "Available templates are: {}"
-        print colored(msg.format(template_names), 'yellow')
-        print "Bye bye"
+        print (colored(msg.format(template_names), 'yellow'))
+        print ("Bye bye")
         return -1
 
     package_spec = sys.argv[1]
     path_current = os.getcwd()
 
     if not gen.generate_package(package_spec, path_current):
-        print colored("Prb while generating the package", "red")
+        print (colored("Prb while generating the package", "red"))
         return -1
     else:
-        print colored("Package generated", "green")
-    print "Bye bye"
+        print (colored("Package generated", "green"))
+    print ("Bye bye")
     return 0
 
 
@@ -855,32 +855,32 @@ def main_check():
     gen = PackageGenerator()
 
     if len(sys.argv) != 2:
-        print colored("Wrong input parameters !", "red")
-        print colored(USAGE_CHECK, "yellow")
+        print (colored("Wrong input parameters !", "red"))
+        print (colored(USAGE_CHECK, "yellow"))
 
         try:
             [_, template_names] = gen.get_template_info()
         except rospkg.common.ResourceNotFound as error:
             msg = "Package package_generator_templates not found in rospack"
-            print colored(msg, 'red')
-            print colored(error, 'red')
+            print (colored(msg, 'red'))
+            print (colored(error, 'red'))
             return -1
         except OSError as error:
             msg = "No template found in package_generator_templates"
-            print colored(msg, 'red')
-            print colored(error, 'red')
+            print (colored(msg, 'red'))
+            print (colored(error, 'red'))
             return -1
 
         msg = "Available templates are: {}"
-        print colored(msg.format(template_names), 'yellow')
-        print "Bye bye"
+        print (colored(msg.format(template_names), 'yellow'))
+        print ("Bye bye")
         return -1
 
     template_name = sys.argv[1]
     if not gen.template_sanity_check(template_name):
-        print colored("Issue detected in template", "red")
+        print (colored("Issue detected in template", "red"))
         return -1
     else:
-        print colored("No issue detected", "green")
-    print "Bye bye"
+        print (colored("No issue detected", "green"))
+    print ("Bye bye")
     return 0

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 @package package_generator
 @file test_update.py
@@ -26,7 +26,7 @@ class UpdateTest(unittest.TestCase):
 
         self.dir_name = "/tmp/test_package_generator/update"
         if not os.path.exists(self.dir_name):
-            print "Creating the repo {}".format(self.dir_name)
+            print ("Creating the repo {}".format(self.dir_name))
             os.makedirs(self.dir_name)
 
     def test_detect_areas(self):
@@ -114,6 +114,6 @@ class UpdateTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print "test_update -- begin"
+    print ("test_update -- begin")
     unittest.main()
-    print "test_update -- end"
+    print ("test_update -- end")
