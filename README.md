@@ -52,6 +52,7 @@ Main changes are:
   This term is more generic, and enables considering more package types (version `2.0.0`).
 * In addition to the custom generator, [jinja generator](https://jinja.palletsprojects.com/en/2.10.x/) can also be used for designing new templates (`2.1.0`).
 * The package template is not anymore provided as input parameters, but is now directly inserted into the package specification file (`3.0.0`).
+* The package is brought to noetic, which becomes the default branch (`noetic-devel`, 4.0.0)
 
 ## Getting started
 
