@@ -4,13 +4,22 @@ The versioning used is [Sentimental versioning][sentimental].
 
 [sentimental]: http://sentimentalversioning.org/
 
+## [4.0.0] 2022-08-31
+
+### Modified
+
+* Adjusted code to get compatibility with noetic
+* `noetic-devel` is to be the main branch
+* previous `master` branch is renamed `melodic-devel` (compatibility with `kinetic` as well)
+* Any update will be only done onto the noetic-devel branch.
+
 ## [3.0.0] 2020-01-30
 
 ### Modified
 
 * The template name is not anymore provided as input parameter to `generate_package`.
   It is now a parameter to the `package` within the interface file.
-  So that a generation / update call only requries the xml file, nothing more.
+  So that a generation / update call only requires the xml file, nothing more.
 
 ## [2.1.0] 2020-01-14
 

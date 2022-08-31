@@ -17,7 +17,7 @@ variables:
   # ROSINSTALL_FILENAME: ".rosinstall"
   NOT_TEST_INSTALL: "true"
 
-ici_kinetic:
+ici_noetic:
   script: .ci_config/gitlab.sh
   variables:
-    ROS_DISTRO: kinetic
+    ROS_DISTRO: noetic
