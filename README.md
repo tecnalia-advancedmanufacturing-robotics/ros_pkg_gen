@@ -59,7 +59,8 @@ Main changes are:
 ### Prerequisites
 
 We assume [`ROS`][ros] is installed on the machine.
-Code is developed and tested so far under `ROS indigo` and `ROS kinetic`.
+Code was initially developed and tested so far under `ROS indigo`, `ROS kinetic` and `ROS melodic`.
+The code is now developed under `ROS noetic`.
 
 [ros]: http://www.ros.org/
 
